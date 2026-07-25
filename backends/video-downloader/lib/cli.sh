@@ -61,6 +61,7 @@ OPT_BATCH_FILE=""
 OPT_POST_CMD=""
 OPT_EXTRA=""
 OPT_UPDATE=false
+OPT_CLIP=""
 
 # URLs posicionales acumuladas durante el parseo
 OPT_URLS=()
@@ -81,7 +82,7 @@ _require_value() {
 
 # ── show_version() ───────────────────────────────────────────────────────────
 show_version() {
-    echo "video-downloader v1.0.0"
+    echo "video-downloader v1.1.0"
     echo "Wrapper modular de yt-dlp — YouTube, Facebook y ~1800 sitios más"
     echo "Autor: achalmaedison"
 }
@@ -114,6 +115,12 @@ ${CLR_BOLD}MODO Y CALIDAD:${CLR_RESET}
     -q, --quality <q>       Altura máx: 2160|1440|1080|720|480|360|best|worst
     -c, --container <c>     mp4|mkv|webm  (contenedor al fusionar; def: ${DEFAULT_CONTAINER})
     -f, --format <str>      Cadena -f cruda de yt-dlp (avanzado; ignora --quality)
+
+${CLR_BOLD}RECORTE EXACTO DE TRAMOS:${CLR_RESET}
+        --clip <INI-FIN>    Recorta solo ese tramo, con corte exacto y
+                            verificación automática (formatos: H:MM:SS,
+                            MM:SS o SS). Compatible con modos video/best/audio.
+                            Ej.: --clip 2:46:00-2:47:00
 
 ${CLR_BOLD}AUDIO (modo audio):${CLR_RESET}
         --audio-format <f>  mp3|m4a|opus|flac|wav|vorbis|aac|best  (def: ${DEFAULT_AUDIO_FORMAT})
@@ -176,6 +183,9 @@ ${CLR_BOLD}EJEMPLOS:${CLR_RESET}
 
     # Video de Facebook privado usando cookies del navegador
     $(basename "$0") --cookies-browser firefox https://www.facebook.com/watch?v=ZZZZ
+
+    # Recortar un tramo exacto (min 2:46:00 al 2:47:00) de un video de Facebook
+    $(basename "$0") --clip 2:46:00-2:47:00 https://www.facebook.com/watch?v=ZZZZ
 
     # Ver los formatos disponibles sin descargar
     $(basename "$0") -m formats https://youtu.be/XXXX
@@ -250,6 +260,7 @@ parse_args() {
             --proxy)               _require_value "--proxy" "${2:-}"; OPT_PROXY="$2"; shift 2 ;;
             --user-agent)          _require_value "--user-agent" "${2:-}"; OPT_USER_AGENT="$2"; shift 2 ;;
 
+            --clip)                _require_value "--clip" "${2:-}"; OPT_CLIP="$2"; shift 2 ;;
             --batch)               _require_value "--batch" "${2:-}"; OPT_BATCH_FILE="$2"; shift 2 ;;
             --post-cmd)            _require_value "--post-cmd" "${2:-}"; OPT_POST_CMD="$2"; shift 2 ;;
             --extra)               _require_value "--extra" "${2:-}"; OPT_EXTRA="$2"; shift 2 ;;
@@ -294,6 +305,16 @@ _validate_flag_combinations() {
     if [ -n "${OPT_COOKIES_FILE}" ] && [ -n "${OPT_COOKIES_BROWSER}" ]; then
         log_error "--cookies y --cookies-browser no pueden usarse a la vez."
         exit 2
+    fi
+
+    # --clip re-codifica con ffmpeg: solo tiene sentido en modos con descarga
+    if [ -n "${OPT_CLIP}" ]; then
+        case "${OPT_MODE}" in
+            video|best|audio) ;;
+            *)
+                log_error "--clip solo es compatible con los modos video, best y audio."
+                exit 2 ;;
+        esac
     fi
 
     # Valores que deben ser enteros: evita errores crípticos de [ -gt ] después

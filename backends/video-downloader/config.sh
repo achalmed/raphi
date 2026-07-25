@@ -83,6 +83,13 @@ DEFAULT_SLEEP=0               # segundos de espera entre videos (cortesía anti-
 DEFAULT_USE_ARIA2=false       # usar aria2c como descargador externo (si está instalado)
 DEFAULT_RESTRICT_NAMES=false  # nombres de archivo ASCII-safe (sin espacios ni tildes)
 
+# ── Recorte exacto de tramos (--clip INICIO-FIN) ─────────────────────────────
+# El clip se re-codifica con ffmpeg para garantizar corte exacto y A/V en
+# sincronía (ver lib/clipper.sh). Estos valores controlan esa re-codificación.
+CLIP_VIDEO_CRF=20             # calidad x264: 18 (más calidad) … 28 (más liviano)
+CLIP_VIDEO_PRESET="veryfast"  # velocidad de codificación: ultrafast…slow
+CLIP_AUDIO_BITRATE="128k"     # bitrate AAC del clip
+
 # ── Autenticación / acceso ───────────────────────────────────────────────────
 # Muchos videos de Facebook/Instagram/privados requieren cookies de sesión.
 COOKIES_FILE=""               # ruta a un cookies.txt exportado

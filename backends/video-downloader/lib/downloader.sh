@@ -113,7 +113,14 @@ dispatch_target() {
     case "${mode}" in
         info)    run_info "${url}" || rc=$? ;;
         formats) run_list_formats "${url}" || rc=$? ;;
-        *)       run_download "${url}" || rc=$? ;;
+        *)
+            # Con --clip activo se usa la ruta robusta de lib/clipper.sh en vez
+            # del descargador de secciones de yt-dlp (que trunca en DASH)
+            if [ -n "${OPT_CLIP}" ]; then
+                run_clip "${url}" || rc=$?
+            else
+                run_download "${url}" || rc=$?
+            fi ;;
     esac
 
     # yt-dlp usa 101 al alcanzar --max-downloads: es una parada esperada, no un fallo

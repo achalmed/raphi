@@ -19,7 +19,7 @@
 #
 #  MOTOR     : yt-dlp (+ ffmpeg). Compatible: Kubuntu / Ubuntu / Arch / Archcraft
 #  AUTOR     : achalmaedison
-#  VERSIÓN   : 1.0.0
+#  VERSIÓN   : 1.1.0  (--clip: recorte exacto con verificación, lib/clipper.sh)
 # =============================================================================
 
 set -euo pipefail
@@ -33,6 +33,7 @@ source "${SCRIPT_DIR}/lib/logger.sh"
 source "${SCRIPT_DIR}/lib/validator.sh"
 source "${SCRIPT_DIR}/lib/cli.sh"
 source "${SCRIPT_DIR}/lib/options.sh"
+source "${SCRIPT_DIR}/lib/clipper.sh"
 source "${SCRIPT_DIR}/lib/downloader.sh"
 source "${SCRIPT_DIR}/lib/summary.sh"
 
@@ -55,7 +56,7 @@ main() {
     echo ""
     echo -e "${CLR_BOLD}${CLR_BLUE}"
     echo "  ╔══════════════════════════════════════════════════════════════════╗"
-    echo "  ║        VIDEO DOWNLOADER v1.0.0 — Descargador universal            ║"
+    echo "  ║        VIDEO DOWNLOADER v1.1.0 — Descargador universal            ║"
     printf "  ║        %-58s║\n" "$(date '+%d/%m/%Y %H:%M:%S')"
     echo "  ╚══════════════════════════════════════════════════════════════════╝"
     echo -e "${CLR_RESET}"
@@ -74,6 +75,9 @@ main() {
     validate_quality "${OPT_QUALITY}"
     validate_cookies "${OPT_COOKIES_FILE}"
     validate_output_dir "${OPT_OUTPUT_DIR}" "${OPT_SIMULATE}"
+    if [ -n "${OPT_CLIP}" ]; then
+        clip_parse_range "${OPT_CLIP}"
+    fi
 
     # ── FASE 5: Reunir objetivos ──────────────────────────────────────────────
     collect_targets OPT_URLS "${OPT_BATCH_FILE}"

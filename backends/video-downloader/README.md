@@ -2,8 +2,9 @@
 
 > Wrapper modular de `yt-dlp` para descargar video y audio de YouTube,
 > Facebook, Instagram, TikTok, Vimeo, X/Twitter y ~1800 sitios más, con
-> selección de calidad, subtítulos, playlists, lotes, historial y
-> SponsorBlock — todo desde una CLI en español.
+> selección de calidad, subtítulos, playlists, lotes, historial,
+> SponsorBlock y recorte exacto de tramos (`--clip`) con verificación
+> automática — todo desde una CLI en español.
 
 ---
 
@@ -121,6 +122,7 @@ alias vdl='~/Documents/scripts_for_linux/script_video_downloader/main.sh'
 | `-f, --format <str>`      | Cadena `-f` cruda de yt-dlp (ignora `--quality`)       | —                  |
 | `--audio-format <f>`      | `mp3`·`m4a`·`opus`·`flac`·`wav`·`aac`·`best`           | `mp3`              |
 | `--audio-quality <q>`     | `0` (mejor) … `10`, o bitrate (`192K`)                 | `0`                |
+| `--clip <INI-FIN>`        | Recorta solo ese tramo, corte exacto + verificación    | —                  |
 | `-o, --output-dir <dir>`  | Carpeta destino                                        | `~/Downloads/videos` |
 | `-t, --template <tpl>`    | Plantilla de nombres de yt-dlp                         | ver `config.sh`    |
 | `--organize`              | Subcarpetas `uploader/playlist/`                       | false              |
@@ -187,6 +189,12 @@ alias vdl='~/Documents/scripts_for_linux/script_video_downloader/main.sh'
 ./main.sh --batch urls.txt --archive --no-confirm --log \
           --post-cmd "notify-send 'Descargas' 'Lote completado'"
 
+# Recortar un tramo exacto (min 2:46:00 → 2:47:00) — corte al frame, A/V sincronizado
+./main.sh --clip 2:46:00-2:47:00 -o ~/Downloads "https://www.facebook.com/watch?v=ZZZZ"
+
+# Solo el audio de ese mismo tramo, en mp3
+./main.sh -m audio --clip 2:46:00-2:47:00 "https://www.facebook.com/watch?v=ZZZZ"
+
 # Ver qué formatos existen antes de decidir
 ./main.sh -m formats "https://youtu.be/XXXX"
 
@@ -214,6 +222,7 @@ script_video_downloader/
     ├── validator.sh     # Dependencias (con degradación), destino, cookies, calidad
     ├── cli.sh           # Parseo de flags, ayuda, validación de combinaciones
     ├── options.sh       # Traduce OPT_* → array YTDLP_ARGS (el corazón del wrapper)
+    ├── clipper.sh       # --clip: URLs crudas + ffmpeg + verificación ffprobe
     ├── downloader.sh    # Ejecución por objetivo, lotes, contadores éxito/fallo
     └── summary.sh       # Banner de configuración, confirmación, resumen, post-cmd
 ```
@@ -228,6 +237,7 @@ script_video_downloader/
 | `lib/validator.sh`  | Falla rápido con mensaje accionable; opcionales degradan          |
 | `lib/cli.sh`        | `OPT_*` desde `DEFAULT_*`, parseo, `--help`, combinaciones        |
 | `lib/options.sh`    | Intención → `YTDLP_ARGS[]` (array, no string: rutas con espacios) |
+| `lib/clipper.sh`    | Recorte exacto: extrae URLs, corta con ffmpeg, verifica streams   |
 | `lib/downloader.sh` | Recorre objetivos; un fallo no aborta el lote                     |
 | `lib/summary.sh`    | Lo que ve el usuario antes y después                              |
 
@@ -238,6 +248,7 @@ script_video_downloader/
 | Problema                                  | Solución                                                                 |
 | ----------------------------------------- | ------------------------------------------------------------------------ |
 | Descargas fallan de repente en YouTube    | `./main.sh --update` (los sitios cambian; yt-dlp se actualiza seguido)   |
+| Clip con imagen congelada y audio andando | Usa `--clip` (nunca `--download-sections` vía `--extra`): corta desde las URLs crudas con ffmpeg y verifica cada stream |
 | `ERROR: ... Sign in to confirm`           | Usa `--cookies-browser firefox` (sesión iniciada en ese navegador)       |
 | Video de Facebook/Instagram no descarga   | Casi siempre requiere cookies: `--cookies-browser <navegador>`           |
 | `yt-dlp: command not found`               | `sudo apt install yt-dlp` o `pipx install yt-dlp`                        |
@@ -302,7 +313,19 @@ se trata como éxito.
 (activados siempre); con `--archive` además nunca re-descarga lo ya bajado,
 ideal para sincronizar canales periódicamente vía cron.
 
+**Por qué `--clip` no usa `--download-sections`:** el descargador de secciones
+de yt-dlp puede truncar el stream de video en sitios DASH (Facebook sirve
+video y audio por separado): el resultado es un clip con audio completo pero
+imagen congelada a mitad. `lib/clipper.sh` evita ese componente: extrae las
+URLs crudas del CDN (`yt-dlp -g`), corta con ffmpeg usando búsqueda de entrada
+(`-ss` antes de `-i`: salta por rangos HTTP al keyframe previo, decodifica y
+descarta hasta el punto exacto) y re-codifica el tramo (x264 CRF 20, ajustable
+en `config.sh`) — cada frame queda decodificable y la sincronía es exacta.
+Al final **verifica con ffprobe** que cada stream dure lo pedido: un clip
+truncado se reporta como fallo, nunca se entrega en silencio. `--clip` opera
+sobre videos individuales (aplica `--no-playlist` internamente).
+
 ---
 
-_video-downloader v1.0.0 — Compatible con Kubuntu y Arch Linux_
+_video-downloader v1.1.0 — Compatible con Kubuntu y Arch Linux_
 _achalmaedison — motor: yt-dlp + ffmpeg_

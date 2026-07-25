@@ -35,6 +35,7 @@ print_config_banner() {
 
     if [ "${OPT_MODE}" != "info" ] && [ "${OPT_MODE}" != "formats" ]; then
         printf "  %-16s %s\n" "Destino:" "${OPT_OUTPUT_DIR}"
+        [ -n "${OPT_CLIP}" ] && printf "  %-16s %s (%ss)\n" "Recorte:" "${OPT_CLIP}" "${CLIP_DURATION}"
         _banner_flag "Subtítulos"  "${OPT_SUBS}"
         _banner_flag "Miniatura"   "${OPT_EMBED_THUMBNAIL}"
         _banner_flag "SponsorBlock" "${OPT_SPONSORBLOCK}"
