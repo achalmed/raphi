@@ -1,4 +1,4 @@
-"""Configuración central de camera-timestamp-renamer.
+"""Configuración central de photo-metadata-suite.
 
 TODO valor ajustable vive aquí. Edita este archivo para cambiar el
 comportamiento por defecto sin tocar la lógica en `lib/`. Cualquier campo
@@ -9,8 +9,8 @@ from __future__ import annotations
 from dataclasses import dataclass, field
 from typing import Optional
 
-APP_NAME = "camera-timestamp-renamer"
-VERSION = "1.3.0"
+APP_NAME = "photo-metadata-suite"
+VERSION = "2.0.0"
 
 # --- Códigos de salida del proyecto (126/127 los reserva el shell) ---
 EXIT_OK = 0

@@ -1,9 +1,19 @@
-# camera-timestamp-renamer
+# scripts_photo_metadata_suite
 
-> Renombra **fotos y videos** de cámara de seguridad según la **fecha y hora
-> impresa en la imagen** (OCR de la marca), al formato `AAAAMMDD_HHMMSS`, de
-> forma segura, configurable y **reversible**. En los videos se lee la marca
-> del primer fotograma (la hora de inicio de la grabación).
+> Suite de fechas y metadatos para colecciones fotográficas: **audita**
+> (`audit-dates`: nombre vs EXIF con sistema de evidencia), **embebe** fechas
+> EXIF desde el nombre (`embed-date`, con pases para WhatsApp/Facebook y modo
+> `--trust-name` para escaneadas), **normaliza** nombres decodificables y
+> extensiones incorrectas (`fix-names`: WhatsApp, Facebook, Twitter,
+> Camera360, PhotoStudio, epoch, 12h am/pm, teléfono+fecha…) y **sincroniza**
+> las correcciones hechas en digiKam (`sync-digikam`, BD leída en copia, solo
+> lectura). Todo simula por defecto y registra cada cambio (`_fix_log.csv`).
+>
+> Incluye además el renombrador OCR original: renombra **fotos y videos** de
+> cámara de seguridad según la **fecha y hora impresa en la imagen** (OCR de
+> la marca), al formato `AAAAMMDD_HHMMSS`, de forma segura, configurable y
+> **reversible**. En los videos se lee la marca del primer fotograma (la hora
+> de inicio de la grabación).
 
 ## 📋 Tabla de Contenidos
 
