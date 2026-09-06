@@ -325,7 +325,15 @@ Al final **verifica con ffprobe** que cada stream dure lo pedido: un clip
 truncado se reporta como fallo, nunca se entrega en silencio. `--clip` opera
 sobre videos individuales (aplica `--no-playlist` internamente).
 
+**Nombre del clip cuando el sitio no da título:** algunos videos (Facebook en
+particular) devuelven un título vacío o un simple `.`; con la plantilla
+`<título> [<id>]` eso generaría un archivo **oculto** (`. [id] (clip …).mp4`,
+que empieza por `.`). `lib/clipper.sh` recorta los puntos/espacios iniciales y
+conserva el `[id]`; si no queda nada imprimible usa `CLIP_FALLBACK_PREFIX`
+(`config.sh`) con marca de tiempo. Así el clip siempre queda visible y con un
+nombre útil.
+
 ---
 
-_video-downloader v1.1.0 — Compatible con Kubuntu y Arch Linux_
+_video-downloader v1.1.1 — Compatible con Kubuntu y Arch Linux_
 _achalmaedison — motor: yt-dlp + ffmpeg_

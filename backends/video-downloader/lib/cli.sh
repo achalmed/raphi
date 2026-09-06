@@ -82,7 +82,7 @@ _require_value() {
 
 # ── show_version() ───────────────────────────────────────────────────────────
 show_version() {
-    echo "video-downloader v1.1.0"
+    echo "video-downloader v1.1.1"
     echo "Wrapper modular de yt-dlp — YouTube, Facebook y ~1800 sitios más"
     echo "Autor: achalmaedison"
 }

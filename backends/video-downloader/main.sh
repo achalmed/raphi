@@ -19,7 +19,7 @@
 #
 #  MOTOR     : yt-dlp (+ ffmpeg). Compatible: Kubuntu / Ubuntu / Arch / Archcraft
 #  AUTOR     : achalmaedison
-#  VERSIÓN   : 1.1.0  (--clip: recorte exacto con verificación, lib/clipper.sh)
+#  VERSIÓN   : 1.1.1  (--clip: recorte exacto + nombre a prueba de títulos vacíos)
 # =============================================================================
 
 set -euo pipefail
@@ -56,7 +56,7 @@ main() {
     echo ""
     echo -e "${CLR_BOLD}${CLR_BLUE}"
     echo "  ╔══════════════════════════════════════════════════════════════════╗"
-    echo "  ║        VIDEO DOWNLOADER v1.1.0 — Descargador universal            ║"
+    echo "  ║        VIDEO DOWNLOADER v1.1.1 — Descargador universal            ║"
     printf "  ║        %-58s║\n" "$(date '+%d/%m/%Y %H:%M:%S')"
     echo "  ╚══════════════════════════════════════════════════════════════════╝"
     echo -e "${CLR_RESET}"

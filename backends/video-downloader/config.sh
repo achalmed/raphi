@@ -89,6 +89,10 @@ DEFAULT_RESTRICT_NAMES=false  # nombres de archivo ASCII-safe (sin espacios ni t
 CLIP_VIDEO_CRF=20             # calidad x264: 18 (más calidad) … 28 (más liviano)
 CLIP_VIDEO_PRESET="veryfast"  # velocidad de codificación: ultrafast…slow
 CLIP_AUDIO_BITRATE="128k"     # bitrate AAC del clip
+# Prefijo de respaldo para el nombre del archivo cuando el sitio devuelve un
+# título vacío o inservible (p. ej. Facebook a veces devuelve un solo "."):
+# el nombre pasaría a ser "<prefijo>_<fecha>_<hora>" en vez de un dotfile oculto.
+CLIP_FALLBACK_PREFIX="clip"
 
 # ── Autenticación / acceso ───────────────────────────────────────────────────
 # Muchos videos de Facebook/Instagram/privados requieren cookies de sesión.

@@ -138,6 +138,30 @@ _clip_extract_urls() {
     return 0
 }
 
+# ── _clip_sanitize_base() ────────────────────────────────────────────────────
+# Blinda el nombre base contra títulos vacíos o inservibles. Facebook y otros
+# sitios a veces devuelven un título vacío o compuesto solo de puntos/espacios;
+# con la plantilla "<título> [<id>]" eso produce ". [id]…" o " [id]…", es decir
+# un archivo OCULTO (empieza por '.') o con espacio inicial. Recorta esos
+# caracteres del arranque y, si tras el recorte no queda nada imprimible, cae al
+# prefijo de respaldo con marca de tiempo (CLIP_FALLBACK_PREFIX en config.sh).
+#
+# Arguments:
+#   $1 - Nombre base candidato ("<título> [<id>]")
+# Outputs (stdout):
+#   Nombre base saneado: nunca vacío, nunca empieza por '.' ni por espacio
+_clip_sanitize_base() {
+    local base="$1"
+    # Recorta el prefijo de puntos/espacios: ${base%%[! .]*} aísla justo ese
+    # tramo inicial (todo hasta el primer carácter que no es '.' ni ' ') y el
+    # ${base#…} lo elimina. Un título normal no tiene ese prefijo y queda igual.
+    base="${base#"${base%%[! .]*}"}"
+    if [ -z "${base}" ]; then
+        base="${CLIP_FALLBACK_PREFIX}_$(date +%Y%m%d_%H%M%S)"
+    fi
+    printf '%s' "${base}"
+}
+
 # ── _clip_output_path() ──────────────────────────────────────────────────────
 # Calcula la ruta final del clip: "<título> [<id>] (clip <rango>).<ext>".
 #
@@ -150,8 +174,8 @@ _clip_output_path() {
 
     local base
     base=$(yt-dlp "${access[@]}" --print "%(title)s [%(id)s]" -- "${url}" 2>/dev/null | head -1) || true
-    [ -z "${base}" ] && base="clip_$(date +%Y%m%d_%H%M%S)"
-    base="${base//\//_}"   # '/' en el título rompería la ruta
+    base="${base//\//_}"                    # '/' en el título rompería la ruta
+    base=$(_clip_sanitize_base "${base}")   # nunca vacío, nunca dotfile oculto
 
     local ext="${OPT_CONTAINER}"
     [ "${OPT_MODE}" = "audio" ] && ext="${OPT_AUDIO_FORMAT}"
