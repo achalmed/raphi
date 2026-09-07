@@ -1,0 +1,13 @@
+# suite.yml — contrato de la suite (esquema en core/suite.schema.yml); core/suites.py generar escribe los índices y READMEs.
+nombre: whisper_transcriber
+objetivo: multimedia
+resumen: Transcribe y traduce audio o video localmente con Whisper.
+escribe_en:
+- archivos
+simula_por_defecto: false
+comandos:
+- main.py <archivo> [--language es] [--dry-run]
+estado: activo
+depende_de:
+- whisper
+- ffmpeg

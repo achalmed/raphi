@@ -1,5 +1,25 @@
 # scripts_photo_metadata_suite
 
+<!-- suite:inicio -->
+**Suite `photo_metadata_suite`** · objetivo *multimedia* · estado *activo* · python · interfaz cli
+
+Renombra e incrusta fechas en fotos de cámaras (Tapo y similares) a partir de la marca de tiempo; audita y sincroniza con digiKam.
+
+- Escribe en: archivos · simula por defecto: sí
+- Depende de: exiftool, python3
+
+Comandos:
+
+```bash
+main.py analyze <carpeta>
+main.py apply <carpeta> --execute
+main.py verify <carpeta>
+main.py undo <carpeta> --execute
+```
+
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-07); no se edita a mano.</sub>
+<!-- suite:fin -->
+
 > Suite de fechas y metadatos para colecciones fotográficas: **audita**
 > (`audit-dates`: nombre vs EXIF con sistema de evidencia), **embebe** fechas
 > EXIF desde el nombre (`embed-date`, con pases para WhatsApp/Facebook y modo

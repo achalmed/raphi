@@ -1,5 +1,22 @@
 # whisper-transcriber
 
+<!-- suite:inicio -->
+**Suite `whisper_transcriber`** · objetivo *multimedia* · estado *activo* · python · interfaz cli
+
+Transcribe y traduce audio o video localmente con Whisper.
+
+- Escribe en: archivos · simula por defecto: no
+- Depende de: whisper, ffmpeg
+
+Comandos:
+
+```bash
+main.py <archivo> [--language es] [--dry-run]
+```
+
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-07); no se edita a mano.</sub>
+<!-- suite:fin -->
+
 > Transcribe y traduce audio/video con OpenAI Whisper desde la terminal:
 > acepta archivos locales, URLs de YouTube (vía yt-dlp) y subtítulos `.srt`
 > para acortar. Reestructuración CLI del cuaderno Colab «Transcribir y

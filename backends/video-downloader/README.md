@@ -1,5 +1,25 @@
 # video-downloader — Descargador universal de video/audio
 
+<!-- suite:inicio -->
+**Suite `video_downloader`** · objetivo *multimedia* · estado *activo* · bash · interfaz cli
+
+Descarga video o audio con yt-dlp y ffmpeg, por URL o por lotes, con recorte opcional.
+
+- Escribe en: archivos · simula por defecto: no
+- Depende de: yt-dlp, ffmpeg
+
+Comandos:
+
+```bash
+main.sh <url>
+main.sh --audio <url>
+main.sh --batch lista.txt
+main.sh --simulate <url>
+```
+
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-07); no se edita a mano.</sub>
+<!-- suite:fin -->
+
 > Wrapper modular de `yt-dlp` para descargar video y audio de YouTube,
 > Facebook, Instagram, TikTok, Vimeo, X/Twitter y ~1800 sitios más, con
 > selección de calidad, subtítulos, playlists, lotes, historial,

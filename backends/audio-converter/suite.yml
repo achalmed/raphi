@@ -1,0 +1,12 @@
+# suite.yml — contrato de la suite (esquema en core/suite.schema.yml); core/suites.py generar escribe los índices y READMEs.
+nombre: audio_converter
+objetivo: multimedia
+resumen: Convierte por lotes audios de WhatsApp (Opus) y otros formatos a MP3 con ffmpeg.
+escribe_en:
+- archivos
+simula_por_defecto: false
+comandos:
+- main.py <carpeta> [--dry-run]
+estado: activo
+depende_de:
+- ffmpeg

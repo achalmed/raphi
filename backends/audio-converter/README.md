@@ -1,5 +1,22 @@
 # audio-converter
 
+<!-- suite:inicio -->
+**Suite `audio_converter`** · objetivo *multimedia* · estado *activo* · python · interfaz cli
+
+Convierte por lotes audios de WhatsApp (Opus) y otros formatos a MP3 con ffmpeg.
+
+- Escribe en: archivos · simula por defecto: no
+- Depende de: ffmpeg
+
+Comandos:
+
+```bash
+main.py <carpeta> [--dry-run]
+```
+
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-07); no se edita a mano.</sub>
+<!-- suite:fin -->
+
 > Convierte audios de WhatsApp (`.opus`, `.ogg`, `.m4a`…) —y cualquier audio
 > que ffmpeg entienda— a `.mp3` por lotes. Pieza intermedia de la cadena:
 > **[script_video_downloader](../script_video_downloader)** (URL → mp3/mp4) y
