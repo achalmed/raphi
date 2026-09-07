@@ -1,47 +1,16 @@
-"""Logging centralizado (INFO / WARNING / ERROR).
-
-Toda la salida al usuario pasa por aquí para mantener un formato uniforme.
-Los mensajes van en español; el código, en inglés técnico.
-"""
+"""scripts_for_linux/scripts_photo_metadata_suite/lib/logger.py — envoltorio (FS2, 2026-09-07): el logger vive en core/py-common/logger.py."""
 from __future__ import annotations
 
-import logging
-from pathlib import Path
-from typing import Optional
+import importlib.util
+import pathlib
+
+_p = pathlib.Path(__file__).resolve()
+while _p != _p.parent and not (_p / "core" / "py-common" / "logger.py").exists():
+    _p = _p.parent
+_s = importlib.util.spec_from_file_location("core_logger", _p / "core" / "py-common" / "logger.py")
+_core = importlib.util.module_from_spec(_s)
+_s.loader.exec_module(_core)
 
 
-def setup_logger(name: str, verbose: bool = False,
-                 log_file: Optional[Path] = None) -> logging.Logger:
-    """Configura un logger con salida a consola y, opcionalmente, a archivo.
-
-    Args:
-        name: Nombre del logger, normalmente el de la herramienta.
-        verbose: Si es True baja el umbral a DEBUG.
-        log_file: Si se indica, añade los registros a este archivo
-            (traza de auditoría persistente).
-
-    Returns:
-        El logger configurado. Llamarlo dos veces con el mismo nombre
-        devuelve la instancia existente sin duplicar manejadores.
-    """
-    logger = logging.getLogger(name)
-    if logger.handlers:
-        # Reconfigurar añadiría manejadores duplicados y cada línea se
-        # imprimiría dos veces; devolvemos la instancia ya configurada.
-        return logger
-
-    logger.setLevel(logging.DEBUG if verbose else logging.INFO)
-    formatter = logging.Formatter(
-        "[%(levelname)s] %(asctime)s - %(message)s",
-        datefmt="%Y-%m-%d %H:%M:%S",
-    )
-    console = logging.StreamHandler()
-    console.setFormatter(formatter)
-    logger.addHandler(console)
-
-    if log_file is not None:
-        file_handler = logging.FileHandler(log_file, encoding="utf-8")
-        file_handler.setFormatter(formatter)
-        logger.addHandler(file_handler)
-
-    return logger
+def setup_logger(name, verbose=False, log_file=None):
+    return _core.configurar(name, verbose, log_file)
