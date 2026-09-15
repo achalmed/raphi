@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""audio-converter — audios de WhatsApp (y cualquier otro) a MP3 por lotes.
+"""script_audio_converter/main.py — audios de WhatsApp (y cualquier otro) a MP3 por lotes.
 
 Orchestration only — the logic lives in lib/:
 
@@ -11,7 +11,7 @@ Orchestration only — the logic lives in lib/:
   6. Summary; exit 1 if any conversion failed.
 
 Pipeline siblings: script_video_downloader (URL -> mp3/mp4) and
-script_whisper_transcriber (mp3 -> txt/srt). Version: 1.0.0
+script_whisper_transcriber (mp3 -> txt/srt).
 """
 from __future__ import annotations
 

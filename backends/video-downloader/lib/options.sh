@@ -14,7 +14,7 @@
 # Array global que se rellena aquí y se consume en lib/downloader.sh
 YTDLP_ARGS=()
 
-# ── _opts_format() ───────────────────────────────────────────────────────────
+# --- _opts_format() --------------------------------------------------------
 # Selección de formato de video/audio según modo, calidad y contenedor.
 # Precedencia: --format crudo > modo audio > modo best > altura numérica.
 _opts_format() {
@@ -44,14 +44,14 @@ _opts_format() {
     YTDLP_ARGS+=( --merge-output-format "${OPT_CONTAINER}" )
 }
 
-# ── _opts_audio() ────────────────────────────────────────────────────────────
+# --- _opts_audio() ---------------------------------------------------------
 # Extracción de audio (solo modo audio): -x + formato + calidad.
 _opts_audio() {
     [ "${OPT_MODE}" = "audio" ] || return 0
     YTDLP_ARGS+=( -x --audio-format "${OPT_AUDIO_FORMAT}" --audio-quality "${OPT_AUDIO_QUALITY}" )
 }
 
-# ── _opts_subs() ─────────────────────────────────────────────────────────────
+# --- _opts_subs() ----------------------------------------------------------
 # Subtítulos: descarga, autogenerados, idiomas, incrustado y formato.
 _opts_subs() {
     # En modo subs siempre se activan aunque no se pase --subs
@@ -72,7 +72,7 @@ _opts_subs() {
     fi
 }
 
-# ── _opts_metadata() ─────────────────────────────────────────────────────────
+# --- _opts_metadata() ------------------------------------------------------
 # Metadatos, capítulos, miniatura y volcados a disco.
 _opts_metadata() {
     [ "${OPT_EMBED_METADATA}" = true ]  && YTDLP_ARGS+=( --embed-metadata )
@@ -85,14 +85,14 @@ _opts_metadata() {
     return 0
 }
 
-# ── _opts_sponsorblock() ─────────────────────────────────────────────────────
+# --- _opts_sponsorblock() --------------------------------------------------
 # Recorta segmentos (patrocinios, intros, etc.) usando la API de SponsorBlock.
 _opts_sponsorblock() {
     [ "${OPT_SPONSORBLOCK}" = true ] || return 0
     YTDLP_ARGS+=( --sponsorblock-remove "${SPONSORBLOCK_CATEGORIES}" )
 }
 
-# ── _opts_playlist() ─────────────────────────────────────────────────────────
+# --- _opts_playlist() ------------------------------------------------------
 # Control de playlists: single vs. completa, selección de items y tope.
 _opts_playlist() {
     if [ "${OPT_NO_PLAYLIST}" = true ]; then
@@ -106,7 +106,7 @@ _opts_playlist() {
     return 0   # ver nota de set -e en _opts_metadata
 }
 
-# ── _opts_network() ──────────────────────────────────────────────────────────
+# --- _opts_network() -------------------------------------------------------
 # Reintentos, concurrencia, límite de tasa, espera, aria2c, proxy y cookies.
 _opts_network() {
     YTDLP_ARGS+=( --retries "${OPT_RETRIES}" --fragment-retries "${OPT_RETRIES}" )
@@ -126,7 +126,7 @@ _opts_network() {
     return 0   # ver nota de set -e en _opts_metadata
 }
 
-# ── _opts_output() ───────────────────────────────────────────────────────────
+# --- _opts_output() --------------------------------------------------------
 # Carpeta de destino, plantilla de nombre y opciones de sistema de archivos.
 _opts_output() {
     YTDLP_ARGS+=( -P "${OPT_OUTPUT_DIR}" )
@@ -146,7 +146,7 @@ _opts_output() {
     YTDLP_ARGS+=( --continue --no-overwrites )
 }
 
-# ── _opts_archive() ──────────────────────────────────────────────────────────
+# --- _opts_archive() -------------------------------------------------------
 # Historial persistente: yt-dlp salta lo que ya figure en el archivo.
 _opts_archive() {
     [ "${OPT_ARCHIVE}" = true ] || return 0
@@ -154,7 +154,7 @@ _opts_archive() {
     YTDLP_ARGS+=( --download-archive "${ARCHIVE_FILE}" )
 }
 
-# ── _opts_misc() ─────────────────────────────────────────────────────────────
+# --- _opts_misc() ----------------------------------------------------------
 # Verbosidad, simulación, y los passthrough --extra / EXTRA_YTDLP_OPTS.
 _opts_misc() {
     # Siempre ignorar errores de un item para no abortar todo el lote
@@ -180,7 +180,7 @@ _opts_misc() {
     fi
 }
 
-# ── build_ytdlp_args() ───────────────────────────────────────────────────────
+# --- build_ytdlp_args() ----------------------------------------------------
 # Orquesta el ensamblado del array YTDLP_ARGS para los modos de descarga
 # (video/audio/best/subs). Los modos info/formats usan build_info_args.
 build_ytdlp_args() {
@@ -201,7 +201,7 @@ build_ytdlp_args() {
     return 0   # ver nota de set -e en _opts_metadata
 }
 
-# ── build_info_args() ────────────────────────────────────────────────────────
+# --- build_info_args() -----------------------------------------------------
 # Conjunto mínimo para los modos info/formats: solo acceso a la red y playlist,
 # sin opciones de descarga/formato que aquí no aplican.
 build_info_args() {

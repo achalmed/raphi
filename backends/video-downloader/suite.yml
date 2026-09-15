@@ -1,5 +1,6 @@
-# suite.yml — contrato de la suite (esquema en core/suite.schema.yml); core/suites.py generar escribe los índices y READMEs.
-nombre: video_downloader
+# script_video_downloader/suite.yml — suite video_downloader: Descarga video o audio con yt-dlp y ffmpeg, por URL o por lotes, con recorte opcional.
+# Contrato: core/suite.schema.yml; core/suites.py validar lo comprueba y generar escribe los índices y README.
+id: video_downloader
 objetivo: multimedia
 resumen: Descarga video o audio con yt-dlp y ffmpeg, por URL o por lotes, con recorte opcional.
 escribe_en:

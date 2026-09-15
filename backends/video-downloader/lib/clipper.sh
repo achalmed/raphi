@@ -16,7 +16,7 @@
 #       truncado se reporta como fallo, nunca se entrega en silencio
 # =============================================================================
 
-# ── Estado global del clip (lo fija clip_parse_range desde main) ─────────────
+# --- Estado global del clip (lo fija clip_parse_range desde main) ----------
 CLIP_START=""        # tiempo de inicio tal como lo escribió el usuario
 CLIP_DURATION=0      # duración del tramo en segundos
 CLIP_LABEL=""        # etiqueta para el nombre de archivo (sin ':')
@@ -24,7 +24,7 @@ CLIP_OUTPUT=""       # ruta final del clip (la fija _clip_output_path)
 CLIP_VIDEO_URL=""    # URL cruda del stream de video
 CLIP_AUDIO_URL=""    # URL cruda del stream de audio ("" si es combinado)
 
-# ── _time_to_seconds() ───────────────────────────────────────────────────────
+# --- _time_to_seconds() ----------------------------------------------------
 # Convierte H:MM:SS, MM:SS o SS a segundos totales.
 # El prefijo 10# evita que "08"/"09" se interpreten como octal inválido.
 #
@@ -44,7 +44,7 @@ _time_to_seconds() {
     fi
 }
 
-# ── clip_parse_range() ───────────────────────────────────────────────────────
+# --- clip_parse_range() ----------------------------------------------------
 # Valida y descompone el rango INICIO-FIN de --clip. Se llama desde main
 # en la fase de validación, una sola vez.
 #
@@ -77,7 +77,7 @@ clip_parse_range() {
     return 0
 }
 
-# ── _clip_access_args() ──────────────────────────────────────────────────────
+# --- _clip_access_args() ---------------------------------------------------
 # Rellena el array (nameref) con las opciones de acceso que necesitan las
 # llamadas de extracción de yt-dlp (cookies, proxy, user-agent).
 #
@@ -93,7 +93,7 @@ _clip_access_args() {
     return 0   # el último test puede ser falso; sin esto set -e abortaría
 }
 
-# ── _clip_extract_urls() ─────────────────────────────────────────────────────
+# --- _clip_extract_urls() --------------------------------------------------
 # Extrae las URLs crudas de los streams con yt-dlp -g, respetando la calidad
 # elegida. Si el sitio no ofrece streams separados, cae al formato combinado.
 #
@@ -138,7 +138,7 @@ _clip_extract_urls() {
     return 0
 }
 
-# ── _clip_sanitize_base() ────────────────────────────────────────────────────
+# --- _clip_sanitize_base() -------------------------------------------------
 # Blinda el nombre base contra títulos vacíos o inservibles. Facebook y otros
 # sitios a veces devuelven un título vacío o compuesto solo de puntos/espacios;
 # con la plantilla "<título> [<id>]" eso produce ". [id]…" o " [id]…", es decir
@@ -162,7 +162,7 @@ _clip_sanitize_base() {
     printf '%s' "${base}"
 }
 
-# ── _clip_output_path() ──────────────────────────────────────────────────────
+# --- _clip_output_path() ---------------------------------------------------
 # Calcula la ruta final del clip: "<título> [<id>] (clip <rango>).<ext>".
 #
 # Arguments:
@@ -182,7 +182,7 @@ _clip_output_path() {
     CLIP_OUTPUT="${OPT_OUTPUT_DIR}/${base} (clip ${CLIP_LABEL}).${ext}"
 }
 
-# ── _clip_audio_codec_args() ─────────────────────────────────────────────────
+# --- _clip_audio_codec_args() ----------------------------------------------
 # Traduce OPT_AUDIO_FORMAT al codificador ffmpeg correspondiente (modo audio).
 #
 # Arguments:
@@ -199,7 +199,7 @@ _clip_audio_codec_args() {
     esac
 }
 
-# ── _clip_run_ffmpeg() ───────────────────────────────────────────────────────
+# --- _clip_run_ffmpeg() ----------------------------------------------------
 # Construye y ejecuta el comando ffmpeg. El -ss va ANTES de cada -i (búsqueda
 # de entrada): ffmpeg salta por rangos HTTP hasta el keyframe previo, decodifica
 # y descarta hasta el punto exacto — por eso el corte es preciso al frame.
@@ -237,7 +237,7 @@ _clip_run_ffmpeg() {
     "${cmd[@]}"
 }
 
-# ── _clip_verify() ───────────────────────────────────────────────────────────
+# --- _clip_verify() --------------------------------------------------------
 # La red de seguridad: comprueba con ffprobe que cada stream del clip dure lo
 # pedido (tolerancia 1.5s). Detecta exactamente el fallo de video congelado
 # que motivó este módulo, en vez de entregar un archivo defectuoso.
@@ -271,7 +271,7 @@ _clip_verify() {
     return 0
 }
 
-# ── run_clip() ───────────────────────────────────────────────────────────────
+# --- run_clip() ------------------------------------------------------------
 # Orquesta el recorte de un objetivo: extraer URLs → ruta → ffmpeg → verificar.
 # La llama dispatch_target (lib/downloader.sh) cuando OPT_CLIP está activo.
 #

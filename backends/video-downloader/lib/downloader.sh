@@ -9,13 +9,13 @@
 #  y se llevan contadores de éxito/fallo para el resumen final.
 # =============================================================================
 
-# ── Contadores globales (los lee lib/summary.sh) ─────────────────────────────
+# --- Contadores globales (los lee lib/summary.sh) --------------------------
 DL_OK_COUNT=0
 DL_FAIL_COUNT=0
 # Array global de objetivos a procesar
 TARGETS=()
 
-# ── collect_targets() ────────────────────────────────────────────────────────
+# --- collect_targets() -----------------------------------------------------
 # Rellena TARGETS con las URLs posicionales y, si se dio --batch, con las
 # líneas del archivo (ignorando vacías y comentarios que empiezan por #).
 #
@@ -47,7 +47,7 @@ collect_targets() {
     done < "${batch_file}"
 }
 
-# ── run_download() ───────────────────────────────────────────────────────────
+# --- run_download() --------------------------------------------------------
 # Descarga un objetivo con el array YTDLP_ARGS ya construido.
 # El `--` separa las opciones de la URL (protege URLs que empiezan por -).
 #
@@ -63,7 +63,7 @@ run_download() {
     return "${rc}"
 }
 
-# ── run_info() ───────────────────────────────────────────────────────────────
+# --- run_info() ------------------------------------------------------------
 # Imprime metadatos del objetivo sin descargar. Usa jq para un resumen legible
 # si está disponible; si no, vuelca el JSON crudo de yt-dlp.
 #
@@ -83,7 +83,7 @@ run_info() {
     return "${rc}"
 }
 
-# ── run_list_formats() ───────────────────────────────────────────────────────
+# --- run_list_formats() ----------------------------------------------------
 # Lista todos los formatos disponibles del objetivo (sin descargar).
 #
 # Arguments:
@@ -95,7 +95,7 @@ run_list_formats() {
     return "${rc}"
 }
 
-# ── dispatch_target() ────────────────────────────────────────────────────────
+# --- dispatch_target() -----------------------------------------------------
 # Elige la acción según el modo y actualiza los contadores de éxito/fallo.
 #
 # Arguments:
@@ -134,7 +134,7 @@ dispatch_target() {
     fi
 }
 
-# ── run_all_targets() ────────────────────────────────────────────────────────
+# --- run_all_targets() -----------------------------------------------------
 # Recorre TARGETS y procesa cada uno; aplica la espera entre videos si se pidió.
 #
 # Arguments:

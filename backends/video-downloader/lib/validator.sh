@@ -11,7 +11,7 @@
 #  apropiado del proyecto (5 = dependencia, 2 = argumentos, etc.).
 # =============================================================================
 
-# ── _detect_install_hint() ───────────────────────────────────────────────────
+# --- _detect_install_hint() ------------------------------------------------
 # Detecta el gestor de paquetes para sugerir el comando de instalación correcto.
 # Outputs (stdout): el prefijo de instalación, ej. "sudo pacman -S".
 _detect_install_hint() {
@@ -26,7 +26,7 @@ _detect_install_hint() {
     fi
 }
 
-# ── validate_dependencies() ──────────────────────────────────────────────────
+# --- validate_dependencies() -----------------------------------------------
 # yt-dlp es obligatorio. ffmpeg es prácticamente obligatorio (fusión de
 # video+audio y extracción de audio lo requieren). aria2c y AtomicParsley son
 # opcionales: si faltan, se avisa y se continúa sin ellos.
@@ -43,7 +43,7 @@ validate_dependencies() {
     local hint failures=0
     hint=$(_detect_install_hint)
 
-    # ── yt-dlp: OBLIGATORIO (el motor de descarga) ────────────────────────────
+    # --- yt-dlp: OBLIGATORIO (el motor de descarga) ------------------------
     if command -v yt-dlp &>/dev/null; then
         log_ok "yt-dlp encontrado: v$(yt-dlp --version 2>/dev/null || echo '?')"
     else
@@ -53,7 +53,7 @@ validate_dependencies() {
         failures=$((failures + 1))
     fi
 
-    # ── ffmpeg/ffprobe: necesarios para fusionar y convertir ──────────────────
+    # --- ffmpeg/ffprobe: necesarios para fusionar y convertir --------------
     if command -v ffmpeg &>/dev/null && command -v ffprobe &>/dev/null; then
         log_ok "ffmpeg y ffprobe encontrados (fusión y conversión disponibles)"
     else
@@ -62,7 +62,7 @@ validate_dependencies() {
         failures=$((failures + 1))
     fi
 
-    # ── aria2c: opcional salvo que se pida --aria2 ────────────────────────────
+    # --- aria2c: opcional salvo que se pida --aria2 ------------------------
     if command -v aria2c &>/dev/null; then
         log_ok "aria2c encontrado (descargador externo acelerado disponible)"
     elif [ "${use_aria2}" = true ]; then
@@ -73,14 +73,14 @@ validate_dependencies() {
         log_debug "aria2c no encontrado (opcional; se usa el descargador nativo)"
     fi
 
-    # ── AtomicParsley: opcional (miniatura incrustada en mp4) ──────────────────
+    # --- AtomicParsley: opcional (miniatura incrustada en mp4) -------------
     if command -v AtomicParsley &>/dev/null || command -v atomicparsley &>/dev/null; then
         log_ok "AtomicParsley encontrado (miniatura incrustable en mp4)"
     else
         log_debug "AtomicParsley no encontrado (opcional; mkv no lo necesita)"
     fi
 
-    # ── jq: opcional (formatea el modo info) ──────────────────────────────────
+    # --- jq: opcional (formatea el modo info) ------------------------------
     command -v jq &>/dev/null || log_debug "jq no encontrado (opcional; modo info usará JSON crudo)"
 
     if [ "${failures}" -gt 0 ]; then
@@ -90,7 +90,7 @@ validate_dependencies() {
     echo ""
 }
 
-# ── validate_output_dir() ────────────────────────────────────────────────────
+# --- validate_output_dir() -------------------------------------------------
 # Verifica que la carpeta de destino exista y sea escribible; la crea si falta.
 #
 # Arguments:
@@ -124,7 +124,7 @@ validate_output_dir() {
     log_ok "Carpeta creada: ${dir}"
 }
 
-# ── validate_cookies() ───────────────────────────────────────────────────────
+# --- validate_cookies() ----------------------------------------------------
 # Si se indicó un archivo de cookies, verifica que exista y sea legible.
 # El navegador (--cookies-from-browser) no se valida aquí: yt-dlp lo resuelve.
 #
@@ -146,7 +146,7 @@ validate_cookies() {
     log_debug "Cookies válidas: ${cookies_file}"
 }
 
-# ── validate_quality() ───────────────────────────────────────────────────────
+# --- validate_quality() ----------------------------------------------------
 # La calidad debe ser 'best', 'worst' o un número entero (altura en px).
 #
 # Arguments:
@@ -164,7 +164,7 @@ validate_quality() {
     esac
 }
 
-# ── validate_targets() ───────────────────────────────────────────────────────
+# --- validate_targets() ----------------------------------------------------
 # Verifica que haya al menos una URL/objetivo para descargar.
 #
 # Arguments:
@@ -181,7 +181,7 @@ validate_targets() {
     log_debug "Objetivos a procesar: ${#targets_ref[@]}"
 }
 
-# ── warn_if_not_url() ────────────────────────────────────────────────────────
+# --- warn_if_not_url() -----------------------------------------------------
 # Aviso suave: yt-dlp acepta URLs http(s) y prefijos de búsqueda (ytsearch:).
 # No abortamos porque hay entradas válidas que no empiezan por http.
 #

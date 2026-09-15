@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""whisper-transcriber — transcripción y traducción de audio/video con Whisper.
+"""script_whisper_transcriber/main.py — transcripción y traducción de audio/video con Whisper.
 
 Modular CLI rebuild of the Colab notebook "Transcribir y Traducir OpenAI
 Whisper" (Jason Boog; mods. Álex Goia; MIT). Orchestration only — the
@@ -13,8 +13,6 @@ logic lives in lib/:
        media -> transcribe/translate                 (lib/transcriber.py)
        .srt  -> shorten lines                        (lib/subtitle_shortener.py)
   5. Summary and temporary-file cleanup.
-
-Version: 1.0.0
 """
 from __future__ import annotations
 

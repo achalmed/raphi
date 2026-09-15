@@ -1,6 +1,6 @@
 """Configuración central de photo-metadata-suite.
 
-TODO valor ajustable vive aquí. Edita este archivo para cambiar el
+Todo valor ajustable vive aquí. Edita este archivo para cambiar el
 comportamiento por defecto sin tocar la lógica en `lib/`. Cualquier campo
 puede además sobreescribirse por CLI (ver `lib/cli.py`).
 """

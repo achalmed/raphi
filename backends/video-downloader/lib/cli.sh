@@ -11,7 +11,7 @@
 #  sigue siendo config.sh.
 # =============================================================================
 
-# ── Estado de opciones (inicializado desde config.sh) ────────────────────────
+# --- Estado de opciones (inicializado desde config.sh) ---------------------
 OPT_VERBOSE="${DEFAULT_VERBOSE}"
 OPT_SIMULATE="${DEFAULT_SIMULATE}"
 OPT_LOG="${DEFAULT_LOG}"
@@ -66,7 +66,7 @@ OPT_CLIP=""
 # URLs posicionales acumuladas durante el parseo
 OPT_URLS=()
 
-# ── _require_value() ─────────────────────────────────────────────────────────
+# --- _require_value() ------------------------------------------------------
 # Aborta con mensaje claro si una flag que exige valor no lo recibió.
 # Bajo `set -u`, leer un $2 ausente mata el script con un error críptico.
 #
@@ -80,14 +80,14 @@ _require_value() {
     fi
 }
 
-# ── show_version() ───────────────────────────────────────────────────────────
+# --- show_version() --------------------------------------------------------
 show_version() {
     echo "video-downloader v1.1.1"
     echo "Wrapper modular de yt-dlp — YouTube, Facebook y ~1800 sitios más"
     echo "Autor: achalmaedison"
 }
 
-# ── show_help() ──────────────────────────────────────────────────────────────
+# --- show_help() -----------------------------------------------------------
 # Ayuda completa con colores si el terminal los soporta.
 show_help() {
     cat <<EOF
@@ -200,7 +200,7 @@ ${CLR_BOLD}DESTINO POR DEFECTO:${CLR_RESET} ${DEFAULT_OUTPUT_DIR}/
 EOF
 }
 
-# ── parse_args() ─────────────────────────────────────────────────────────────
+# --- parse_args() ----------------------------------------------------------
 # Parsea todos los argumentos. Flags cortos y largos vía case; lo que no sea
 # flag se acumula como URL posicional en OPT_URLS.
 #
@@ -277,7 +277,7 @@ parse_args() {
     _validate_flag_combinations
 }
 
-# ── _validate_flag_combinations() ────────────────────────────────────────────
+# --- _validate_flag_combinations() -----------------------------------------
 # Detecta combinaciones inválidas o incoherentes tras el parseo.
 _validate_flag_combinations() {
     # Modo válido
@@ -324,7 +324,7 @@ _validate_flag_combinations() {
     _require_integer "--sleep"      "${OPT_SLEEP}"
 }
 
-# ── _require_integer() ───────────────────────────────────────────────────────
+# --- _require_integer() ----------------------------------------------------
 # Aborta si el valor de una flag numérica no es un entero no negativo.
 #
 # Arguments:

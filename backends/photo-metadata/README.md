@@ -17,7 +17,7 @@ main.py verify <carpeta>
 main.py undo <carpeta> --execute
 ```
 
-<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-07); no se edita a mano.</sub>
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-15); no se edita a mano.</sub>
 <!-- suite:fin -->
 
 > Suite de fechas y metadatos para colecciones fotográficas: **audita**

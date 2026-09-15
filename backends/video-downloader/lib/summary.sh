@@ -8,7 +8,7 @@
 #  aquí mantiene main.sh centrado en el flujo.
 # =============================================================================
 
-# ── print_config_banner() ────────────────────────────────────────────────────
+# --- print_config_banner() -------------------------------------------------
 # Resume la configuración activa antes de iniciar. Muestra solo lo relevante
 # según el modo para no abrumar.
 #
@@ -48,7 +48,7 @@ print_config_banner() {
     log_separator
 }
 
-# ── _banner_flag() ───────────────────────────────────────────────────────────
+# --- _banner_flag() --------------------------------------------------------
 # Imprime una fila del banner solo si la flag booleana está activa.
 #
 # Arguments:
@@ -59,7 +59,7 @@ _banner_flag() {
     return 0
 }
 
-# ── confirm_or_abort() ───────────────────────────────────────────────────────
+# --- confirm_or_abort() ----------------------------------------------------
 # Pide confirmación interactiva salvo que se pase --no-confirm o --simulate,
 # o que el modo sea de solo lectura (info/formats).
 #
@@ -82,7 +82,7 @@ confirm_or_abort() {
     fi
 }
 
-# ── show_summary() ───────────────────────────────────────────────────────────
+# --- show_summary() --------------------------------------------------------
 # Balance final: éxitos, fallos, carpeta de destino y log.
 #
 # Arguments:
@@ -106,7 +106,7 @@ show_summary() {
     echo ""
 }
 
-# ── run_post_command() ───────────────────────────────────────────────────────
+# --- run_post_command() ----------------------------------------------------
 # Ejecuta un comando definido por el usuario al terminar (notificaciones, etc.).
 # En simulación solo lo muestra. Se usa `bash -c` para respetar la línea tal cual.
 #
