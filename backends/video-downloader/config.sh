@@ -3,7 +3,7 @@
 #  config.sh — Configuración centralizada de video-downloader
 # =============================================================================
 #
-#  TODO valor ajustable del script vive aquí. Edita este archivo para cambiar
+#  Todo valor ajustable del script vive aquí. Edita este archivo para cambiar
 #  el comportamiento por defecto sin tocar la lógica de ningún módulo de lib/.
 #
 #  El motor real es yt-dlp; ffmpeg se usa para fusionar/convertir. Las opciones
