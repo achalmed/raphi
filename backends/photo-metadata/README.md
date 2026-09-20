@@ -1,5 +1,8 @@
-# scripts_photo_metadata_suite
-
+---
+tipo: readme
+estado: activo
+---
+# scripts_photo_metadata_suite/ — fechas, nombres y metadatos de fotos y videos de cámara: auditoría, OCR de la marca, EXIF y digiKam (v2.0)
 <!-- suite:inicio -->
 **Suite `photo_metadata_suite`** · objetivo *multimedia* · estado *activo* · python · interfaz cli
 
@@ -89,7 +92,7 @@ tras exportaciones masivas, ordenar cronológicamente por nombre.
 ### Paso 1: Ir a la carpeta del proyecto
 
 ```bash
-cd /home/achalmaedison/Documents/scripts_for_linux/camera-timestamp-renamer
+cd ~/Documents/scripts_for_linux/scripts_photo_metadata_suite
 ```
 
 ### Paso 2: Instalar dependencias
@@ -271,7 +274,7 @@ Ajusta `--workers` al número de núcleos físicos si hace falta.
 
 ### Para agregar un nuevo módulo de dominio
 
-1. Crea `lib/nuevo_modulo.py` con funciones de responsabilidad única.
+1. Crea lib/<tema>.py con funciones de responsabilidad única.
 2. Añade sus valores ajustables a `config.py` (nunca hardcodeados en `lib/`).
 3. Orquéstalo desde `lib/commands.py`.
 4. Agrega las flags necesarias en `lib/cli.py`.
@@ -312,4 +315,11 @@ Ajusta `--workers` al número de núcleos físicos si hace falta.
 - **Videos M2TS**: algunos `.mp4` son en realidad streams M2TS que no admiten
   metadatos embebidos; para ellos `embed-date` deja al menos el `mtime`
   correcto (por eso `set_file_modify_date` viene activado).
-```
+
+## Límite honesto
+
+- **Formato de marca fijo** `AAAA-MM-DD HH:MM:SS` (cámaras Tapo); otro formato exige ajustar `timestamp_regex` en `config.py`.
+- **Las fotos sin marca legible se marcan `SKIP` y no se tocan**; ráfagas con la misma hora reciben sufijo `_2`, `_3`…
+- **Reversible, pero cada `apply` sobrescribe `_rename_log.csv` y `_undo_rename.sh`**: deshaz antes de re-aplicar.
+- **Los videos M2TS no admiten metadatos embebidos**: `embed-date` deja solo el `mtime`.
+- **Simula por defecto**: nada cambia sin `--execute`; el renombrado nunca sobrescribe un archivo existente.

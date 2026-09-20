@@ -1,5 +1,8 @@
-# whisper-transcriber
-
+---
+tipo: readme
+estado: activo
+---
+# script_whisper_transcriber/ — transcripción y traducción local de audio o video con Whisper, con subtítulos (v1.0)
 <!-- suite:inicio -->
 **Suite `whisper_transcriber`** · objetivo *multimedia* · estado *activo* · python · interfaz cli
 
@@ -328,7 +331,7 @@ Actualiza yt-dlp (YouTube cambia a menudo): `pip install -U yt-dlp`.
 
 ### Para agregar un nuevo módulo:
 
-1. Crea `lib/nuevo_modulo.py` con funciones de responsabilidad única.
+1. Crea lib/<tema>.py con funciones de responsabilidad única.
 2. Añade sus valores ajustables en `config.py` (nunca hardcodeados en
    `lib/`).
 3. Impórtalo y orquéstalo desde `main.py`.
@@ -376,3 +379,11 @@ Actualiza yt-dlp (YouTube cambia a menudo): `pip install -U yt-dlp`.
 - Motor: [OpenAI Whisper](https://github.com/openai/whisper) ·
   Descargas: [yt-dlp](https://github.com/yt-dlp/yt-dlp) ·
   Subtítulos: [pysrt](https://github.com/byroot/pysrt).
+
+## Límite honesto
+
+- **`--task translate` solo produce inglés** (límite de Whisper).
+- **Modelo `large` por defecto**: en CPU es muy pesado; `--model small`/`turbo` o `DEFAULT_MODEL`.
+- **No descarga el video completo**: eso es `script_video_downloader`; aquí solo se baja el audio necesario.
+- **En `--dry-run` las dependencias ausentes son avisos**, no errores; la ejecución real sale con código 5.
+- **Las entradas `.srt` solo se acortan** (a `*_acortado.srt`), no se transcriben; el fallo de una entrada no detiene a las demás.

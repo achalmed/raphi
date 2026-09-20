@@ -1,5 +1,8 @@
-# video-downloader — Descargador universal de video/audio
-
+---
+tipo: readme
+estado: activo
+---
+# script_video_downloader/ — descarga de video o audio con yt-dlp y ffmpeg, por URL o por lotes, con recorte exacto (v1.1)
 <!-- suite:inicio -->
 **Suite `video_downloader`** · objetivo *multimedia* · estado *activo* · bash · interfaz cli
 
@@ -143,9 +146,9 @@ alias vdl='~/Documents/scripts_for_linux/script_video_downloader/main.sh'
 | `--audio-format <f>`      | `mp3`·`m4a`·`opus`·`flac`·`wav`·`aac`·`best`           | `mp3`              |
 | `--audio-quality <q>`     | `0` (mejor) … `10`, o bitrate (`192K`)                 | `0`                |
 | `--clip <INI-FIN>`        | Recorta solo ese tramo, corte exacto + verificación    | —                  |
-| `-o, --output-dir <dir>`  | Carpeta destino                                        | `~/Downloads/videos` |
+| `-o, --output-dir <dir>`  | Carpeta destino                                        | ~/Downloads/videos |
 | `-t, --template <tpl>`    | Plantilla de nombres de yt-dlp                         | ver `config.sh`    |
-| `--organize`              | Subcarpetas `uploader/playlist/`                       | false              |
+| `--organize`              | Subcarpetas uploader/playlist/                       | false              |
 | `--restrict-names`        | Nombres ASCII sin espacios ni tildes                   | false              |
 | `--subs` / `--auto-subs`  | Subtítulos manuales / autogenerados                    | false              |
 | `--embed-subs`            | Incrustarlos en el contenedor                          | false              |
@@ -357,3 +360,11 @@ nombre útil.
 
 _video-downloader v1.1.1 — Compatible con Kubuntu y Arch Linux_
 _achalmaedison — motor: yt-dlp + ffmpeg_
+
+## Límite honesto
+
+- **Descarga solo lo que tienes derecho a descargar**; las cookies dan acceso a tu sesión y `cookies.txt` no se comparte.
+- **No simula por defecto**: `--simulate` hay que pedirlo.
+- **`--clip` re-codifica el tramo** (x264 CRF 20, ajustable en `config.sh`) y solo opera sobre videos individuales; no usa `--download-sections` porque trunca DASH.
+- **`--extra` divide por espacios simples**: un valor con espacios va en `EXTRA_YTDLP_OPTS` de `config.sh`.
+- **Depende de yt-dlp y ffmpeg del sistema**; los sitios cambian y una descarga que ayer funcionaba puede fallar hoy (código 1 si todo el lote falla).

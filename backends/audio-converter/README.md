@@ -1,5 +1,8 @@
-# audio-converter
-
+---
+tipo: readme
+estado: activo
+---
+# script_audio_converter/ — notas de voz de WhatsApp (Opus) y otros audios a MP3 por lotes con ffmpeg (v1.0)
 <!-- suite:inicio -->
 **Suite `audio_converter`** · objetivo *multimedia* · estado *activo* · python · interfaz cli
 
@@ -215,7 +218,7 @@ Sube el bitrate: `--bitrate 192k` (o edita `DEFAULT_BITRATE`). Para voz,
 
 ### Para agregar un nuevo módulo:
 
-1. Crea `lib/nuevo_modulo.py` con funciones de responsabilidad única.
+1. Crea lib/<tema>.py con funciones de responsabilidad única.
 2. Añade sus valores ajustables en `config.py` (nunca hardcodeados en `lib/`).
 3. Impórtalo y orquéstalo desde `main.py`.
 4. Agrega las flags necesarias en `lib/cli.py` y valida en `lib/validator.py`.
@@ -248,3 +251,11 @@ Sube el bitrate: `--bitrate 192k` (o edita `DEFAULT_BITRATE`). Para voz,
 - Supuesto de diseño («hazlo directo»): se creó como script independiente en
   vez de ampliar `script_video_downloader`, por separación de
   responsabilidades (red vs. transcodificación local).
+
+## Límite honesto
+
+- **Solo produce MP3**: no hay flag de formato; se añadiría en `config.py` y `lib/cli.py`, hoy no existe.
+- **Nunca modifica ni borra los orígenes**; omite los `.mp3` de entrada y lo ya convertido salvo `--overwrite`.
+- **Con un `--output-dir` común, dos orígenes con el mismo nombre base colisionan**: se convierte el primero y se avisa del resto.
+- **No simula por defecto**: `--dry-run` hay que pedirlo.
+- **Es transcodificación local, no descarga**: lo de red es `script_video_downloader`.
