@@ -63,7 +63,7 @@ main() {
     parse_args "$@"
 
     # --- FASE 2: Inicializar logger ----------------------------------------
-    logger_init "${OPT_VERBOSE}" "${OPT_LOG}" "${LOG_FILE}" "${LOG_MAX_BYTES}"
+    logger_init "${OPT_VERBOSE}" "${OPT_LOG}" "${RUTA_LOG}" "${LOG_MAX_BYTES}"
 
     # --- FASE 3: Atajo --update (no requiere el resto del flujo) -----------
     [ "${OPT_UPDATE}" = true ] && update_ytdlp
@@ -102,7 +102,7 @@ main() {
     # --- FASE 9: Resumen y post-comando ------------------------------------
     # No usar ${OPT_LOG:+...}: OPT_LOG es la cadena "true"/"false" (nunca vacía)
     local summary_log_path=""
-    [ "${OPT_LOG}" = true ] && summary_log_path="${LOG_FILE}"
+    [ "${OPT_LOG}" = true ] && summary_log_path="${RUTA_LOG}"
     show_summary "${DL_OK_COUNT}" "${DL_FAIL_COUNT}" "${OPT_MODE}" "${summary_log_path}"
     run_post_command "${OPT_POST_CMD}" "${OPT_SIMULATE}"
 

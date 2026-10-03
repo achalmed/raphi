@@ -14,6 +14,8 @@ logger_init() {
         LOG_FILE="$LOGGER_LOG_FILE"; log_rotate_if_needed "$LOG_FILE" "${4:-10485760}"
         { echo "════════════════════════════════════════════════"; echo "  SESIÓN DE DESCARGA: $(date '+%Y-%m-%d %H:%M:%S')"
           echo "  Usuario: ${USER:-desconocido}"; echo "  Host:    $(hostname)"; echo "════════════════════════════════════════════════"; } >> "$LOG_FILE"
+    else
+        LOG_FILE=""   # sin --log, el logger de core/ no copia nada a disco (aunque venga del entorno)
     fi
     return 0
 }

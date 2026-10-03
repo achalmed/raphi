@@ -106,7 +106,7 @@ ${CLR_BOLD}GENERALES:${CLR_RESET}
         --version           Muestra la versión
     -v, --verbose           Modo detallado (salida ampliada de yt-dlp)
     -s, --simulate          Simula: hace todo menos descargar (dry-run)
-    -l, --log               Guarda log en: ${LOG_FILE}
+    -l, --log               Guarda log en: ${RUTA_LOG}
         --no-confirm        No pide confirmación inicial (cron/scripts)
         --update            Actualiza yt-dlp (yt-dlp -U) y sale
 

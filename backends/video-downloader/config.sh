@@ -111,7 +111,9 @@ OUTPUT_TEMPLATE_ORGANIZED="%(uploader).80B/%(playlist_title|Sueltos)s/%(title)s 
 EXTRA_YTDLP_OPTS=()
 
 # --- Archivo de log --------------------------------------------------------
-LOG_FILE="${HOME_DIR}/video_downloader.log"
+# Destino del log con --log. No se llama LOG_FILE: ese nombre es del logger de core/, que
+# copiaría cada mensaje en él aunque --log esté apagado (core/docs/logger.md).
+RUTA_LOG="${HOME_DIR}/video_downloader.log"
 LOG_MAX_BYTES=10485760        # 10 MB — rota automáticamente al superarlo
 
 # --- Valores por defecto de flags generales --------------------------------
