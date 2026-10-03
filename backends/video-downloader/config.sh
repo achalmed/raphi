@@ -12,8 +12,15 @@
 # =============================================================================
 
 # --- Usuario y rutas base --------------------------------------------------
-USUARIO="${SUDO_USER:-${USER:-achalmaedison}}"
-HOME_DIR="/home/${USUARIO}"
+# Las rutas salen de core/env.sh (regla 5 del CLAUDE.md raíz), nunca de «/home/<usuario>» escrito a
+# mano. DOCS_ROOT se resuelve por la ubicación de este archivo, no por $HOME: con sudo sigue siendo el
+# ~/Documents del usuario que invoca, y su carpeta madre es su directorio personal.
+_d="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
+while [ "$_d" != / ] && [ ! -f "$_d/core/env.sh" ]; do _d="$(dirname "$_d")"; done
+[ -f "$_d/core/env.sh" ] || { echo "[ERROR] no encuentro core/env.sh subiendo desde ${BASH_SOURCE[0]}" >&2; exit 1; }
+source "$_d/core/env.sh"; unset _d
+USUARIO="${SUDO_USER:-${USER:-$(id -un)}}"
+HOME_DIR="$(dirname "$DOCS_ROOT")"
 
 # --- Carpeta de destino de las descargas -----------------------------------
 # Se crea automáticamente si no existe. Sobreescribible con --output-dir/-o.
