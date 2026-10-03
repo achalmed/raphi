@@ -8,7 +8,7 @@ escribe_en:
 simula_por_defecto: false
 comandos:
 - main.sh <url>
-- main.sh --audio <url>
+- main.sh -m audio --audio-format mp3 <url>
 - main.sh --batch lista.txt
 - main.sh --simulate <url>
 estado: activo

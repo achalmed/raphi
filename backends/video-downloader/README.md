@@ -15,12 +15,12 @@ Comandos:
 
 ```bash
 main.sh <url>
-main.sh --audio <url>
+main.sh -m audio --audio-format mp3 <url>
 main.sh --batch lista.txt
 main.sh --simulate <url>
 ```
 
-<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-20); no se edita a mano.</sub>
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-10-03); no se edita a mano.</sub>
 <!-- suite:fin -->
 
 > Wrapper modular de `yt-dlp` para descargar video y audio de YouTube,
@@ -241,7 +241,7 @@ script_video_downloader/
 ├── config.sh            # Configuración centralizada: TODO default editable vive aquí
 ├── README.md            # Esta documentación
 └── lib/
-    ├── logger.sh        # Logging: colores tput, niveles, rotación de log
+    ├── logger.sh        # Logging: envoltorio de core/shell-lib; sesión y rotación
     ├── validator.sh     # Dependencias (con degradación), destino, cookies, calidad
     ├── cli.sh           # Parseo de flags, ayuda, validación de combinaciones
     ├── options.sh       # Traduce OPT_* → array YTDLP_ARGS (el corazón del wrapper)
