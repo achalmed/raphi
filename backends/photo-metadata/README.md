@@ -2,7 +2,7 @@
 tipo: readme
 estado: activo
 ---
-# scripts_photo_metadata_suite/ — fechas, nombres y metadatos de fotos y videos de cámara: auditoría, OCR de la marca, EXIF y digiKam (v2.0)
+# scripts_photo_metadata_suite/ — fechas y nombres de fotos y videos: renombrado por la marca de tiempo impresa, auditoría, EXIF y digiKam
 <!-- suite:inicio -->
 **Suite `photo_metadata_suite`** · objetivo *multimedia* · estado *activo* · python · interfaz cli
 
@@ -23,303 +23,118 @@ main.py undo <carpeta> --execute
 <sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-20); no se edita a mano.</sub>
 <!-- suite:fin -->
 
-> Suite de fechas y metadatos para colecciones fotográficas: **audita**
-> (`audit-dates`: nombre vs EXIF con sistema de evidencia), **embebe** fechas
-> EXIF desde el nombre (`embed-date`, con pases para WhatsApp/Facebook y modo
-> `--trust-name` para escaneadas), **normaliza** nombres decodificables y
-> extensiones incorrectas (`fix-names`: WhatsApp, Facebook, Twitter,
-> Camera360, PhotoStudio, epoch, 12h am/pm, teléfono+fecha…) y **sincroniza**
-> las correcciones hechas en digiKam (`sync-digikam`, BD leída en copia, solo
-> lectura). Todo simula por defecto y registra cada cambio (`_fix_log.csv`).
->
-> Incluye además el renombrador OCR original: renombra **fotos y videos** de
-> cámara de seguridad según la **fecha y hora impresa en la imagen** (OCR de
-> la marca), al formato `AAAAMMDD_HHMMSS`, de forma segura, configurable y
-> **reversible**. En los videos se lee la marca del primer fotograma (la hora
-> de inicio de la grabación).
+## Qué es
 
-## 📋 Tabla de Contenidos
+Una CLI con siete subcomandos sobre **una carpeta** de fotos y videos (sin recorrer subcarpetas). Dos familias:
 
-- [Descripción](#-descripción)
-- [Requisitos](#️-requisitos)
-- [Instalación](#-instalación)
-- [Uso](#-uso)
-- [Flujo recomendado](#-flujo-recomendado)
-- [Configuración](#️-configuración)
-- [Arquitectura](#️-arquitectura)
-- [Solución de Problemas](#-solución-de-problemas)
-- [Cómo Contribuir](#-cómo-contribuir--agregar-funcionalidades)
-- [Notas y Advertencias](#️-notas-y-advertencias)
+- **Renombrado por la marca de tiempo impresa** (cámaras que imprimen `AAAA-MM-DD HH:MM:SS` en una esquina):
+  `analyze` lee la marca con OCR (`tesseract`; en los videos, sobre un fotograma extraído con `ffmpeg`) y
+  arma el plan `AAAAMMDD_HHMMSS.ext`; `verify` genera montajes PNG de las lecturas dudosas y las colisiones;
+  `apply` renombra según el plan; `undo` revierte el último `apply`.
+- **Fechas y nombres de una colección**: `audit-dates` compara la fecha del nombre con la de los metadatos;
+  `embed-date` escribe en EXIF/QuickTime/XMP la fecha que trae el nombre; `fix-names` corrige extensiones que
+  no corresponden al formato real y lleva a `AAAAMMDD_HHMMSS` los nombres con fecha decodificable (WhatsApp,
+  Facebook, capturas, epoch…) o los que no traen fecha pero sí EXIF; `sync-digikam` escribe en el EXIF las
+  fechas corregidas dentro de digiKam.
 
-## 📖 Descripción
+Qué escribe, siempre dentro de la carpeta objetivo:
 
-Muchas cámaras (Tapo y similares) guardan fotos cuyo **nombre de archivo no
-coincide** con el instante real de captura, pero **sí** imprimen la fecha/hora
-en una esquina de la imagen. Esta herramienta lee esa marca con OCR
-(`tesseract`) y renombra cada foto a `AAAAMMDD_HHMMSS.ext`.
+| subcomando | sin `--execute` | con `--execute` |
+|---|---|---|
+| `analyze` | `rename_plan.csv` y `analysis.json` (no acepta `--execute`) | — |
+| `verify` | `verify_review_N.png` y, si no se da `--from-plan`, `analysis.json` | — |
+| `apply` | si no se da `--from-plan`, reanaliza y **reescribe `rename_plan.csv`** y `analysis.json` | renombra en dos fases y deja `_rename_log.csv` y `_undo_rename.sh` |
+| `undo` | nada | revierte con `_rename_log.csv` y lo borra |
+| `audit-dates` | `date_audit.csv` (no acepta `--execute`) | — |
+| `embed-date` | nada | metadatos de los archivos, en el sitio, y su fecha de modificación |
+| `fix-names` | nada | renombra y añade filas a `_fix_log.csv` |
+| `sync-digikam` | nada | metadatos de los archivos, en el sitio, y su fecha de modificación |
 
-Está pensada para reutilizarse en casos similares: puedes cambiar **dónde** se
-lee la marca, los umbrales de binarización, las extensiones aceptadas y más,
-sin tocar la lógica interna. Todo cambio de archivos es **simulado por
-defecto** y queda **registrado para deshacerse**.
+Simula por defecto en los cinco subcomandos que aceptan `--execute`. `sync-digikam` lee `digikam4.db` de la
+carpeta padre (o de la propia carpeta) **en una copia temporal**; la base original no se toca. Los mensajes van
+a la terminal y, con `--log-file`, también a ese archivo.
 
-Casos de uso: normalizar carpetas de cámaras de seguridad, corregir nombres
-tras exportaciones masivas, ordenar cronológicamente por nombre.
-
-## ⚙️ Requisitos
-
-### Sistema Operativo
-
-- Linux o macOS (probado en Linux).
-
-### Dependencias del sistema
-
-- **tesseract-ocr** — motor de OCR.
-  `sudo apt install tesseract-ocr`
-- **ffmpeg** — extraer fotogramas de video (solo necesario si procesas videos).
-  `sudo apt install ffmpeg`
-- **exiftool** — escribir la fecha en metadatos (solo para el subcomando `embed-date`).
-  `sudo apt install libimage-exiftool-perl`
-
-### Dependencias de Python
-
-- Python >= 3.9
-- Pillow >= 9.1 — recorte y montajes.
-- numpy >= 1.21 — binarización vectorizada.
-
-## 🚀 Instalación
-
-### Paso 1: Ir a la carpeta del proyecto
+## Uso
 
 ```bash
-cd ~/Documents/scripts_for_linux/scripts_photo_metadata_suite
+python3 main.py analyze "<carpeta>"                         # plan y JSON, sin renombrar
+python3 main.py verify "<carpeta>"                          # montajes de revisión
+python3 main.py apply "<carpeta>" --from-plan "<carpeta>/rename_plan.csv"             # simula el plan revisado
+python3 main.py apply "<carpeta>" --from-plan "<carpeta>/rename_plan.csv" --execute   # lo aplica
+python3 main.py undo "<carpeta>" --execute                  # revierte el último apply
+python3 main.py audit-dates "<carpeta>" --year 2026         # nombre frente a EXIF, a CSV
+python3 main.py fix-names "<carpeta>"                       # simula; --execute renombra
+python3 main.py embed-date "<carpeta>" --only images        # simula; --execute escribe
+python3 main.py sync-digikam "<carpeta>"                    # simula; --execute escribe
+python3 main.py analyze "<carpeta>" --crop-left 0 --crop-width 1 --crop-height 0.10   # marca en otra franja
 ```
 
-### Paso 2: Instalar dependencias
+| opción | subcomandos | qué hace | por defecto |
+|---|---|---|---|
+| `--execute` | `apply`, `undo`, `embed-date`, `fix-names`, `sync-digikam` | aplica de verdad | simula |
+| `--from-plan CSV` | `apply`, `verify` | usa un plan editado a mano en vez de reanalizar | reanaliza |
+| `--workers N` | `analyze`, `apply`, `verify` | procesos de OCR en paralelo; `0` = todos los núcleos | `0` |
+| `--limit N` | `analyze`, `apply`, `verify` | solo los N primeros archivos | `0` (sin límite) |
+| `--only all\|images\|videos` | `analyze`, `apply`, `verify`, `embed-date` | qué medios procesar | `all` |
+| `--crop-left`, `--crop-top` | `analyze`, `apply`, `verify` | esquina del recorte donde se lee la marca, en fracción 0–1 | `0`, `0` |
+| `--crop-width`, `--crop-height` | `analyze`, `apply`, `verify` | tamaño del recorte, en fracción 0–1 | `0.40`, `0.075` |
+| `--trust-name` | `embed-date` | el nombre manda sobre cualquier EXIF (fotos escaneadas) | no |
+| `--year N` | `audit-dates` | año esperado, para señalar intrusos | el nombre de la carpeta, si es un año |
+| `-v`, `--verbose` | todos | salida detallada | no |
+| `--log-file RUTA` | todos | copia los mensajes a ese archivo | no |
+| `--version` | — | la imprime | — |
 
-```bash
-sudo apt install tesseract-ocr ffmpeg   # dependencias del sistema (ffmpeg: videos)
-pip install -r requirements.txt         # dependencias de Python
-```
+El resto de valores (umbrales del OCR, regex de la marca, rango de años 2015–2035, extensiones, etiquetas de
+fecha que se escriben, nombres de los archivos de salida, tolerancia de la auditoría) vive en `config.py`.
+Códigos de salida: `0` bien, `1` error de E/S, `2` uso o plan inválido, `3` no encontrado, `4` sin permisos,
+`5` falta una dependencia.
 
-## 💻 Uso
+Requisitos: Python 3 con Pillow y numpy (`requirements.txt`; los cargan todos los subcomandos); `tesseract`
+para `analyze`, `apply` y `verify`; `ffmpeg` solo si la carpeta tiene videos; `exiftool` para `audit-dates`,
+`embed-date`, `fix-names` y `sync-digikam`; el logger común del workspace (`core/py-common/logger.py`, en su
+raíz), que `lib/logger.py` busca subiendo carpetas.
 
-### Sintaxis
+## Estructura
 
-```bash
-python main.py <subcomando> <carpeta> [OPCIONES]
-```
-
-### Subcomandos
-
-| Subcomando | Qué hace | ¿Modifica archivos? |
-| --- | --- | --- |
-| `analyze` | Lee las marcas y escribe el plan (`rename_plan.csv`) y `analysis.json` | No |
-| `verify`  | Genera montajes PNG con las lecturas dudosas y las colisiones | No |
-| `apply`   | Renombra según el plan (**simula** salvo `--execute`) | Solo con `--execute` |
-| `undo`    | Revierte el último renombrado usando `_rename_log.csv` | Solo con `--execute` |
-| `embed-date` | Escribe la fecha de captura (EXIF/QuickTime + mtime) desde el nombre | Solo con `--execute` |
-
-### Opciones
-
-| Flag | Descripción | Aplica a |
-| --- | --- | --- |
-| `--execute` | Aplica de verdad (sin esto, solo simula) | `apply`, `undo` |
-| `--from-plan FILE` | Usa un CSV de plan editado a mano | `apply`, `verify` |
-| `--crop-left / --crop-top / --crop-width / --crop-height` | Posición y tamaño del recorte de análisis (fracciones 0–1) | `analyze`, `apply`, `verify` |
-| `--workers N` | Procesos en paralelo (0 = todos los núcleos) | todos menos `undo` |
-| `--limit N` | Procesar solo las primeras N imágenes (pruebas rápidas) | todos menos `undo` |
-| `--verbose, -v` | Salida detallada | todos |
-| `--log-file FILE` | Guardar los logs también en un archivo | todos |
-| `--version` | Mostrar versión | — |
-| `--help, -h` | Mostrar ayuda | — |
-
-### Ejemplos
-
-```bash
-# Analizar sin tocar nada
-python main.py analyze ./fotos
-
-# Simular el renombrado (por defecto NO cambia nada)
-python main.py apply ./fotos
-
-# Aplicar de verdad (deja _rename_log.csv y _undo_rename.sh)
-python main.py apply ./fotos --execute
-
-# Deshacer
-python main.py undo ./fotos --execute
-
-# Escribir la fecha en los metadatos desde el nombre (arregla el agrupado en digiKam)
-python main.py embed-date ./fotos --execute
-
-# La marca está en OTRA posición (franja superior completa, más alta):
-python main.py analyze ./fotos --crop-left 0 --crop-width 1 --crop-height 0.10
-```
-
-## 🔄 Flujo recomendado
-
-1. **`analyze`** → revisa `rename_plan.csv` y el resumen.
-2. **`verify`** → abre los `verify_review_*.png` para comprobar visualmente las
-   lecturas marcadas `weak`/`dark`/`fail` y las colisiones.
-3. Si algo se leyó mal, **edita la columna `new` de `rename_plan.csv`** a mano.
-4. **`apply --from-plan rename_plan.csv --execute`** → aplica tu plan revisado.
-5. ¿Algo no cuadró? **`undo --execute`**.
-
-## 🎛️ Configuración
-
-Todos los valores por defecto viven en [`config.py`](config.py) (clase
-`Settings`). Los más útiles:
-
-| Campo | Para qué | Default |
-| --- | --- | --- |
-| `crop_*_frac` | **Dónde** se lee la marca (posición/tamaño del recorte) | esquina sup. izq. |
-| `bright_thresholds` / `dark_thresholds` | Umbrales de binarización para el OCR | listas por defecto |
-| `tesseract_psms` / `tesseract_whitelist` | Modo de página y caracteres permitidos | `[7, 6]` / dígitos |
-| `timestamp_regex` | Patrón de la fecha/hora en el texto OCR | `AAAA-MM-DD HH:MM:SS` |
-| `year_min` / `year_max` | Rango válido de años (descarta lecturas absurdas) | 2015–2035 |
-| `image_extensions` | Qué archivos se consideran fotos | `.jpg .jpeg .png` |
-| `video_extensions` | Qué archivos se consideran videos | `.mp4 .mov .avi .mkv` |
-| `ffmpeg_frame_times` | Segundos a probar para sacar el fotograma del video | `["0","1","2"]` |
-| `image_date_tags` / `video_date_tags` | Qué etiquetas de fecha escribe `embed-date` | EXIF / QuickTime+XMP |
-| `set_file_modify_date` | Fijar también el `mtime` desde el nombre (respaldo M2TS) | `True` |
-| `confident_min_votes` | Votos para marcar una lectura como fiable | 3 |
-
-Regla: los valores ajustables van en `config.py`; nunca se codifican dentro de
-`lib/`.
-
-## 🗂️ Arquitectura
-
-```
-camera-timestamp-renamer/
-├── main.py              # Punto de entrada: parsea, enruta, mapea errores a códigos
-├── config.py            # Configuración central (Settings) + códigos de salida
-├── requirements.txt
-├── README.md
-└── lib/
-    ├── logger.py        # Logging centralizado (INFO/WARN/ERROR)
-    ├── errors.py        # Excepciones propias (DependencyError, PlanError)
-    ├── validator.py     # Valida dependencias, carpeta y parámetros de recorte
-    ├── cli.py           # argparse: subcomandos y overrides de configuración
-    ├── ocr.py           # NÚCLEO: recorte + binarización + tesseract + votación
-    ├── video.py         # Extrae un fotograma del video con ffmpeg
-    ├── media.py         # Despacha foto/video hacia el mismo OCR
-    ├── metadata.py      # Escribe fechas EXIF/QuickTime/mtime con exiftool
-    ├── scanner.py       # Escaneo paralelo con progreso (fix OMP_THREAD_LIMIT)
-    ├── planner.py       # Construye el plan y resuelve colisiones (_2, _3…)
-    ├── renamer.py       # Renombrado en dos fases + log + script de deshacer
-    ├── montage.py       # Montajes PNG de verificación
-    └── commands.py      # Orquestación de cada subcomando
-```
-
-### Responsabilidad por módulo
-
-| Archivo | Responsabilidad |
-| --- | --- |
-| `main.py` | Único punto de arranque; traduce excepciones a códigos de salida |
-| `config.py` | Todo valor editable y los códigos de salida |
-| `lib/ocr.py` | Leer la marca de una imagen (recorte, umbrales, votación) |
-| `lib/video.py` | Extraer un fotograma de un video con ffmpeg |
-| `lib/media.py` | Unificar fotos y videos sobre el mismo OCR |
-| `lib/metadata.py` | Escribir la fecha en metadatos (exiftool) desde el nombre |
-| `lib/scanner.py` | Recorrer la carpeta en paralelo |
-| `lib/planner.py` | Decidir el nombre destino y manejar duplicados |
-| `lib/renamer.py` | Aplicar/deshacer renombrados sin pérdida de datos |
-| `lib/montage.py` | Generar imágenes de revisión humana |
-| `lib/commands.py` | Encadenar los pasos de cada subcomando |
-
-### Códigos de salida
-
-| Código | Significado |
-| --- | --- |
-| 0 | Éxito |
-| 1 | Error general (E/S) |
-| 2 | Error de argumentos / plan inválido |
-| 3 | Carpeta o archivo no encontrado |
-| 4 | Sin permisos |
-| 5 | Dependencia no instalada (tesseract) |
-
-## 🔧 Solución de Problemas
-
-### `'tesseract' no está instalado`
-
-```bash
-sudo apt install tesseract-ocr
-```
-
-### `ModuleNotFoundError: No module named 'PIL'` / `numpy`
-
-```bash
-pip install -r requirements.txt
-```
-
-### `'ffmpeg' no está instalado` (al procesar videos)
-
-```bash
-sudo apt install ffmpeg
-```
-
-### El OCR lee mal o no encuentra la marca
-
-- La marca puede estar en otra posición → ajusta `--crop-*`.
-- Fotos verticales con barras negras: la marca está más abajo; sube
-  `--crop-top` o amplía `--crop-height`.
-- Revisa con `verify` y corrige a mano el `rename_plan.csv` antes de `apply`.
-
-### El escaneo va muy lento
-
-Ya se aplica `OMP_THREAD_LIMIT=1` para que `tesseract` no sature los núcleos.
-Ajusta `--workers` al número de núcleos físicos si hace falta.
-
-## 🤝 Cómo Contribuir / Agregar Funcionalidades
-
-### Para agregar un nuevo módulo de dominio
-
-1. Crea lib/<tema>.py con funciones de responsabilidad única.
-2. Añade sus valores ajustables a `config.py` (nunca hardcodeados en `lib/`).
-3. Orquéstalo desde `lib/commands.py`.
-4. Agrega las flags necesarias en `lib/cli.py`.
-5. Actualiza este README.
-
-### Estándares de código
-
-- Máximo 30 líneas por función; propósito único.
-- Nombres descriptivos en inglés (`verbo + sustantivo`).
-- Type hints en firmas públicas; docstrings que documentan el contrato.
-- Comenta el "por qué", no el "qué".
-- `ruff check .` y `python -m py_compile` sin advertencias antes de un PR.
-
-## ⚠️ Notas y Advertencias
-
-- **Formato de marca soportado**: `AAAA-MM-DD HH:MM:SS` (el de cámaras Tapo).
-  Para otros formatos, ajusta `timestamp_regex` en `config.py`.
-- **Duplicados**: cuando dos fotos comparten fecha/hora exacta (ráfagas o
-  copias) no pueden tener el mismo nombre; la segunda y siguientes reciben
-  sufijo `_2`, `_3`… Es la única desviación del formato puro y garantiza que
-  **no se pierda ninguna foto**.
-- **Fotos sin marca** (p. ej. una imagen que no es de la cámara) se marcan
-  `SKIP` y **no se tocan**.
-- **Videos**: se procesan igual que las fotos, leyendo la marca del primer
-  fotograma legible (la hora de inicio de la grabación). Requiere `ffmpeg`.
-  Ajusta `video_extensions` y `ffmpeg_frame_times` en `config.py` si hace falta.
-- **Reversibilidad**: `apply --execute` deja `_rename_log.csv` y
-  `_undo_rename.sh` en la carpeta. `undo --execute` revierte y borra el log.
-  Cada nuevo `apply` sobrescribe el log anterior: deshaz antes de re-aplicar.
-- **Seguridad**: el renombrado es en dos fases y nunca sobrescribe un archivo
-  existente; ante cualquier conflicto, aborta sin modificar nada.
-- **`embed-date` y digiKam**: si tus fotos/videos aparecen agrupados por una
-  fecha equivocada (p.ej. el año en que los copiaste), suele ser porque no
-  tienen fecha de captura embebida y el visor usa una fecha del sistema de
-  archivos. `embed-date` escribe `DateTimeOriginal` (fotos), las fechas
-  QuickTime+XMP (videos) y el `mtime`, todo desde el nombre. Luego, en digiKam:
-  seleccionar todo → **"Volver a leer metadatos"**.
-- **Videos M2TS**: algunos `.mp4` son en realidad streams M2TS que no admiten
-  metadatos embebidos; para ellos `embed-date` deja al menos el `mtime`
-  correcto (por eso `set_file_modify_date` viene activado).
+| archivo | qué hace |
+|---|---|
+| `main.py` | parsea, despacha el subcomando y traduce las excepciones a códigos de salida |
+| `config.py` | `Settings` con todos los valores ajustables y los códigos de salida |
+| `requirements.txt` | dependencias de Python |
+| `lib/cli.py` | subcomandos y opciones; fusiona las opciones con `config.py` |
+| `lib/commands.py` | implementación de cada subcomando |
+| `lib/validator.py` | comprueba `tesseract`, `ffmpeg`, `exiftool`, la carpeta y el recorte |
+| `lib/scanner.py` | lista los medios de la carpeta y los analiza en paralelo |
+| `lib/ocr.py` | recorte, binarización con varios umbrales, `tesseract` y votación de la lectura |
+| `lib/video.py` | extrae un fotograma de un video con `ffmpeg` |
+| `lib/media.py` | lleva fotos y videos al mismo OCR |
+| `lib/planner.py` | plan de renombrado, sufijos `_2`, `_3`… ante colisiones, lectura y escritura del CSV |
+| `lib/renamer.py` | renombrado en dos fases, registro y script de deshacer |
+| `lib/montage.py` | montajes PNG de revisión |
+| `lib/audit.py` | lectura de fechas con `exiftool`, clasificación nombre frente a metadatos y CSV de auditoría |
+| `lib/metadata.py` | escritura de fechas con `exiftool` (pase estándar, pase especial y fecha de archivo) |
+| `lib/fixer.py` | correcciones de extensión y de nombre, y su registro |
+| `lib/digikam.py` | lee las fechas de digiKam en copia y las escribe con `exiftool` |
+| `lib/errors.py` | excepciones propias |
+| `lib/logger.py` | envoltorio del logger común |
+| `suite.yml` | manifiesto de la suite (genera el bloque de arriba) |
 
 ## Límite honesto
 
-- **Formato de marca fijo** `AAAA-MM-DD HH:MM:SS` (cámaras Tapo); otro formato exige ajustar `timestamp_regex` en `config.py`.
-- **Las fotos sin marca legible se marcan `SKIP` y no se tocan**; ráfagas con la misma hora reciben sufijo `_2`, `_3`…
-- **Reversible, pero cada `apply` sobrescribe `_rename_log.csv` y `_undo_rename.sh`**: deshaz antes de re-aplicar.
-- **Los videos M2TS no admiten metadatos embebidos**: `embed-date` deja solo el `mtime`.
-- **Simula por defecto**: nada cambia sin `--execute`; el renombrado nunca sobrescribe un archivo existente.
+- **No todo se deshace.** Solo `apply` tiene `undo`. `embed-date` y `sync-digikam` escriben con
+  `-overwrite_original`: sin copia de respaldo ni registro de los valores anteriores. `fix-names` anota lo que
+  renombra en `_fix_log.csv`, pero no hay subcomando que lo revierta (ver `docs/decisiones.md` §Pendientes).
+- **`apply` sin `--from-plan` reanaliza y reescribe `rename_plan.csv`**, también al simular: las correcciones
+  hechas a mano en el plan se pierden si no se pasa `--from-plan`.
+- **`undo` solo revierte el último `apply`**: cada `apply --execute` sobrescribe `_rename_log.csv` y
+  `_undo_rename.sh`. `undo --execute` borra el registro y deja el script.
+- **`embed-date` escribe por defecto solo donde falta la fecha** (o donde el EXIF es posterior al día del nombre
+  y no trae cámara); `--trust-name` la pisa siempre. La fecha de modificación del archivo la fija en todos los
+  que tienen nombre `AAAAMMDD_HHMMSS`, haya o no EXIF; en formatos sin metadatos escribibles es lo único que
+  queda.
+- **`fix-names` también renombra desde el EXIF** cuando el nombre no trae fecha o el EXIF es anterior; no toca
+  mayúsculas y minúsculas.
+- **Un solo formato de marca** (`AAAA-MM-DD HH:MM:SS`) y años entre 2015 y 2035; otro formato exige cambiar
+  `timestamp_regex` en `config.py`. Lo que no tiene marca legible queda `SKIP` y no se toca.
+- **Una carpeta cada vez**: ningún subcomando recorre subcarpetas.
+- **Solo se usa en Linux**; otras plataformas no están probadas.
