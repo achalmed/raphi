@@ -12,3 +12,5 @@ estado: activo
 depende_de:
 - whisper
 - ffmpeg
+- yt-dlp (solo para URL)
+- pysrt (opcional)

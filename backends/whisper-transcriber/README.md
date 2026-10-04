@@ -9,7 +9,7 @@ estado: activo
 Transcribe y traduce audio o video localmente con Whisper.
 
 - Escribe en: archivos · simula por defecto: no
-- Depende de: whisper, ffmpeg
+- Depende de: whisper, ffmpeg, yt-dlp (solo para URL), pysrt (opcional)
 
 Comandos:
 
@@ -17,7 +17,7 @@ Comandos:
 main.py <archivo> [--language es] [--dry-run]
 ```
 
-<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-20); no se edita a mano.</sub>
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-10-04); no se edita a mano.</sub>
 <!-- suite:fin -->
 
 ## Qué es

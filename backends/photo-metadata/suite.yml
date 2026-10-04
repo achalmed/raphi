@@ -7,11 +7,15 @@ escribe_en:
 - archivos
 simula_por_defecto: true
 comandos:
-- main.py analyze <carpeta>
-- main.py apply <carpeta> --execute
-- main.py verify <carpeta>
-- main.py undo <carpeta> --execute
+- main.py analyze|verify <carpeta>
+- main.py apply <carpeta> [--execute] [--from-plan plan.csv]
+- main.py undo <carpeta> [--execute]
+- main.py audit-dates <carpeta> [--year AAAA]
+- main.py fix-names|embed-date <carpeta> [--execute]
+- main.py sync-digikam <carpeta> [--execute]
 estado: activo
 depende_de:
 - exiftool
-- python3
+- python3 (Pillow, numpy)
+- tesseract
+- ffmpeg

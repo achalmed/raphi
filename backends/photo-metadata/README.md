@@ -9,18 +9,20 @@ estado: activo
 Renombra e incrusta fechas en fotos de cámaras (Tapo y similares) a partir de la marca de tiempo; audita y sincroniza con digiKam.
 
 - Escribe en: archivos · simula por defecto: sí
-- Depende de: exiftool, python3
+- Depende de: exiftool, python3 (Pillow, numpy), tesseract, ffmpeg
 
 Comandos:
 
 ```bash
-main.py analyze <carpeta>
-main.py apply <carpeta> --execute
-main.py verify <carpeta>
-main.py undo <carpeta> --execute
+main.py analyze|verify <carpeta>
+main.py apply <carpeta> [--execute] [--from-plan plan.csv]
+main.py undo <carpeta> [--execute]
+main.py audit-dates <carpeta> [--year AAAA]
+main.py fix-names|embed-date <carpeta> [--execute]
+main.py sync-digikam <carpeta> [--execute]
 ```
 
-<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-09-20); no se edita a mano.</sub>
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-10-04); no se edita a mano.</sub>
 <!-- suite:fin -->
 
 ## Qué es
