@@ -55,10 +55,11 @@ def _log_summary(logger: logging.Logger, entries: list[PlanEntry]) -> None:
 
 
 def _scan_and_plan(folder: Path, settings: Settings,
-                   logger: logging.Logger) -> list[PlanEntry]:
-    """Escanea la carpeta y construye el plan, escribiendo también el JSON."""
+                   logger: logging.Logger, write: bool = True) -> list[PlanEntry]:
+    """Escanea la carpeta y construye el plan; con `write`, escribe también el JSON."""
     results = scanner.scan_folder(folder, settings, _progress(logger))
-    _write_analysis(results, folder, settings)
+    if write:
+        _write_analysis(results, folder, settings)
     return planner.build_plan(results)
 
 
@@ -74,13 +75,16 @@ def cmd_analyze(folder_arg: str, settings: Settings, logger: logging.Logger) -> 
 
 def cmd_apply(folder_arg: str, settings: Settings, logger: logging.Logger,
               execute: bool, from_plan: str | None) -> int:
-    """Renombra según el plan. Sin `execute` solo simula."""
+    """Renombra según el plan. Sin `execute` solo simula y no escribe nada: ni el
+    plan ni el JSON (un plan editado a mano no se pisa al simular; para escribirlo,
+    `analyze`)."""
     folder = _prepare(folder_arg, settings)
     if from_plan:
         entries = planner.read_plan_csv(Path(from_plan))
     else:
-        entries = _scan_and_plan(folder, settings, logger)
-        planner.write_plan_csv(entries, folder / settings.plan_csv_name)
+        entries = _scan_and_plan(folder, settings, logger, write=execute)
+        if execute:
+            planner.write_plan_csv(entries, folder / settings.plan_csv_name)
     _log_summary(logger, entries)
     pairs = renamer.apply_plan(entries, folder, settings, execute)
     if execute:

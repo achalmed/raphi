@@ -11,3 +11,4 @@ comandos:
 estado: activo
 depende_de:
 - ffmpeg
+pruebas: tests/run.sh -k audio_converter   # desde la raíz del repo; simulación sobre un HOME temporal (tests/test_simulacion.py)

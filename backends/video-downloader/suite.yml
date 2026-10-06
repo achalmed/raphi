@@ -15,3 +15,4 @@ estado: activo
 depende_de:
 - yt-dlp
 - ffmpeg
+pruebas: tests/run.sh -k video_downloader   # desde la raíz del repo; solo --help: --simulate consulta la red (tests/test_simulacion.py)

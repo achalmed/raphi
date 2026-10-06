@@ -14,3 +14,4 @@ depende_de:
 - ffmpeg
 - yt-dlp (solo para URL)
 - pysrt (opcional)
+pruebas: tests/run.sh -k whisper_transcriber   # desde la raíz del repo; simulación sobre un HOME temporal (tests/test_simulacion.py)

@@ -45,7 +45,7 @@ Qué escribe, siempre dentro de la carpeta objetivo:
 |---|---|---|
 | `analyze` | `rename_plan.csv` y `analysis.json` (no acepta `--execute`) | — |
 | `verify` | `verify_review_N.png` y, si no se da `--from-plan`, `analysis.json` | — |
-| `apply` | si no se da `--from-plan`, reanaliza y **reescribe `rename_plan.csv`** y `analysis.json` | renombra en dos fases y deja `_rename_log.csv` y `_undo_rename.sh` |
+| `apply` | nada: reanaliza (o lee `--from-plan`) y anuncia lo que renombraría | si no se da `--from-plan`, reanaliza y **reescribe `rename_plan.csv`** y `analysis.json`; renombra en dos fases y deja `_rename_log.csv` y `_undo_rename.sh` |
 | `undo` | nada | revierte con `_rename_log.csv` y lo borra |
 | `audit-dates` | `date_audit.csv` (no acepta `--execute`) | — |
 | `embed-date` | nada | metadatos de los archivos, en el sitio, y su fecha de modificación |
@@ -126,8 +126,8 @@ raíz), que `lib/logger.py` busca subiendo carpetas.
 - **No todo se deshace.** Solo `apply` tiene `undo`. `embed-date` y `sync-digikam` escriben con
   `-overwrite_original`: sin copia de respaldo ni registro de los valores anteriores. `fix-names` anota lo que
   renombra en `_fix_log.csv`, pero no hay subcomando que lo revierta (ver `estado.md` §Por hacer).
-- **`apply` sin `--from-plan` reanaliza y reescribe `rename_plan.csv`**, también al simular: las correcciones
-  hechas a mano en el plan se pierden si no se pasa `--from-plan`.
+- **`apply --execute` sin `--from-plan` reanaliza y reescribe `rename_plan.csv`**: las correcciones hechas a
+  mano en el plan se pierden si no se pasa `--from-plan`. Al simular no se escribe nada.
 - **`undo` solo revierte el último `apply`**: cada `apply --execute` sobrescribe `_rename_log.csv` y
   `_undo_rename.sh`. `undo --execute` borra el registro y deja el script.
 - **`embed-date` escribe por defecto solo donde falta la fecha** (o donde el EXIF es posterior al día del nombre

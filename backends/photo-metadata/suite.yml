@@ -19,3 +19,4 @@ depende_de:
 - python3 (Pillow, numpy)
 - tesseract
 - ffmpeg
+pruebas: tests/run.sh -k photo_metadata   # desde la raíz del repo; simulación sobre un HOME temporal (tests/test_simulacion.py)
