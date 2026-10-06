@@ -92,7 +92,7 @@ integrada (comando exacto, stdout, stderr, código de salida y duración) y el l
   `backends/page-counter/config.py` (los `pub_*` son submódulos del hub); los nombres
   lógicos no llevan `pub_`; `blog` y `teching` cuelgan del `_site/` del hub. Cuenta lo **renderizado**:
   con `freeze: true` un conteo viejo significa un render viejo. Su `excel_databases/` es local e ignorado;
-  no es el Excel de metadatos de `scripts_quarto_studio`.
+  no es el Excel de metadatos de `scripts-quarto`.
 - **soffice devuelve 0 aunque no convierta** (documentos protegidos) y corrompe su perfil si corre en
   paralelo: docflow aísla cada invocación en un perfil temporal, le pone `timeout` (300 s,
   `DOCFLOW_SOFFICE_TIMEOUT`) y comprueba que el archivo esperado exista (`backends/docflow/lib/core/soffice.sh`).
