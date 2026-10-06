@@ -137,8 +137,8 @@ en mp4) y `jq` (resumen del modo `info`).
 - **`--clip` en modo audio con `vorbis` o `best`** codifica AAC, pero la extensión del archivo es la palabra pedida.
 - **`--extra` divide por espacios simples**: un valor con espacios va en `EXTRA_YTDLP_OPTS` de `config.sh`, un
   elemento por token.
-- **`--simulate` no es del todo inocuo**: con `--archive` crea la carpeta del historial (ver `docs/decisiones.md`
-  §Pendientes) y siempre consulta la red.
+- **`--simulate` no es del todo inocuo**: con `--archive` crea la carpeta del historial (ver `estado.md`
+  §Por hacer) y siempre consulta la red.
 - **`--post-cmd` ejecuta el texto tal cual** con `bash -c`.
 - **Subtítulos siempre en `srt`** (`DEFAULT_SUB_FORMAT`); no hay opción para cambiarlo.
 - **Miniatura incrustada en mp4** necesita `AtomicParsley`; con `-c mkv` no.

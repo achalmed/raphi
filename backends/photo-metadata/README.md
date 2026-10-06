@@ -125,7 +125,7 @@ raíz), que `lib/logger.py` busca subiendo carpetas.
 
 - **No todo se deshace.** Solo `apply` tiene `undo`. `embed-date` y `sync-digikam` escriben con
   `-overwrite_original`: sin copia de respaldo ni registro de los valores anteriores. `fix-names` anota lo que
-  renombra en `_fix_log.csv`, pero no hay subcomando que lo revierta (ver `docs/decisiones.md` §Pendientes).
+  renombra en `_fix_log.csv`, pero no hay subcomando que lo revierta (ver `estado.md` §Por hacer).
 - **`apply` sin `--from-plan` reanaliza y reescribe `rename_plan.csv`**, también al simular: las correcciones
   hechas a mano en el plan se pierden si no se pasa `--from-plan`.
 - **`undo` solo revierte el último `apply`**: cada `apply --execute` sobrescribe `_rename_log.csv` y
