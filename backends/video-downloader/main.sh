@@ -32,6 +32,7 @@ source "${SCRIPT_DIR}/lib/validator.sh"
 source "${SCRIPT_DIR}/lib/cli.sh"
 source "${SCRIPT_DIR}/lib/options.sh"
 source "${SCRIPT_DIR}/lib/clipper.sh"
+source "${SCRIPT_DIR}/lib/clipper_dash.sh"
 source "${SCRIPT_DIR}/lib/downloader.sh"
 source "${SCRIPT_DIR}/lib/summary.sh"
 

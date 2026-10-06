@@ -23,6 +23,8 @@ CLIP_LABEL=""        # etiqueta para el nombre de archivo (sin ':')
 CLIP_OUTPUT=""       # ruta final del clip (la fija _clip_output_path)
 CLIP_VIDEO_URL=""    # URL cruda del stream de video
 CLIP_AUDIO_URL=""    # URL cruda del stream de audio ("" si es combinado)
+CLIP_SS_VIDEO=""     # -ss propio del video ("" = CLIP_START); lo fija clipper_dash.sh
+CLIP_SS_AUDIO=""     # -ss propio del audio ("" = CLIP_START); lo fija clipper_dash.sh
 
 # --- _time_to_seconds() ----------------------------------------------------
 # Convierte H:MM:SS, MM:SS o SS a segundos totales.
@@ -208,6 +210,7 @@ _clip_audio_codec_args() {
 #   El código de salida de ffmpeg
 _clip_run_ffmpeg() {
     local -a cmd=( ffmpeg -hide_banner -y )
+    local ssv="${CLIP_SS_VIDEO:-${CLIP_START}}" ssa="${CLIP_SS_AUDIO:-${CLIP_START}}"
     if [ "${LOGGER_VERBOSE}" = true ]; then
         cmd+=( -loglevel info -stats )
     else
@@ -217,11 +220,11 @@ _clip_run_ffmpeg() {
     if [ "${OPT_MODE}" = "audio" ]; then
         local -a acodec=()
         _clip_audio_codec_args acodec
-        cmd+=( -ss "${CLIP_START}" -t "${CLIP_DURATION}" -i "${CLIP_AUDIO_URL}" -vn "${acodec[@]}" )
+        cmd+=( -ss "${ssa}" -t "${CLIP_DURATION}" -i "${CLIP_AUDIO_URL}" -vn "${acodec[@]}" )
     elif [ -n "${CLIP_AUDIO_URL}" ]; then
         # Streams separados (DASH): un -ss por cada entrada
-        cmd+=( -ss "${CLIP_START}" -t "${CLIP_DURATION}" -i "${CLIP_VIDEO_URL}" )
-        cmd+=( -ss "${CLIP_START}" -t "${CLIP_DURATION}" -i "${CLIP_AUDIO_URL}" )
+        cmd+=( -ss "${ssv}" -t "${CLIP_DURATION}" -i "${CLIP_VIDEO_URL}" )
+        cmd+=( -ss "${ssa}" -t "${CLIP_DURATION}" -i "${CLIP_AUDIO_URL}" )
         cmd+=( -map 0:v:0 -map 1:a:0 )
         cmd+=( -c:v libx264 -crf "${CLIP_VIDEO_CRF}" -preset "${CLIP_VIDEO_PRESET}" )
         cmd+=( -c:a aac -b:a "${CLIP_AUDIO_BITRATE}" -movflags +faststart -shortest )
@@ -289,13 +292,27 @@ run_clip() {
         return 0
     fi
 
+    # Grabación de un vivo (manifiesto DASH «dynamic»): ffmpeg no puede saltar
+    # dentro de él; se bajan solo los segmentos del tramo (lib/clipper_dash.sh)
+    CLIP_SS_VIDEO="" ; CLIP_SS_AUDIO=""
+    local raw="${CLIP_VIDEO_URL:-${CLIP_AUDIO_URL}}"
+    [ "${OPT_MODE}" = "audio" ] && raw="${CLIP_AUDIO_URL}"
+    if clip_dash_applies "${raw}"; then
+        if ! clip_dash_prepare "${raw}"; then
+            clip_dash_cleanup
+            return 1
+        fi
+    fi
+
     log_info "Recortando ${CLIP_START} +${CLIP_DURATION}s (re-codificación exacta)..."
     if ! _clip_run_ffmpeg; then
         # Un archivo a medias no sirve y confunde; se elimina
         rm -f "${CLIP_OUTPUT}"
+        clip_dash_cleanup
         log_error "ffmpeg falló al recortar el tramo."
         return 1
     fi
+    clip_dash_cleanup
 
     _clip_verify || return 1
     log_ok "Clip guardado: ${CLIP_OUTPUT}"

@@ -96,6 +96,9 @@ DEFAULT_RESTRICT_NAMES=false  # nombres de archivo ASCII-safe (sin espacios ni t
 CLIP_VIDEO_CRF=20             # calidad x264: 18 (más calidad) … 28 (más liviano)
 CLIP_VIDEO_PRESET="veryfast"  # velocidad de codificación: ultrafast…slow
 CLIP_AUDIO_BITRATE="128k"     # bitrate AAC del clip
+# Grabaciones de vivos de Facebook (DASH «dynamic», ver lib/clipper_dash.sh):
+# el tramo se arma bajando sus segmentos de ~2 s; esto fija cuántos a la vez.
+CLIP_DASH_PARALLEL=8
 # Prefijo de respaldo para el nombre del archivo cuando el sitio devuelve un
 # título vacío o inservible (p. ej. Facebook a veces devuelve un solo "."):
 # el nombre pasaría a ser "<prefijo>_<fecha>_<hora>" en vez de un dotfile oculto.

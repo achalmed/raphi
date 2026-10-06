@@ -120,6 +120,7 @@ en mp4) y `jq` (resumen del modo `info`).
 | `lib/validator.sh` | dependencias, calidad, cookies, carpeta de destino, objetivos |
 | `lib/options.sh` | traduce las opciones al arreglo de argumentos de yt-dlp |
 | `lib/clipper.sh` | `--clip`: URL crudas con `yt-dlp -g`, corte con ffmpeg, verificación con ffprobe, nombre del clip |
+| `lib/clipper_dash.sh` | `--clip` sobre grabaciones de vivos de Facebook (DASH «dynamic»): calibra y baja solo los segmentos del tramo |
 | `lib/downloader.sh` | lotes, un objetivo por modo, contadores de éxito y fallo |
 | `lib/summary.sh` | banner de configuración, confirmación, resumen y `--post-cmd` |
 
@@ -134,6 +135,10 @@ en mp4) y `jq` (resumen del modo `info`).
   opera sobre videos individuales y verifica con ffprobe que cada stream dure lo pedido: un clip truncado cuenta como
   fallo, aunque el archivo queda en disco (solo se borra si falla ffmpeg). No se debe sustituir por `--download-sections` vía `--extra`: en sitios DASH
   trunca el video y deja la imagen congelada.
+- **`--clip` en la grabación de un vivo de Facebook** baja los segmentos de ~2 s del tramo con `curl`
+  (`CLIP_DASH_PARALLEL` a la vez) a una carpeta temporal que se borra al terminar; el minuto 0 es el primer segmento
+  de la emisión. Depende de los atributos `FBPredicted*` del manifiesto: si Facebook los retira, este camino deja de
+  aplicar y se vuelve al corte normal.
 - **`--clip` en modo audio con `vorbis` o `best`** codifica AAC, pero la extensión del archivo es la palabra pedida.
 - **`--extra` divide por espacios simples**: un valor con espacios va en `EXTRA_YTDLP_OPTS` de `config.sh`, un
   elemento por token.
