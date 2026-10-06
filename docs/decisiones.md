@@ -81,7 +81,7 @@ conserva el original. Lo que tenía de decisión está en la primera entrada de 
 | fecha | pendiente | dueño |
 |---|---|---|
 | 2026-10-31 | `backends/page-counter/config.py` resuelve `~/Documents` con `Path.home()`: pasar a `core/env.py` | autor |
-| 2026-10-31 | `backends/pdf-suite/install.sh` instala en una ruta fija de otro repo (`scripts_for_linux/pdf-suite`) y crea con `sudo` un lanzador en `/usr/local/bin` que apunta a esa copia: debe usar la carpeta del propio backend | autor |
+| 2026-10-31 | `backends/pdf-suite/install.sh` instala en una ruta fija de otro repo (`scripts-linux/pdf-suite`) y crea con `sudo` un lanzador en `/usr/local/bin` que apunta a esa copia: debe usar la carpeta del propio backend | autor |
 | 2026-10-31 | `backends/pdf-suite/config.sh`: las rutas sugeridas del menú (`PDF_SEARCH_PATHS`) incluyen carpetas que ya no existen en el espacio de trabajo | autor |
 | 2026-10-31 | `backends/page-counter/install.sh` crea un entorno conda propio: tercer camino de instalación frente al `.venv` del repo | autor |
 | 2026-10-31 | `backends/docflow/suite.yml` y `backends/page-counter/suite.yml` citan comandos que no existen (`main.sh convert … --to pdf`, `main.py --hub`); el bloque generado de sus README los repite hasta que se corrija el manifiesto y se regenere | orquestador del ecosistema |

@@ -15,7 +15,7 @@ BLUE='\033[0;34m'; CYAN='\033[0;36m'; BOLD='\033[1m'; NC='\033[0m'
 INSTALLER_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 
 # Ruta de instalación fija del usuario
-INSTALL_DIR="${HOME}/Documents/scripts_for_linux/pdf-suite"
+INSTALL_DIR="${HOME}/Documents/scripts-linux/pdf-suite"
 
 # Wrapper global
 WRAPPER_PATH="/usr/local/bin/pdf-suite"
