@@ -268,6 +268,6 @@ como fallo y el lote continúa.
 convertido), `convertidor: docflow`, `convertido` (instante) y `tags: [original]`. Las imágenes van a `<base>_files/images/figure-NNN.*`.
 
 Dependen de esa forma el vault (`01 notes`, notas `tipo: original`), la estructura de proyecto de
-`03 writing` (`03 writing/proyecto/esquema.py` y `03 writing/proyecto/lib/normalizar.py` ubican las imágenes de una conversión en
+`escritura` (`escritura/proyecto/esquema.py` y `escritura/proyecto/lib/normalizar.py` ubican las imágenes de una conversión en
 `originales/`) y `meta/organization/normalizar_notas.py`. Un cambio en las claves o en la carpeta de
 imágenes se anuncia en `docs/decisiones.md` y se avisa a esos tres.

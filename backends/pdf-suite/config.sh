@@ -110,7 +110,7 @@ PDF_SEARCH_PATHS=(
     "${HOME}/Documents/biblioteca"
     "${HOME}/Documents/01 notes"
     "${HOME}/Documents/datafw"
-    "${HOME}/Documents/03 writing"
+    "${HOME}/Documents/escritura"
     "${HOME}/Documents/04 index"
     "${HOME}/Documents/06 archives"
     "${HOME}/Documents/doc_administrativos"
