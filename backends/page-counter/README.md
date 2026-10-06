@@ -95,5 +95,5 @@ La GUI importa estos módulos tal cual (`studio/services/pagecounter.py`). Cómo
 - **La raíz de los blogs se resuelve con `Path.home()`** en `config.py`, no con `core/env.py`: si el espacio
   de trabajo no está en `~/Documents`, hay que editar `config.py`.
 - **`install.sh` de esta carpeta crea un entorno conda propio**; el camino del repo es el `.venv` de la raíz.
-- `excel_databases/` no es el Excel de metadatos de los blogs, que vive en `scripts_quarto_studio`.
+- `excel_databases/` no es el Excel de metadatos de los blogs, que vive en `scripts-quarto`.
 - Sin pruebas automáticas; sin `pypdf` solo funcionan `--listar` y `--help`.
