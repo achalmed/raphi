@@ -109,7 +109,7 @@ readonly SEP_LIGHT="────────────────────
 PDF_SEARCH_PATHS=(
     "${HOME}/Documents/biblioteca"
     "${HOME}/Documents/01 notes"
-    "${HOME}/Documents/02 analysis"
+    "${HOME}/Documents/datafw"
     "${HOME}/Documents/03 writing"
     "${HOME}/Documents/04 index"
     "${HOME}/Documents/06 archives"
