@@ -88,11 +88,7 @@ integrada (comando exacto, stdout, stderr, código de salida y duración) y el l
 
 - **El CI se dispara solo con cambios en `backends/docflow/`** (`.github/workflows/ci.yml`, `paths`): si se
   mueve una carpeta, sus rutas y las de `.gitignore` se mueven con ella, o el CI deja de correr sin avisar.
-- **`page-counter` localiza los blogs con `DIR_HUB = "04 index"` y `SUBDIR_PUBS = "04 index/_pubs"`** en
-  `backends/page-counter/config.py` (los `pub_*` son submódulos del hub); los nombres
-  lógicos no llevan `pub_`; `blog` y `teching` cuelgan del `_site/` del hub. Cuenta lo **renderizado**:
-  con `freeze: true` un conteo viejo significa un render viejo. Su `excel_databases/` es local e ignorado;
-  no es el Excel de metadatos de `scripts-quarto`.
+- **`page-counter` localiza la raíz y el hub por `core/env.py` y los blogs por el registro `<hub>/_pubs/pubs.yml`** (`core/py-common/pubs.py`, ola 6, 6f): nada se lista a mano ni se descubre por el prefijo de carpeta.
 - **soffice devuelve 0 aunque no convierta** (documentos protegidos) y corrompe su perfil si corre en
   paralelo: docflow aísla cada invocación en un perfil temporal, le pone `timeout` (300 s,
   `DOCFLOW_SOFFICE_TIMEOUT`) y comprueba que el archivo esperado exista (`backends/docflow/lib/core/soffice.sh`).
