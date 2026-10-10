@@ -10,7 +10,7 @@ comandos:
 - main.py
 - main.py -b <blog> [<blog> ...]
 estado: activo
-entrada: 04 index/_site y _pubs/*/_site
+entrada: web/_site y _pubs/*/_site
 depende_de:
 - python3
 - pypdf

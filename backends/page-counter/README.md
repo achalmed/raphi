@@ -34,9 +34,9 @@ búsqueda, totales).
 
 Los blogs se piden por su nombre lógico, sin `pub_`: `actus-mercator`, `aequilibria`, `axiomata`, `chaska`,
 `dialectica-y-mercado`, `epsilon-y-beta`, `methodica`, `numerus-scriptum`, `optimums`, `pecunia-fluxus` y
-`res-publica` viven en `04 index/_pubs/<nombre>/_site/`; `blog` y `teching` son secciones del `_site/`
-del hub (`04 index`), y el alias `website-achalma` selecciona las dos. La lista está en `BLOGS_ESTANDAR` de
-`config.py`; la ubicación de los blogs la fija el hub (`04 index/docs/pubs-submodulos.md`).
+`res-publica` viven en `web/_pubs/<nombre>/_site/`; `blog` y `teching` son secciones del `_site/`
+del hub (`web`), y el alias `website-achalma` selecciona las dos. La lista está en `BLOGS_ESTANDAR` de
+`config.py`; la ubicación de los blogs la fija el hub (`web/docs/pubs-submodulos.md`).
 
 ## Uso
 
