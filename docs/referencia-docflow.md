@@ -269,5 +269,5 @@ convertido), `convertidor: docflow`, `convertido` (instante) y `tags: [original]
 
 Dependen de esa forma el vault (`notas`, notas `tipo: original`), la estructura de proyecto de
 `escritura` (`escritura/proyecto/esquema.py` y `escritura/proyecto/lib/normalizar.py` ubican las imágenes de una conversión en
-`originales/`) y `meta/organization/normalizar_notas.py`. Un cambio en las claves o en la carpeta de
+`originales/`) y `meta/vault-os/organization/normalizar_notas.py`. Un cambio en las claves o en la carpeta de
 imágenes se anuncia en `docs/decisiones.md` y se avisa a esos tres.
