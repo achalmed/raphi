@@ -3,7 +3,7 @@ lib/validator.py — Validación de entradas y resolución de rutas de blogs.
 
 Comprueba precondiciones (ruta base, nombres de blog) antes de procesar
 nada, y traduce nombres lógicos de blog ("axiomata") a rutas reales
-("~/Documents/04 index/_pubs/pub_axiomata/_site").
+("<hub>/_pubs/<blog>/_site", según el registro `_pubs/pubs.yml`).
 """
 
 from pathlib import Path
@@ -13,7 +13,7 @@ from config import (
     ALIAS_WEBSITE_ACHALMA,
     BLOGS_ESTANDAR,
     BLOGS_WEBSITE_ACHALMA,
-    PREFIJO_BLOG,
+    CARPETA_BLOG,
     RUTA_BASE_PUBLICACIONES,
     SUBDIR_PUBS,
 )
@@ -34,12 +34,12 @@ def blog_site_path(blog_name: str) -> Path:
     Resolves the rendered-site path of a standard blog.
 
     Args:
-        blog_name: Logical blog name without the "pub_" prefix.
+        blog_name: Logical blog name (the one in the registry `_pubs/pubs.yml`).
 
     Returns:
         Absolute path to the blog's _site directory.
     """
-    return RUTA_BASE_PUBLICACIONES / SUBDIR_PUBS / f"{PREFIJO_BLOG}{blog_name}" / "_site"
+    return CARPETA_BLOG[blog_name] / "_site"
 
 
 def known_blog_names() -> List[str]:
