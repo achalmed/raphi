@@ -76,9 +76,8 @@ backends/docflow/install.sh                           # dependencias del sistema
 backends/docflow/bin/docflow to-md -n -v ruta/        # simular (-n) una conversión a Markdown antes de aplicarla
 backends/docflow/bin/docflow to-md ruta/ --jobs 4 --report html   # lote en paralelo con reporte de sesión
 backends/pdf-suite/main.sh -n compress documento.pdf  # -n simula sin escribir
-bats backends/docflow/tests/                          # pruebas de docflow en sandbox aislado
+bats backends/docflow/tests/ · .venv/bin/python -m pytest -q tests   # pruebas de docflow (sandbox) y de Raphi (corpus generado)
 pyside6-designer studio/resources/ui/main_window.ui   # editar el shell de la GUI; se carga en tiempo de ejecución
-.venv/bin/python -m pytest -q tests                   # pruebas del motor, las recetas, la CLI y la API (corpus generado)
 JWT_SECRET=… .venv/bin/uvicorn raphi.sola:app --port 8040   # Raphi web sola (cuentas: python -m tiqsi.minimo cuenta …)
 ```
 
