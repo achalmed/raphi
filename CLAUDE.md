@@ -12,7 +12,7 @@ que se toque.
 ## Reglas que no se negocian
 
 - **Raphi, escritorio y web, es una sola aplicación** (decisión del 2026-10-27, `docs/decisiones.md`; plan en
-  el repo de Qillqa, `docs/plataforma/propuesta-raphi.md`): la interfaz que viene es la web, y el escritorio la
+  el repo de Qillqa, `qillqa/docs/plataforma/propuesta-raphi.md`): la interfaz que viene es la web, y el escritorio la
   mostrará en PySide6 con un puente nativo; ninguna pantalla nueva se escribe solo para el escritorio. Hasta la
   fase R4, la GUI de `studio/` sigue siendo Raphi escritorio y sus reglas, las de abajo.
 - **El repo es público**: nada del despacho ni de nadie; `python3 scripts/escanear.py` (o la guarda pre-push

@@ -22,7 +22,7 @@ La licencia pasa a AGPL-3.0 (Edison es el único autor; lo publicado antes sigue
 público, con la guarda del escáner de Tiqsi en cada envío (`scripts/escanear.py`). Supera a la entrada
 del 2026-07-13 en lo que dice de la plataforma («no una plataforma») y al plan de `gui-suites` de absorber
 el studio. La propuesta completa, con sus fases R0–R8, vive en el repo de Qillqa
-(`docs/plataforma/propuesta-raphi.md`); R0 es este renombre.
+(`qillqa/docs/plataforma/propuesta-raphi.md`); R0 es este renombre.
 
 ### 2026-07-13 · Una GUI sobre tres backends intactos, no una plataforma
 

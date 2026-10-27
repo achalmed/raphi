@@ -52,12 +52,9 @@ archivos en los que el fallo de uno no debe detener el resto.
 Un solo nombre desde el 2026-10-27: la carpeta, el repositorio de GitHub (`achalmed/raphi`, antes
 `scripts_for_libreoffice`), la suite raíz y la aplicación se llaman **Raphi** («hoja» en quechua).
 
-**Hacia dónde va** (la propuesta aprobada vive en el repo de Qillqa, `docs/plataforma/propuesta-raphi.md`):
-Raphi pasa a ser también un módulo de la plataforma Qillqa (contrato Tiqsi), que funciona solo o dentro de
-ella. Tendrá un motor Python con todas las operaciones (las de pdf-suite, docflow y page-counter, y la
-conversión de imágenes, audio, video, subtítulos y archivos comprimidos) y **una sola interfaz, la web**:
-Raphi escritorio la mostrará en una ventana PySide6, así que toda mejora de la web llega al escritorio.
-Hasta que esa web cubra lo que hace la GUI actual, esta sigue siendo Raphi escritorio.
+**Hacia dónde va** (plan en `qillqa/docs/plataforma/propuesta-raphi.md`): un módulo más de la plataforma
+Qillqa, que funciona solo o dentro de ella, con un motor Python que reúne pdf-suite, docflow, page-counter y la
+conversión de medios, y **una sola interfaz, la web**, que el escritorio mostrará en PySide6.
 
 **No es** una biblioteca y no reescribe los backends: cada motor sigue siendo una CLI independiente, con
 su `suite.yml`, su README y su instalador (docflow, además, con tests Bats y CI); la GUI los invoca como
