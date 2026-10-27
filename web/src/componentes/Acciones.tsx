@@ -39,9 +39,11 @@ export interface PropsAcciones {
   sugeridas?: string[]
   /** Un botón con texto o solo el icono (en una fila apretada). */
   variante?: 'boton' | 'icono'
+  /** El color del botón cuando el módulo lo pinta sobre un fondo propio (el visor oscuro de la Mediateca). */
+  color?: string
 }
 
-export default function Acciones({ nombre, archivo, guardar, etiquetaGuardar = 'Guardar aquí', sugeridas = [], variante = 'boton' }: PropsAcciones) {
+export default function Acciones({ nombre, archivo, guardar, etiquetaGuardar = 'Guardar aquí', sugeridas = [], variante = 'boton', color }: PropsAcciones) {
   const navegar = useNavigate()
   const [ancla, setAncla] = useState<HTMLElement | null>(null)
   const [subido, setSubido] = useState<Archivo | null>(null)
@@ -82,18 +84,20 @@ export default function Acciones({ nombre, archivo, guardar, etiquetaGuardar = '
   }
 
   const primero = (lista ?? []).filter((f) => sugeridas.includes(f.operacion))
+  // Una sugerida con varios destinos (convertir_imagen: JPG, PNG…) lleva el formato en su texto.
+  const varias = new Set(primero.map((f) => f.operacion).filter((op, i, todas) => todas.indexOf(op) !== i))
   const conversiones = (lista ?? []).filter((f) => f.a && !sugeridas.includes(f.operacion))
   const herramientas = (lista ?? []).filter((f) => !f.a && !sugeridas.includes(f.operacion))
   const titulo = 'Convertir, comprimir y más con Raphi'
   return (
     <>
       {variante === 'icono'
-        ? <Tooltip title={titulo}><IconButton size="small" onClick={abrir} aria-label={titulo}><AutoFixHighOutlinedIcon fontSize="small" /></IconButton></Tooltip>
-        : <Button size="small" startIcon={<AutoFixHighOutlinedIcon />} onClick={abrir} title={titulo}>Raphi ▸</Button>}
+        ? <Tooltip title={titulo}><IconButton size="small" onClick={abrir} aria-label={titulo} sx={color ? { color } : undefined}><AutoFixHighOutlinedIcon fontSize="small" /></IconButton></Tooltip>
+        : <Button size="small" startIcon={<AutoFixHighOutlinedIcon />} onClick={abrir} title={titulo} sx={color ? { color } : undefined}>Raphi ▸</Button>}
       <Menu anchorEl={ancla} open={Boolean(ancla)} onClose={() => setAncla(null)} PaperProps={{ sx: { maxHeight: 460, minWidth: 220 } }}>
         {error && <Alert severity="error" sx={{ m: 1 }}>{error}</Alert>}
         {!error && !lista && <MenuItem disabled><CircularProgress size={18} sx={{ mr: 1 }} /> Preparando…</MenuItem>}
-        {primero.map((f) => <MenuItem key={`s-${f.operacion}-${f.a}`} onClick={() => correr(f)}>{f.titulo}</MenuItem>)}
+        {primero.map((f) => <MenuItem key={`s-${f.operacion}-${f.a}`} onClick={() => correr(f)}>{varias.has(f.operacion) && f.a ? `${f.titulo}: ${f.a.toUpperCase()}` : f.titulo}</MenuItem>)}
         {primero.length > 0 && <Divider />}
         {conversiones.length > 0 && <ListSubheader>Convertir a</ListSubheader>}
         {conversiones.map((f) => <MenuItem key={`c-${f.operacion}-${f.a}`} onClick={() => correr(f)}>{f.a!.toUpperCase()}</MenuItem>)}
