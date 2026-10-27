@@ -65,7 +65,7 @@ export default function Sistema() {
   const [error, setError] = useState('')
   useEffect(() => { pedirSistema().then(setD).catch((e) => setError(e.message)) }, [])
   return (
-    <Marco titulo="Sistema" opciones={OPCIONES('/raphi/sistema', navegar)}>
+    <Marco modulo="raphi" titulo="Sistema" opciones={OPCIONES('/raphi/sistema', navegar)}>
       <Stack spacing={3} sx={{ maxWidth: 900, mx: 'auto', p: { xs: 1, sm: 2 } }}>
         {error && <Alert severity="error">{error}</Alert>}
         {d && (

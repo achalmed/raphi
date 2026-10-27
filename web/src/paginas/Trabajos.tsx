@@ -43,7 +43,7 @@ export default function Trabajos() {
   useEffect(() => setAbierto(id), [id])
 
   return (
-    <Marco titulo="Trabajos" opciones={OPCIONES('/raphi/trabajos', navegar)}>
+    <Marco modulo="raphi" titulo="Trabajos" opciones={OPCIONES('/raphi/trabajos', navegar)}>
       <Stack spacing={1.25} sx={{ maxWidth: 960, mx: 'auto', p: { xs: 1, sm: 2 } }}>
         {error && <Alert severity="error">{error}</Alert>}
         {!lista && !error && <LinearProgress />}

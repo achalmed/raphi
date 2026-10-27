@@ -71,7 +71,7 @@ export default function MesaDeTrabajo() {
   )
 
   return (
-    <Marco titulo="Mesa de trabajo" opciones={OPCIONES('/raphi/mesa', navegar)}>
+    <Marco modulo="raphi" titulo="Mesa de trabajo" opciones={OPCIONES('/raphi/mesa', navegar)}>
       <Stack spacing={2} sx={{ p: { xs: 1, sm: 2 } }}>
         <ElegirArchivos archivos={archivos} alCambiar={setArchivos} extensiones={['.pdf']} ordenable
           texto="Suelte uno o varios PDF: sus páginas aparecen abajo para ordenarlas" />

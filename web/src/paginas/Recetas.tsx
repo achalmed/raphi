@@ -82,7 +82,7 @@ export default function Recetas() {
   useEffect(() => { recargar(); cargarCatalogo().then((c) => setOps(c.operaciones)) }, [])
   const titulo = (id: string) => ops.find((o) => o.id === id)?.titulo ?? id
   return (
-    <Marco titulo="Recetas" opciones={OPCIONES('/raphi/recetas', navegar)}>
+    <Marco modulo="raphi" titulo="Recetas" opciones={OPCIONES('/raphi/recetas', navegar)}>
       <Stack spacing={1.5} sx={{ maxWidth: 900, mx: 'auto', p: { xs: 1, sm: 2 } }}>
         <Typography color="text.secondary">
           Una receta encadena herramientas: lo que sale de un paso entra al siguiente y solo se guarda el resultado final.

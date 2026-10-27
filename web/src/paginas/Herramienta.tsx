@@ -42,7 +42,7 @@ export default function Herramienta() {
     if (ids.length) Promise.all(ids.map((a) => api<Archivo>(`${BASE}/archivos/${a}`))).then(setArchivos).catch(() => undefined)
   }, [consulta])
 
-  if (cat && !op && !receta) return <Marco titulo="Raphi" volver="/raphi"><Alert severity="warning">No hay una herramienta «{id}».</Alert></Marco>
+  if (cat && !op && !receta) return <Marco modulo="raphi" titulo="Raphi" volver="/raphi"><Alert severity="warning">No hay una herramienta «{id}».</Alert></Marco>
   const titulo = op?.titulo ?? receta?.nombre ?? ''
   const descripcion = op?.descripcion ?? receta?.descripcion ?? ''
   const sinEntradas = op ? op.minimo_entradas === 0 : Boolean(receta?.sin_entradas)
@@ -62,7 +62,7 @@ export default function Herramienta() {
   }
 
   return (
-    <Marco titulo={titulo} volver="/raphi">
+    <Marco modulo="raphi" titulo={titulo} volver="/raphi">
       <Stack spacing={2.5} sx={{ maxWidth: 860, mx: 'auto', p: { xs: 1, sm: 2 } }}>
         <Typography color="text.secondary">{descripcion}</Typography>
         {receta && (

@@ -52,7 +52,7 @@ export default function Herramientas() {
   }, [cat, consulta, categoria])
 
   return (
-    <Marco titulo="Herramientas" opciones={OPCIONES('/raphi', navegar)}>
+    <Marco modulo="raphi" titulo="Herramientas" opciones={OPCIONES('/raphi', navegar)}>
       <Stack spacing={3} sx={{ maxWidth: 1200, mx: 'auto', p: { xs: 1, sm: 2 } }}>
         {error && <Alert severity="error">{error}</Alert>}
         <Box>
