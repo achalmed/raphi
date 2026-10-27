@@ -1,4 +1,4 @@
-# Lo que hacía page-counter: las páginas de los index.pdf de los blogs del hub, en un Excel.
+# raphi/recetas/paginas-de-los-blogs.yml — receta de serie: Lo que hacía page-counter: las páginas de los index.pdf de los blogs del hub, en un Excel.
 nombre: Páginas de los blogs
 descripcion: Inventario de páginas de los index.pdf de los blogs del hub (solo dentro del espacio de trabajo).
 sin_entradas: true

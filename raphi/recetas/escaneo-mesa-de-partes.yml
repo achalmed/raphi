@@ -1,4 +1,4 @@
-# Lo que llega escaneado a una mesa de partes: buscable, liviano, de archivo y foliado.
+# raphi/recetas/escaneo-mesa-de-partes.yml — receta de serie: Lo que llega escaneado a una mesa de partes: buscable, liviano, de archivo y foliado.
 nombre: Escaneo de mesa de partes
 descripcion: OCR en español con enderezado, compresión hasta 10 MB, PDF/A-2b y foliación.
 pasos:
