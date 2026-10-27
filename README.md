@@ -78,7 +78,8 @@ backends/docflow/bin/docflow to-md ruta/ --jobs 4 --report html   # lote en para
 backends/pdf-suite/main.sh -n compress documento.pdf  # -n simula sin escribir
 bats backends/docflow/tests/                          # pruebas de docflow en sandbox aislado
 pyside6-designer studio/resources/ui/main_window.ui   # editar el shell de la GUI; se carga en tiempo de ejecución
-.venv/bin/python -m pytest -q tests                   # pruebas del motor, las recetas y la CLI (corpus generado)
+.venv/bin/python -m pytest -q tests                   # pruebas del motor, las recetas, la CLI y la API (corpus generado)
+JWT_SECRET=… .venv/bin/uvicorn raphi.sola:app --port 8040   # Raphi web sola (cuentas: python -m tiqsi.minimo cuenta …)
 ```
 
 Regla de oro: `-n`/`--dry-run` antes de un lote en `docflow` y `pdf-suite`, que escriben de verdad salvo

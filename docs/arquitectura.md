@@ -148,6 +148,26 @@ Lo usan la CLI (`raphi <operación>`), la API y la web que vienen (R2–R3) y, a
 - **Fronteras** (`tests/test_fronteras.py`): el motor no importa FastAPI, SQLAlchemy, Qt ni Tiqsi; nada en `raphi/`
   importa a otro proyecto de la plataforma.
 
+## La API y el módulo de Tiqsi (`raphi/api/`, `raphi/manifiesto.py`)
+
+La misma API (`/api/raphi/…`) sirve a la web, al escritorio y a otros sistemas: operaciones y formatos; archivos
+subidos (con miniaturas WebP en caché) o, solo en el escritorio, del disco por su ruta (`/locales`, nunca se copian
+ni se borran); trabajos; recetas. Toda ruta pide la identidad del anfitrión (`tiqsi.puertos.usuario_actual`) y una
+cuenta solo ve lo suyo.
+
+- **La cola** (`raphi/trabajos.py`): un trabajo se guarda «pendiente»; el repartidor (tarea del anfitrión) corre
+  `RAPHI_CONCURRENCIA` a la vez en un hilo, con el avance en memoria guardado cada segundo y la cancelación mirada
+  entre página y página. Al arrancar, lo que quedó «en_curso» vuelve a la cola. Al terminar anota
+  «raphi.trabajo.terminado» en su bandeja y, si tardó más de 30 s, «aviso.nuevo» (la campana, como Minka y Punku).
+  La purga borra a las `RAPHI_RETENCION_HORAS` lo subido y las salidas, nunca los archivos locales.
+- **La base propia** (`raphi/db.py`): tablas `raphi_*` sin claves foráneas hacia nadie, con el mismo código en
+  SQLite (escritorio, sola) y en PostgreSQL (Qillqa).
+- **Tres modos** (`RAPHI_MODO`): `modulo` (lo monta un anfitrión por `MANIFIESTO`), `sola` (`raphi.sola`, el
+  anfitrión mínimo de Tiqsi con cuentas) y `escritorio` (`raphi.escritorio`, una persona en 127.0.0.1 con una ficha
+  de un solo uso que la ventana pone donde la cáscara web guarda la sesión).
+- **Lo que ofrece a los demás** (`raphi/contrato.py`): «pdf.v1» (ejecutar una operación o receta, miniatura, texto,
+  info, firmas) y «conversion.v1» (formatos de un archivo, convertir). Los demás la aprovechan, nunca la necesitan.
+
 ## Cómo extender
 
 ### Raphi

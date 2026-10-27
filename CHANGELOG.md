@@ -29,6 +29,9 @@ y `APP_VERSION` (`studio/__init__.py`). Sin etiquetas git: por qué se lleva igu
 - Recetas (`raphi recetas`, `raphi receta`): cuatro de serie y las del usuario en `~/.config/raphi/recetas/`.
 - La CLI `raphi <operación>` (`-n`, `-o`, `--json`; salida 0 · 1 · 2 · 130) y `raphi doctor`.
 - 37 pruebas con un corpus generado en cada corrida y la prueba de fronteras del motor.
+- La API `/api/raphi` (operaciones, formatos, archivos con miniaturas, trabajos, recetas), la cola de trabajos con
+  avance, cancelación, reanudación y purga, la base propia (SQLite o PostgreSQL) y el módulo de Tiqsi (`MANIFIESTO`,
+  «pdf.v1», «conversion.v1»); los modos `sola` y `escritorio` (servidor local con ficha de un solo uso).
 
 ## Raphi escritorio (GUI; antes DocFlow Studio)
 
