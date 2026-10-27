@@ -17,8 +17,8 @@ APPS_DIR="${HOME}/.local/share/applications"
 
 echo "==> Creando entorno virtual (.venv)…"
 python3 -m venv "${DIR}/.venv"
-"${DIR}/.venv/bin/pip" install --upgrade pip >/dev/null
-"${DIR}/.venv/bin/pip" install -r "${DIR}/requirements.txt"
+"${DIR}/.venv/bin/python" -m pip install --upgrade pip >/dev/null
+"${DIR}/.venv/bin/python" -m pip install -r "${DIR}/requirements.txt"
 
 echo "==> Enlazando lanzador en ${BIN_DIR}/raphi…"
 mkdir -p "$BIN_DIR"
