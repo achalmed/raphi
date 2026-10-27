@@ -82,7 +82,7 @@ blog); un Excel que no se guarda suele estar abierto en LibreOffice; un PDF en `
 | `lib/ui.py` · `lib/logger.py` | presentación en la terminal; registro (`-v` → DEBUG) |
 | `requirements.txt` · `install.sh` · `suite.yml` | dependencias; instalador propio (ver Límite honesto); manifiesto de la suite |
 
-La GUI importa estos módulos tal cual (`studio/services/pagecounter.py`). Cómo añadir un módulo:
+Raphi lo reemplaza con «Inventario de páginas» y su fuente «blogs del hub» (`raphi/motor/pdf_info.py`, `raphi/fuentes/hub.py`; la receta `paginas-de-los-blogs`). Cómo añadir un módulo:
 `docs/arquitectura.md` §Cómo extender. Versiones: `CHANGELOG.md`.
 
 ## Límite honesto

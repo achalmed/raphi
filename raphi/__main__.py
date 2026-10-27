@@ -7,6 +7,7 @@
     python -m raphi recetas                                # las recetas guardadas
     python -m raphi receta escaneo-mesa-de-partes *.pdf -o salida/
     python -m raphi doctor                                 # qué falta en esta máquina
+    python -m raphi accion comprimir a.pdf --hasta 10      # lo de los menús de Dolphin: junto al original y aviso al final
 
 Salida: 0 todo bien · 1 algún archivo falló · 2 error de uso · 130 cancelado. Con --json, el informe en JSON.
 """
@@ -76,6 +77,19 @@ def _doctor() -> int:
     return 1 if faltan else 0
 
 
+def _avisar_escritorio(titulo: str, informe) -> None:
+    """El aviso del sistema al terminar una acción del menú de Dolphin (notify-send, si está)."""
+    import shutil
+    import subprocess
+    if not shutil.which("notify-send"):
+        return
+    bien = sum(e.ok for e in informe.elementos)
+    salidas = [a.name for a in informe.archivos]
+    texto = (f"{bien} de {len(informe.elementos)} listos" + (f": {', '.join(salidas[:3])}" if salidas else "")
+             + ("" if informe.ok else f" · {next(e.error for e in informe.elementos if not e.ok)}"))
+    subprocess.run(["notify-send", "-a", "Raphi", "-i", "document-edit", f"Raphi · {titulo}", texto], check=False)
+
+
 def main(argv: list[str] | None = None) -> int:
     argv = list(sys.argv[1:] if argv is None else argv)
     if not argv or argv[0] in ("-h", "--help"):
@@ -123,6 +137,12 @@ def main(argv: list[str] | None = None) -> int:
             informe = recetas.aplicar(recetas.buscar(a.receta), a.entradas, destino=a.destino, simular=a.simular)
             return _imprimir_informe(informe, a.json)
 
+        accion = orden == "accion"
+        if accion:
+            if not resto:
+                print("raphi accion <operación> [opciones] archivos…", file=sys.stderr)
+                return 2
+            orden, resto = resto[0], resto[1:]
         op = obtener(orden)
         ap = argparse.ArgumentParser(prog=f"raphi {op.id}", description=f"{op.titulo}: {op.descripcion}")
         ap.add_argument("entradas", nargs="*" if op.minimo_entradas == 0 else "+", help="archivos")
@@ -142,6 +162,8 @@ def main(argv: list[str] | None = None) -> int:
                                  progreso=progreso)
         if sys.stderr.isatty() and not a.json:
             print("\r" + " " * 62 + "\r", end="", file=sys.stderr)
+        if accion:
+            _avisar_escritorio(op.titulo, informe)
         return _imprimir_informe(informe, a.json)
     except OperacionDesconocida as e:
         print(f"raphi: {e} (raphi lista)", file=sys.stderr)

@@ -6,7 +6,7 @@ estado: activo
 
 Orden de lectura: `arquitectura.md` (principios comunes, diseño de docflow, cómo extender), las dos
 referencias (todas las opciones de cada CLI) y `decisiones.md` (por qué el repo es así, y sus pendientes).
-La puerta de cada herramienta vive junto a ella (`backends/*/README.md`, `studio/README.md`). Índice
+La puerta de cada herramienta vive junto a ella (`backends/*/README.md`). Índice
 generado por `core/docs.py indice` desde el frontmatter (NORMATIVA §15.6).
 
 <!-- docs:inicio -->

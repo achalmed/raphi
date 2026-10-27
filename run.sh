@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
 # run.sh — Lanzador de Raphi escritorio
-# Sin argumentos abre la aplicación; con argumentos es la CLI del motor (raphi lista, raphi comprimir a.pdf -n…).
+# Sin argumentos (o «escritorio archivos…») abre la ventana; con otros, es la CLI del motor (raphi lista, raphi comprimir a.pdf -n…).
 # Usa el venv local si existe (creado por install.sh); si no, el python3 del sistema.
 set -euo pipefail
 
@@ -12,9 +12,10 @@ else
     PYTHON="$(command -v python3)"
 fi
 
-if [[ $# -gt 0 ]]; then
-    # La CLI corre donde está el usuario: sus rutas relativas son las suyas.
-    PYTHONPATH="${DIR}${PYTHONPATH:+:$PYTHONPATH}" exec "$PYTHON" -m raphi "$@"
+# Todo corre donde está el usuario (sus rutas relativas son las suyas); el paquete se encuentra por PYTHONPATH.
+export PYTHONPATH="${DIR}${PYTHONPATH:+:$PYTHONPATH}"
+if [[ $# -eq 0 || "$1" == "escritorio" ]]; then
+    [[ "${1:-}" == "escritorio" ]] && shift
+    exec "$PYTHON" -m escritorio "$@"            # la ventana (o, si ya está abierta, le manda los archivos)
 fi
-cd "$DIR"
-exec "$PYTHON" -m studio
+exec "$PYTHON" -m raphi "$@"

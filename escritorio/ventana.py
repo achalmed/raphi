@@ -1,0 +1,228 @@
+"""La ventana de Raphi escritorio: QtWebEngine con la web de Raphi, su sesión, el puente, lo soltado y la bandeja.
+
+- **La sesión**: antes de que la página cargue, un guion pone la ficha del servidor donde la cáscara mínima de Tiqsi
+  guarda la suya (`tiqsi_token`), así que no hay pantalla de inicio de sesión.
+- **Lo soltado**: un archivo arrastrado desde Dolphin a la ventana llega a la web como su RUTA (evento `raphi:rutas`),
+  no como una copia subida; así una operación puede escribir junto al original.
+- **La bandeja del sistema**: el ícono abre la ventana y su menú muestra la **zona para soltar**, una ventanita que
+  queda encima de todo: lo que se suelta en ella abre Raphi con esos archivos (el gesto de Tangerine en Plasma).
+- **Una sola instancia**: si Raphi ya está abierto, `raphi escritorio archivo.pdf` (el menú de Dolphin) le manda los
+  archivos por un socket local en vez de abrir otra ventana.
+"""
+from __future__ import annotations
+
+import json
+import sys
+from pathlib import Path
+
+from PySide6.QtCore import QEvent, QFile, QIODevice, QObject, QSettings, QSize, Qt, QUrl
+from PySide6.QtGui import QAction, QIcon
+from PySide6.QtNetwork import QLocalServer, QLocalSocket
+from PySide6.QtWebChannel import QWebChannel
+from PySide6.QtWebEngineCore import QWebEnginePage, QWebEngineProfile, QWebEngineScript
+from PySide6.QtWebEngineWidgets import QWebEngineView
+from PySide6.QtWidgets import QApplication, QLabel, QMainWindow, QMenu, QSystemTrayIcon, QVBoxLayout, QWidget
+
+from escritorio import puente as modulo_puente
+from escritorio.servidor import Servidor
+from escritorio.vigilancia import Vigilancia
+
+NOMBRE_SOCKET = "raphi-escritorio"
+ICONO = "document-edit"
+
+
+def _rutas(evento) -> list[str]:
+    datos = evento.mimeData()
+    return [u.toLocalFile() for u in datos.urls() if u.isLocalFile()] if datos and datos.hasUrls() else []
+
+
+class FiltroSoltar(QObject):
+    """Recibe lo soltado sobre la vista web: si son archivos del disco, entrega sus rutas a la web."""
+
+    def __init__(self, ventana: "Ventana") -> None:
+        super().__init__(ventana)
+        self.ventana = ventana
+
+    def eventFilter(self, _objeto, evento) -> bool:
+        if evento.type() in (QEvent.Type.DragEnter, QEvent.Type.DragMove) and _rutas(evento):
+            evento.acceptProposedAction()
+            return True
+        if evento.type() == QEvent.Type.Drop and (rutas := _rutas(evento)):
+            evento.acceptProposedAction()
+            self.ventana.entregar(rutas)
+            return True
+        return False
+
+
+class ZonaSoltar(QWidget):
+    """La ventanita para soltar: siempre encima, sin marco; lo soltado abre Raphi con esos archivos."""
+
+    def __init__(self, ventana: "Ventana") -> None:
+        super().__init__(None, Qt.WindowType.Tool | Qt.WindowType.WindowStaysOnTopHint | Qt.WindowType.FramelessWindowHint)
+        self.ventana = ventana
+        self.setAcceptDrops(True)
+        self.setFixedSize(QSize(150, 110))
+        self.setWindowTitle("Raphi: soltar aquí")
+        caja = QVBoxLayout(self)
+        etiqueta = QLabel("Soltar aquí\npara Raphi")
+        etiqueta.setAlignment(Qt.AlignmentFlag.AlignCenter)
+        caja.addWidget(etiqueta)
+        self.setStyleSheet("QWidget{background:#1f3a93;color:white;border-radius:14px;font-weight:600}")
+        self._arrastre = None
+
+    def dragEnterEvent(self, e):
+        if _rutas(e):
+            e.acceptProposedAction()
+
+    def dropEvent(self, e):
+        if rutas := _rutas(e):
+            e.acceptProposedAction()
+            self.ventana.entregar(rutas)
+
+    def mousePressEvent(self, e):
+        self._arrastre = e.globalPosition().toPoint() - self.frameGeometry().topLeft()
+
+    def mouseMoveEvent(self, e):
+        if self._arrastre is not None:
+            self.move(e.globalPosition().toPoint() - self._arrastre)
+
+    def mouseReleaseEvent(self, _e):
+        self._arrastre = None
+
+
+class Ventana(QMainWindow):
+    def __init__(self, servidor: Servidor, ajustes: QSettings) -> None:
+        super().__init__()
+        self.servidor, self.ajustes = servidor, ajustes
+        self.setWindowTitle("Raphi")
+        self.setWindowIcon(QIcon.fromTheme(ICONO))
+        self.resize(1280, 860)
+        self.pendientes: list[str] = []
+        self.cargada = False
+
+        # Perfil propio y persistente. Su padre es la aplicación, no la ventana: la página debe destruirse antes que él.
+        perfil = QWebEngineProfile("raphi", QApplication.instance())
+        sesion = QWebEngineScript()
+        sesion.setName("raphi-sesion")
+        sesion.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentCreation)
+        sesion.setWorldId(QWebEngineScript.ScriptWorldId.MainWorld)
+        sesion.setSourceCode("localStorage.setItem('tiqsi_token', %s);localStorage.setItem('tiqsi_rol','administrador');"
+                             "localStorage.setItem('tiqsi_nombre', %s);" % (json.dumps(servidor.ficha), json.dumps("Raphi")))
+        canal_js = QFile(":/qtwebchannel/qwebchannel.js")
+        canal_js.open(QIODevice.OpenModeFlag.ReadOnly)
+        canal = QWebEngineScript()
+        canal.setName("raphi-puente")
+        canal.setInjectionPoint(QWebEngineScript.InjectionPoint.DocumentCreation)
+        canal.setWorldId(QWebEngineScript.ScriptWorldId.MainWorld)
+        canal.setSourceCode(bytes(canal_js.readAll()).decode() + modulo_puente.GUION)
+        perfil.scripts().insert(sesion)
+        perfil.scripts().insert(canal)
+
+        self.vista = QWebEngineView(self)
+        self.vista.setPage(QWebEnginePage(perfil, self.vista))
+        self.vigilancia = Vigilancia(servidor, ajustes, self.avisar)
+        self.puente = modulo_puente.Puente(self, self.vigilancia, self.avisar)
+        self.canal = QWebChannel(self.vista.page())
+        self.canal.registerObject("puente", self.puente)
+        self.vista.page().setWebChannel(self.canal)
+        self.vista.loadFinished.connect(self._cargada)
+        self.setCentralWidget(self.vista)
+        self.vista.setAcceptDrops(True)
+        self._filtro = FiltroSoltar(self)
+        self.vista.installEventFilter(self._filtro)
+        if self.vista.focusProxy():
+            self.vista.focusProxy().installEventFilter(self._filtro)
+        self.vista.load(QUrl(f"{servidor.url}/raphi"))
+
+        self.zona = ZonaSoltar(self)
+        self.bandeja = QSystemTrayIcon(QIcon.fromTheme(ICONO), self)
+        menu = QMenu()
+        for texto, hacer in (("Abrir Raphi", self.mostrar), ("Zona para soltar", self.alternar_zona),
+                             ("Salir", QApplication.instance().quit)):
+            accion = QAction(texto, menu)
+            accion.triggered.connect(hacer)
+            menu.addAction(accion)
+        self.bandeja.setContextMenu(menu)
+        self.bandeja.activated.connect(lambda r: self.mostrar() if r == QSystemTrayIcon.ActivationReason.Trigger else None)
+        self.bandeja.setToolTip("Raphi")
+        self.bandeja.show()
+        if self.ajustes.value("geometria"):
+            self.restoreGeometry(self.ajustes.value("geometria"))
+
+    def _cargada(self, ok: bool) -> None:
+        self.cargada = ok
+        if ok and self.pendientes:
+            rutas, self.pendientes = self.pendientes, []
+            self.entregar(rutas)
+
+    def entregar(self, rutas: list[str]) -> None:
+        """Las rutas van a la web: a la pantalla abierta (su zona para soltar) o, si no está cargada, al cargar."""
+        self.mostrar()
+        if not self.cargada:
+            self.pendientes += rutas
+            return
+        self.vista.page().runJavaScript(
+            "window.dispatchEvent(new CustomEvent('raphi:rutas', {detail: %s}))" % json.dumps(rutas))
+
+    def mostrar(self) -> None:
+        self.showNormal()
+        self.raise_()
+        self.activateWindow()
+
+    def alternar_zona(self) -> None:
+        self.zona.setVisible(not self.zona.isVisible())
+
+    def avisar(self, titulo: str, texto: str) -> None:
+        self.bandeja.showMessage(titulo, texto, QIcon.fromTheme(ICONO), 6000)
+
+    def closeEvent(self, e) -> None:
+        self.ajustes.setValue("geometria", self.saveGeometry())
+        super().closeEvent(e)
+
+
+def main(argv: list[str] | None = None) -> int:
+    argv = list(sys.argv[1:] if argv is None else argv)
+    rutas = [str(Path(a).resolve()) for a in argv if not a.startswith("-")]
+    # ¿Ya hay un Raphi abierto? Se le mandan los archivos y se termina.
+    otro = QLocalSocket()
+    otro.connectToServer(NOMBRE_SOCKET)
+    if otro.waitForConnected(300):
+        otro.write(json.dumps(rutas).encode())
+        otro.waitForBytesWritten(1000)
+        otro.disconnectFromServer()
+        return 0
+
+    QApplication.setApplicationName("Raphi")
+    QApplication.setOrganizationName("achalma")
+    QApplication.setDesktopFileName("raphi")
+    app = QApplication([sys.argv[0], *argv])
+    app.setQuitOnLastWindowClosed(True)
+    ajustes = QSettings("achalma", "raphi")
+    servidor = Servidor()
+    try:
+        servidor.arrancar()
+    except RuntimeError as e:
+        print(f"raphi: {e}", file=sys.stderr)
+        return 1
+    ventana = Ventana(servidor, ajustes)
+    QLocalServer.removeServer(NOMBRE_SOCKET)
+    escucha = QLocalServer()
+    escucha.listen(NOMBRE_SOCKET)
+
+    def recibir():
+        conexion = escucha.nextPendingConnection()
+        conexion.waitForReadyRead(1000)
+        try:
+            ventana.entregar(json.loads(bytes(conexion.readAll()).decode() or "[]"))
+        except ValueError:
+            ventana.mostrar()
+
+    escucha.newConnection.connect(recibir)
+    ventana.show()
+    if rutas:
+        ventana.entregar(rutas)
+    app.aboutToQuit.connect(servidor.detener)
+    try:
+        return app.exec()
+    finally:
+        servidor.detener()

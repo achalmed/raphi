@@ -15,8 +15,22 @@ DIR="$(cd "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")" && pwd)"
 BIN_DIR="${HOME}/.local/bin"
 APPS_DIR="${HOME}/.local/share/applications"
 
-echo "==> Creando entorno virtual (.venv)…"
-python3 -m venv "${DIR}/.venv"
+# El Python del sistema antes que el de conda: el de Anaconda carga su propia libbrotli (1.0.x), demasiado vieja para
+# QtWebEngine, y la ventana del escritorio no abre. RAPHI_PYTHON elige otro a mano.
+PYTHON_BASE="${RAPHI_PYTHON:-}"
+if [[ -z "$PYTHON_BASE" ]]; then
+    for candidato in /usr/bin/python3 "$(command -v python3)"; do
+        if [[ -x "$candidato" ]]; then PYTHON_BASE="$candidato"; break; fi
+    done
+fi
+# Un .venv hecho con conda se rehace (es regenerable: todo sale de requirements.txt).
+if [[ -f "${DIR}/.venv/pyvenv.cfg" ]] && grep -qi "conda" "${DIR}/.venv/pyvenv.cfg"; then
+    echo "==> El .venv anterior es de conda: se rehace con ${PYTHON_BASE}…"
+    rm -rf "${DIR}/.venv"
+fi
+
+echo "==> Creando entorno virtual (.venv) con ${PYTHON_BASE}…"
+"$PYTHON_BASE" -m venv "${DIR}/.venv"
 "${DIR}/.venv/bin/python" -m pip install --upgrade pip >/dev/null
 "${DIR}/.venv/bin/python" -m pip install -r "${DIR}/requirements.txt"
 # Tiqsi (el contrato de la plataforma) desde el espacio de trabajo, si está al lado: la API y el módulo lo usan.

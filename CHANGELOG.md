@@ -42,6 +42,22 @@ y `APP_VERSION` (`studio/__init__.py`). Sin etiquetas git: por qué se lleva igu
 
 #### Cambiado
 
+- **La ventana es nueva** (`escritorio/`, R4): PySide6 con QtWebEngine que muestra la web de Raphi, servida en
+  127.0.0.1 con una ficha de un solo uso; puente nativo (archivos del disco por su ruta, «Mostrar» en la carpeta,
+  guardar donde se elija, carpetas vigiladas, menús de Dolphin), lo soltado desde Dolphin llega como ruta, bandeja
+  del sistema con su zona para soltar y una sola instancia. `raphi` sin argumentos la abre; con argumentos es la CLI.
+- `install.sh` crea el entorno con el Python del sistema (el de conda carga una libbrotli que rompe QtWebEngine) y
+  rehace un `.venv` de conda.
+
+#### Retirado
+
+- `studio/`, la GUI nativa con sus seis páginas: las cubre la web (etiqueta `antes-retirar-studio-2026-10-27`).
+
+#### Añadido
+
+- `raphi accion <operación>`: la usan los menús de Dolphin; escribe junto al original y avisa al terminar.
+
+
 - La aplicación se llama **Raphi** (ventana, lanzador `raphi`, entrada de escritorio `raphi.desktop`); el
   instalador retira el lanzador y la entrada de `docflow-studio`.
 - Los ajustes pasan a `~/.config/achalma/raphi.conf` y el registro a `~/.local/state/raphi/`; los del nombre

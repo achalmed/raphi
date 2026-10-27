@@ -75,7 +75,21 @@ def crear_app(ficha: str, web: Path | None = None) -> FastAPI:
     web = web or (WEB_REPO if WEB_REPO.is_dir() else None)
     if web and Path(web).is_dir():
         from fastapi.staticfiles import StaticFiles
-        app.mount("/", StaticFiles(directory=str(web), html=True), name="web")
+        from starlette.exceptions import HTTPException as HTTPExceptionStarlette
+
+        class Pagina(StaticFiles):
+            """Los archivos de la web y, para cualquier dirección que no sea de la API ni un archivo, su index.html:
+            «/raphi/mesa» abre la página y su enrutador la muestra (lo mismo que el anfitrión mínimo de Tiqsi)."""
+
+            async def get_response(self, ruta: str, scope):
+                try:
+                    return await super().get_response(ruta, scope)
+                except HTTPExceptionStarlette as e:
+                    if e.status_code != 404 or ruta.startswith("api/") or Path(ruta).suffix:
+                        raise
+                    return await super().get_response("index.html", scope)
+
+        app.mount("/", Pagina(directory=str(web), html=True), name="web")
     app.state.anfitrion = anfitrion
     return app
 

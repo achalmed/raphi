@@ -10,6 +10,15 @@ lo revocado se marca «Superada por …» y no se borra. Los pendientes, con fec
 
 ## Producto
 
+### 2026-10-27 · R4: la ventana nueva y el retiro de la GUI nativa
+
+La GUI PySide6 nativa (`studio/`) se retira: sus seis páginas las cubre la web (Conversión y PDF por las
+herramientas, Metadatos por «editar» y «quitar metadatos», Reportes por «Inventario de páginas» y Trabajos,
+Vigilancia por las carpetas vigiladas del escritorio, Sistema por su pantalla). Lo único que no pasa a la web son
+la configuración y la caché de docflow, que siguen en su CLI. La versión de la aplicación vive ahora en
+`raphi/__init__.py` (`VERSION`). El entorno se crea con el Python del sistema: el de Anaconda carga su libbrotli
+1.0.x y QtWebEngine no abre. Se conserva todo en la etiqueta `antes-retirar-studio-2026-10-27`.
+
 ### 2026-10-27 · DocFlow Studio se convierte en Raphi, escritorio y web con una sola interfaz
 
 Edison decide que el repo no se separa: la carpeta y el repositorio de GitHub pasan a llamarse `raphi`, la
@@ -46,7 +55,7 @@ cifrar, marca de agua, OCR, información). En la app toda operación PDF pasa po
 superconjunto; docflow queda como motor de conversión documental y conserva **PDF/A**, que pdf-suite no
 implementa. El código sigue duplicado en los backends (ambos son CLIs completas); lo que no se duplica es
 la puerta de entrada. Consecuencia: una operación PDF nueva se añade en pdf-suite y en
-`studio/services/pdfsuite.py`, nunca en `docflow pdf`.
+studio/services/pdfsuite.py (retirado el 2026-10-27), nunca en `docflow pdf`.
 
 ### 2026-07-10 · docflow sustituye a script_doc_suite
 
@@ -83,7 +92,7 @@ Desviación del perfil del ecosistema (NORMATIVA §15.11 pide un manifiesto que 
 que la consuma): aquí ningún `suite.yml` declara versión y no hay etiquetas. Se conserva porque las
 cuatro herramientas muestran su versión al usuario (`--version` y la ventana de la app) y el repo es
 público. La versión se declara en `backends/docflow/lib/core/constants.sh`, `backends/pdf-suite/config.sh`,
-`backends/page-counter/config.py` y `studio/__init__.py`; `CHANGELOG.md` la sigue por herramienta y no
+`backends/page-counter/config.py` y studio/__init__.py (hoy `raphi/__init__.py`); `CHANGELOG.md` la sigue por herramienta y no
 registra fases internas del ecosistema, que quedan en el `git log`.
 
 ### 2026-10-04 · La visión de producto sale del repo

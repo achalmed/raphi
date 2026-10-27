@@ -9,7 +9,7 @@ Este documento explica las decisiones de diseño de docflow v3 y cómo extender 
 de modificar el núcleo. Sus **Principios** son los de las cuatro suites del repo (`raphi`,
 `docflow`, `page_counter`, `pdf_suite`); el resto describe docflow y sus rutas son relativas a
 `backends/docflow/`, salvo las dos secciones finales de «Cómo extender», que tratan pdf-suite y
-page-counter. Cómo se extiende la GUI está en `studio/README.md` §Reglas de la arquitectura.
+page-counter. El motor, la API, la web y el escritorio de Raphi tienen sus secciones más abajo.
 
 ## Principios
 
@@ -218,8 +218,8 @@ Una operación nueva (`backends/pdf-suite/`):
 2. En `main.sh`, cargarlo con `source "${_MAIN_DIR}/lib/<operacion>.sh"` y añadir la rama al
    `case "$operation"` de `main()`.
 3. En `backends/pdf-suite/lib/cli.sh`, la opción del menú en `show_interactive_menu()` y la línea de `show_help`.
-4. La entrada en `docs/referencia-pdf-suite.md` y, si la app debe ofrecerla, en `OPERACIONES` de
-   `studio/ui/pages/pdf.py` con su función en `studio/services/pdfsuite.py`.
+4. La entrada en `docs/referencia-pdf-suite.md`. En Raphi, una operación nueva se escribe en el motor
+   (§Raphi), no aquí: pdf-suite se retira en R8.
 
 Convenciones del backend: funciones `verbo_sustantivo()` cortas que comentan el porqué; toda salida
 visible pasa por `log_success`, `log_failure` o `log_skip`; se prueban los casos de error (archivo

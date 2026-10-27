@@ -19,4 +19,4 @@ depende_de:
 - PySide6
 - pikepdf
 - PyMuPDF
-nota: motor y CLI en raphi/ (python -m raphi); GUI en studio/ (QSettings); backends docflow, pdf-suite y page-counter en backends/
+nota: motor y CLI en raphi/ (python -m raphi); la web en web/ y la ventana en escritorio/ (la misma interfaz); backends docflow, pdf-suite y page-counter en backends/
