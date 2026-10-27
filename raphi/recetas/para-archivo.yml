@@ -1,0 +1,6 @@
+# Conservación a largo plazo.
+nombre: Para archivo
+descripcion: Repara si hace falta y convierte a PDF/A-2b.
+pasos:
+  - operacion: reparar
+  - operacion: pdfa

@@ -1,6 +1,28 @@
-# Raphi escritorio — frontend PySide6
+# requirements.txt — el entorno de Raphi (.venv): escritorio, motor, API y pruebas.
+# Las versiones de la API y de Pillow son las de Qillqa (qillqa/backend/requirements.txt): dentro de la plataforma
+# Raphi corre en su mismo proceso. Tiqsi entra editable desde el espacio de trabajo: install.sh añade «-e ../tiqsi».
+
+# Escritorio
 PySide6>=6.6
 
-# Backend "Conteo de páginas" (backends/page-counter)
-pypdf>=3.0
-openpyxl>=3.0
+# Motor
+pikepdf==10.17.0
+pymupdf==1.28.2                 # AGPL-3.0, como Raphi: miniaturas, texto, foliar, sellos, marca de agua
+pypdf>=3.0                      # page-counter, hasta que se retire (R8)
+Pillow==12.3.0
+pillow-heif==1.8.1
+openpyxl==3.1.5
+PyYAML==6.0.3
+
+# API y módulo de Tiqsi
+fastapi==0.136.3
+starlette==1.9.0
+uvicorn[standard]==0.30.6
+sqlalchemy[asyncio]==2.0.35
+aiosqlite==0.22.1
+PyJWT==2.15.1
+python-multipart==0.0.32
+
+# Pruebas
+pytest==9.0.3
+httpx==0.27.2

@@ -1,0 +1,28 @@
+# pyproject.toml — el paquete de Python de Raphi: el motor, la CLI, la API y el módulo de Tiqsi
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "raphi"
+version = "0.1.0"
+description = "Raphi: PDF, ofimática y conversión de archivos (motor, CLI, API web, módulo de la plataforma Qillqa y escritorio)."
+readme = "README.md"
+license = "AGPL-3.0-only"
+requires-python = ">=3.11"
+dependencies = ["pikepdf>=9", "pymupdf>=1.24,<2", "Pillow>=10", "pillow-heif>=0.16", "openpyxl>=3.1", "PyYAML>=6"]
+
+[project.optional-dependencies]
+web = ["tiqsi", "fastapi>=0.110", "sqlalchemy[asyncio]>=2", "aiosqlite>=0.20", "python-multipart>=0.0.9", "PyJWT>=2.8",
+       "uvicorn[standard]>=0.30"]
+escritorio = ["PySide6>=6.6"]
+pruebas = ["pytest>=8", "httpx>=0.27"]
+
+[project.scripts]
+raphi-cli = "raphi.__main__:main"
+
+[tool.setuptools]
+packages = ["raphi", "raphi.motor", "raphi.fuentes", "raphi.api"]
+
+[tool.setuptools.package-data]
+raphi = ["recetas/*.yml"]

@@ -1,0 +1,7 @@
+# Un PDF que debe entrar en el límite de una mesa de partes virtual o de un correo.
+nombre: Para enviar
+descripcion: Comprime hasta 10 MB y quita los metadatos.
+pasos:
+  - operacion: comprimir
+    params: {hasta: 10, umbral: 0}
+  - operacion: quitar_metadatos

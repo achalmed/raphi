@@ -19,6 +19,10 @@ echo "==> Creando entorno virtual (.venv)…"
 python3 -m venv "${DIR}/.venv"
 "${DIR}/.venv/bin/python" -m pip install --upgrade pip >/dev/null
 "${DIR}/.venv/bin/python" -m pip install -r "${DIR}/requirements.txt"
+# Tiqsi (el contrato de la plataforma) desde el espacio de trabajo, si está al lado: la API y el módulo lo usan.
+if [[ -f "${DIR}/../tiqsi/pyproject.toml" ]]; then
+    "${DIR}/.venv/bin/python" -m pip install -q -e "${DIR}/../tiqsi"
+fi
 
 echo "==> Enlazando lanzador en ${BIN_DIR}/raphi…"
 mkdir -p "$BIN_DIR"

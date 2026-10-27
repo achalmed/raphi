@@ -13,6 +13,23 @@ y `APP_VERSION` (`studio/__init__.py`). Sin etiquetas git: por qué se lleva igu
 
 <!-- Mantén «Sin publicar» arriba en cada herramienta; al subir su versión en el código, sus entradas pasan a la versión nueva con fecha ISO. -->
 
+## Raphi (motor, CLI y recetas)
+
+### Sin publicar
+
+#### Añadido
+
+- El motor `raphi/motor/`: 48 operaciones en un solo registro (organizar, optimizar, convertir, editar, seguridad,
+  información, medios y archivos), con simular, verificar la salida y el error por archivo en el núcleo.
+- Lo nuevo frente a pdf-suite y docflow: comprimir hasta un tamaño, componer páginas de varios PDF, foliar
+  expedientes (correlativo o de atrás hacia adelante), sello de recepción, ver firmas digitales, ¿necesita OCR?,
+  PDF a HTML y a Word, imágenes (también HEIC) a PDF, conversión de imágenes, audio, video y subtítulos, archivos
+  comprimidos y quitar metadatos de cualquier archivo; el menú «a qué se puede convertir» (`raphi formatos`).
+- «Inventario de páginas» con el Excel de page-counter y la fuente «blogs del hub» (solo en el espacio de trabajo).
+- Recetas (`raphi recetas`, `raphi receta`): cuatro de serie y las del usuario en `~/.config/raphi/recetas/`.
+- La CLI `raphi <operación>` (`-n`, `-o`, `--json`; salida 0 · 1 · 2 · 130) y `raphi doctor`.
+- 37 pruebas con un corpus generado en cada corrida y la prueba de fronteras del motor.
+
 ## Raphi escritorio (GUI; antes DocFlow Studio)
 
 ### Sin publicar

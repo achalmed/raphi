@@ -127,7 +127,35 @@ imagen, motor PDF). Valor = ruta de salida. Hit solo si la salida registrada
 coincide con la esperada y aún existe. El índice es append-only (la última
 entrada gana); `docflow cache prune` lo compacta.
 
+## El motor de Raphi (`raphi/`)
+
+Desde el 2026-10-27 (R1 de `qillqa/docs/plataforma/propuesta-raphi.md`) las operaciones viven en un motor Python
+que reúne las de pdf-suite, el PDF/A y la conversión de docflow, el conteo de page-counter y la conversión de medios.
+Lo usan la CLI (`raphi <operación>`), la API y la web que vienen (R2–R3) y, al final, el escritorio (R4).
+
+- **Una operación, una declaración**: `@operacion(id, categoría, título, descripción, entrada=, lote=, parametros=,
+  requiere=)` en el módulo de su familia (`raphi/motor/pdf_*.py`, `documentos.py`, `medios.py`). La ficha
+  (`Operacion.ficha()`) es lo que leen la CLI y los formularios; `requiere` dice qué programa o módulo necesita y, si
+  falta, la operación se ofrece como no disponible en vez de fallar a mitad.
+- **Los tres principios, en `raphi/motor/base.py` y no en cada operación**: `ejecutar` corre una operación de lote una vez
+  por entrada y anota el error de cada una sin detener el resto; `Contexto.salida` nunca devuelve la ruta de una
+  entrada ni una que exista («-2», «-3»…); `verificar_salida` comprueba toda salida (existe, no está vacía; un PDF abre
+  y tiene páginas) antes de darla por buena. Con `simular=True` cada función devuelve su `plan` sin escribir.
+- **Recetas** (`raphi/recetas.py`): pasos encadenados en una carpeta temporal; lo que sale de un paso entra al
+  siguiente, un paso sin cambio deja pasar lo que recibió y solo el resultado final se copia al destino.
+- **Fuentes** (`raphi/fuentes/`): de dónde sale un inventario de páginas; «hub» es el caso de page-counter y solo
+  existe dentro del espacio de trabajo.
+- **Fronteras** (`tests/test_fronteras.py`): el motor no importa FastAPI, SQLAlchemy, Qt ni Tiqsi; nada en `raphi/`
+  importa a otro proyecto de la plataforma.
+
 ## Cómo extender
+
+### Raphi
+
+Una operación nueva es una función en el módulo de su familia con `@operacion(...)`: recibe un `Contexto` (sus
+entradas, `ctx.p(clave)`, `ctx.salida()`, `ctx.temporal()`, `ctx.avisar(fracción, mensaje)`, `ctx.simular`) y devuelve
+un `Resultado` (archivos, datos, mensajes, plan o `sin_cambio`). Un fallo explicable es `ErrorOperacion`. Su prueba va
+en `tests/` con el corpus de `tests/conftest.py`, generado en cada corrida.
 
 ### docflow
 

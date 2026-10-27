@@ -7,12 +7,16 @@ escribe_en:
 - archivos
 simula_por_defecto: false
 comandos:
-- main.py
-- './run.sh                 # usa el .venv si existe'
-- python3 -m studio
-- raphi                    # lanzador que instala install.sh
+- main.py                  # la aplicación (o raphi, el lanzador de install.sh; o ./run.sh)
+- raphi lista              # las operaciones del motor
+- raphi doctor             # lo que falta en esta máquina
+- 'raphi comprimir a.pdf --hasta 10 -n   # una operación (simulada)'
+- raphi receta para-enviar a.pdf
+- python3 -m pytest -q tests
 estado: activo
 interfaz: gui
 depende_de:
 - PySide6
-nota: config en studio/core/settings.py (QSettings); backends docflow, pdf-suite y page-counter en backends/
+- pikepdf
+- PyMuPDF
+nota: motor y CLI en raphi/ (python -m raphi); GUI en studio/ (QSettings); backends docflow, pdf-suite y page-counter en backends/

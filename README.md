@@ -10,16 +10,18 @@ estado: activo
 Raphi escritorio (PySide6; antes DocFlow Studio) sobre docflow, pdf-suite y page-counter.
 
 - Escribe en: archivos · simula por defecto: no
-- Depende de: PySide6
-- Nota: config en studio/core/settings.py (QSettings); backends docflow, pdf-suite y page-counter en backends/
+- Depende de: PySide6, pikepdf, PyMuPDF
+- Nota: motor y CLI en raphi/ (python -m raphi); GUI en studio/ (QSettings); backends docflow, pdf-suite y page-counter en backends/
 
 Comandos:
 
 ```bash
 main.py
-./run.sh                 # usa el .venv si existe
-python3 -m studio
-raphi
+raphi lista
+raphi doctor
+raphi comprimir a.pdf --hasta 10 -n   # una operación (simulada)
+raphi receta para-enviar a.pdf
+python3 -m pytest -q tests
 ```
 
 <sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-10-27); no se edita a mano.</sub>
@@ -66,17 +68,17 @@ fuera de la carpeta que se le pasa y de los directorios XDG de cada backend.
 
 ```bash
 ./install.sh                                          # una vez: .venv con PySide6, lanzador ~/.local/bin/raphi y entrada de escritorio
-raphi                                                 # o ./run.sh (usa .venv si existe), python3 main.py, python3 -m studio
+raphi                                                 # la aplicación (o ./run.sh, python3 main.py, python3 -m studio)
+raphi lista · raphi doctor                            # el motor: sus 48 operaciones y lo que falta en esta máquina
+raphi comprimir *.pdf --hasta 10 -n                   # cualquier operación: -n simula, -o carpeta de salida, --json
+raphi receta escaneo-mesa-de-partes recibido.pdf      # una cadena guardada (raphi recetas); raphi formatos foto.heic
 backends/docflow/install.sh                           # dependencias del sistema de docflow (pandoc, LibreOffice, qpdf, gs, ocrmypdf…)
-backends/pdf-suite/main.sh deps                       # dependencias de pdf-suite (su install.sh no sigue al repo: ver su README)
-backends/docflow/bin/docflow doctor                   # qué falta y el comando exacto para tu distro
 backends/docflow/bin/docflow to-md -n -v ruta/        # simular (-n) una conversión a Markdown antes de aplicarla
 backends/docflow/bin/docflow to-md ruta/ --jobs 4 --report html   # lote en paralelo con reporte de sesión
-backends/pdf-suite/main.sh                            # menú interactivo; con operación: compress, merge, split, ocr, metadata…
 backends/pdf-suite/main.sh -n compress documento.pdf  # -n simula sin escribir
-python3 backends/page-counter/main.py --listar        # conteo de páginas de los blogs (escribe solo su excel_databases/)
 bats backends/docflow/tests/                          # pruebas de docflow en sandbox aislado
 pyside6-designer studio/resources/ui/main_window.ui   # editar el shell de la GUI; se carga en tiempo de ejecución
+.venv/bin/python -m pytest -q tests                   # pruebas del motor, las recetas y la CLI (corpus generado)
 ```
 
 Regla de oro: `-n`/`--dry-run` antes de un lote en `docflow` y `pdf-suite`, que escriben de verdad salvo

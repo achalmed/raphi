@@ -8,3 +8,9 @@ __pycache__/
 
 # Reportes Excel generados por page-counter (su único producto)
 backends/page-counter/excel_databases/
+
+# Paquete, pruebas y web
+*.egg-info/
+.pytest_cache/
+web/node_modules/
+web/dist/
