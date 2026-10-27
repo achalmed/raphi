@@ -15,8 +15,8 @@ engine_office_convert() {
 
     # Markdown → docx: pandoc genera estructura semántica (estilos reales)
     if [[ "$in_ext" == "md" || "$in_ext" == "qmd" ]] && deps_has pandoc; then
-        # shellcheck disable=SC2206
         local -a cmd=(pandoc "$input" -o "$output")
+        # shellcheck disable=SC2206  # los argumentos extra se parten a propósito
         [[ -n "${DOCFLOW_PANDOC_ARGS:-}" ]] && cmd+=(${DOCFLOW_PANDOC_ARGS})
         "${cmd[@]}" >/dev/null 2>&1 && [[ -s "$output" ]] && return 0
     fi

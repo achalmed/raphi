@@ -4,11 +4,11 @@ estado: activo
 ---
 # CHANGELOG — raphi (antes DocFlow Studio; repo `achalmed/raphi`, antes `scripts_for_libreoffice`)
 
-Versiones de las cuatro herramientas del repo, cada una con su número, según
+Versiones de las herramientas del repo, cada una con su número, según
 [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer 2.0.0](https://semver.org/lang/es/).
-La versión vigente se declara en el código: `DOCFLOW_VERSION` (`backends/docflow/lib/core/constants.sh`),
-`PDF_SUITE_VERSION` (`backends/pdf-suite/config.sh`), `SCRIPT_VERSION` (`backends/page-counter/config.py`)
-y `APP_VERSION` (`studio/__init__.py`). Sin etiquetas git: por qué se lleva igualmente, en
+La versión vigente se declara en el código: `version` de `pyproject.toml` (Raphi: motor, CLI, API, web y
+escritorio) y `DOCFLOW_VERSION` (`backends/docflow/lib/core/constants.sh`). pdf-suite y page-counter se
+retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por qué se lleva igualmente, en
 `docs/decisiones.md`.
 
 <!-- Mantén «Sin publicar» arriba en cada herramienta; al subir su versión en el código, sus entradas pasan a la versión nueva con fecha ISO. -->
@@ -98,6 +98,10 @@ y `APP_VERSION` (`studio/__init__.py`). Sin etiquetas git: por qué se lleva igu
 
 - El CI (ShellCheck y Bats en Ubuntu y Arch) vuelve a dispararse: sus rutas apuntaban a una carpeta que
   ya no existía (2026-09-20).
+- `index` informaba «índice generado» y salía con 0 aunque el script de Python fallara; ahora sale con 1.
+- El CI pasa de nuevo: ShellCheck ya no avisa de las variables que comparten los archivos de `lib/` (se
+  declara en cada uno por qué), la prueba de `to-md` busca `titulo:` y no `title:`, y en Arch el paquete se
+  llama `bats` (2026-10-27).
 
 ### [3.0.0] - 2026-07-10
 

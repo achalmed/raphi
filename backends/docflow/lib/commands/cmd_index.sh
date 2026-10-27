@@ -66,7 +66,8 @@ lines += ["", "## Árbol del directorio", ""] + tree_lines + [""]
 out.write_text("\n".join(lines), encoding="utf-8")
 print(len(entries))
 PYEOF
-    local count=$?
+    local estado=$?
+    (( estado == 0 )) || { log_error "no se pudo generar ${out}."; exit "$EXIT_ERROR"; }
     log_ok "índice generado: ${out}"
     exit 0
 }

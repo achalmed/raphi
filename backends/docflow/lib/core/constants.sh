@@ -1,6 +1,7 @@
 #!/usr/bin/env bash
 # lib/core/constants.sh — Metadatos, códigos de salida y colores.
 # Única fuente de verdad para valores inmutables de todo el proyecto.
+# shellcheck disable=SC2034  # las constantes las leen los demás archivos de lib/
 
 readonly DOCFLOW_NAME="docflow"
 readonly DOCFLOW_VERSION="3.0.0"

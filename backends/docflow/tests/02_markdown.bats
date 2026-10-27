@@ -15,7 +15,7 @@ teardown() { teardown_sandbox; }
     run "$DOCFLOW_BIN" to-md informe.docx
     [ "$status" -eq 0 ]
     [ -f informe.md ]
-    grep -q '^title:' informe.md
+    grep -q '^titulo:' informe.md
     grep -q '# Título de prueba' informe.md
     grep -q '| A' informe.md
 }

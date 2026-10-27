@@ -12,7 +12,7 @@ jobs:
     name: ShellCheck
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: shellcheck
         run: |
           sudo apt-get update -q && sudo apt-get install -y shellcheck
@@ -24,7 +24,7 @@ jobs:
     name: Bats (Ubuntu)
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
       - name: Instalar dependencias
         run: |
           sudo apt-get update -q
@@ -38,7 +38,7 @@ jobs:
     container: archlinux:latest
     steps:
       - name: Instalar dependencias
-        run: pacman -Syu --noconfirm bash bash-bats pandoc-cli libreoffice-still qpdf ghostscript poppler python git
-      - uses: actions/checkout@v4
+        run: pacman -Syu --noconfirm bash bats pandoc-cli libreoffice-still qpdf ghostscript poppler python git
+      - uses: actions/checkout@v5
       - name: Ejecutar suite
         run: bats backends/docflow/tests/

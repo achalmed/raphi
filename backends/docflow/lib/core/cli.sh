@@ -2,6 +2,7 @@
 # lib/core/cli.sh — Parsing de argumentos y ayuda.
 # Un solo lugar para todos los flags: añadir una opción = tocar este archivo
 # (y defaults.conf si tiene valor por defecto configurable).
+# shellcheck disable=SC2034  # las variables DOCFLOW_* que deja el parser las leen los comandos y los workers
 
 # cli_parse_global "$@" — deja DOCFLOW_COMMAND y DOCFLOW_ARGS (posicionales)
 cli_parse_global() {
