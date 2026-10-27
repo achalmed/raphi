@@ -1,8 +1,8 @@
-# suite.yml — suite document_studio: Interfaz de escritorio (PySide6) sobre docflow, pdf-suite y page-counter.
+# suite.yml — suite raphi: Raphi escritorio (PySide6; antes DocFlow Studio) sobre docflow, pdf-suite y page-counter.
 # Contrato: core/suite.schema.yml; core/suites.py validar lo comprueba y generar escribe los índices y README.
-id: document_studio
+id: raphi
 objetivo: documentos
-resumen: Interfaz de escritorio (PySide6) sobre docflow, pdf-suite y page-counter.
+resumen: Raphi escritorio (PySide6; antes DocFlow Studio) sobre docflow, pdf-suite y page-counter.
 escribe_en:
 - archivos
 simula_por_defecto: false
@@ -10,6 +10,7 @@ comandos:
 - main.py
 - './run.sh                 # usa el .venv si existe'
 - python3 -m studio
+- raphi                    # lanzador que instala install.sh
 estado: activo
 interfaz: gui
 depende_de:

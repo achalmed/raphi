@@ -6,7 +6,7 @@ estado: activo
 # Arquitectura de docflow y principios comunes a las cuatro suites
 
 Este documento explica las decisiones de diseño de docflow v3 y cómo extender el sistema. Léelo antes
-de modificar el núcleo. Sus **Principios** son los de las cuatro suites del repo (`document_studio`,
+de modificar el núcleo. Sus **Principios** son los de las cuatro suites del repo (`raphi`,
 `docflow`, `page_counter`, `pdf_suite`); el resto describe docflow y sus rutas son relativas a
 `backends/docflow/`, salvo las dos secciones finales de «Cómo extender», que tratan pdf-suite y
 page-counter. Cómo se extiende la GUI está en `studio/README.md` §Reglas de la arquitectura.

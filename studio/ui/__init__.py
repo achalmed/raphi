@@ -1,1 +1,1 @@
-"""studio/ui/__init__.py — interfaz gráfica de document_studio."""
+"""studio/ui/__init__.py — interfaz gráfica de Raphi escritorio."""

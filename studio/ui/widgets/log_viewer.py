@@ -1,4 +1,4 @@
-"""Visor del log persistente de la aplicación (~/.local/state/docflow-studio).
+"""Visor del log persistente de la aplicación (~/.local/state/raphi).
 
 La consola muestra la sesión en vivo; este visor muestra el histórico en
 disco, con filtro de texto y nivel.

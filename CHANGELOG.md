@@ -2,7 +2,7 @@
 tipo: changelog
 estado: activo
 ---
-# CHANGELOG — scripts_document_studio (DocFlow Studio; repo `scripts_for_libreoffice`)
+# CHANGELOG — raphi (antes DocFlow Studio; repo `achalmed/raphi`, antes `scripts_for_libreoffice`)
 
 Versiones de las cuatro herramientas del repo, cada una con su número, según
 [Keep a Changelog 1.1.0](https://keepachangelog.com/es-ES/1.1.0/) y [SemVer 2.0.0](https://semver.org/lang/es/).
@@ -13,7 +13,21 @@ y `APP_VERSION` (`studio/__init__.py`). Sin etiquetas git: por qué se lleva igu
 
 <!-- Mantén «Sin publicar» arriba en cada herramienta; al subir su versión en el código, sus entradas pasan a la versión nueva con fecha ISO. -->
 
-## DocFlow Studio (GUI)
+## Raphi escritorio (GUI; antes DocFlow Studio)
+
+### Sin publicar
+
+#### Cambiado
+
+- La aplicación se llama **Raphi** (ventana, lanzador `raphi`, entrada de escritorio `raphi.desktop`); el
+  instalador retira el lanzador y la entrada de `docflow-studio`.
+- Los ajustes pasan a `~/.config/achalma/raphi.conf` y el registro a `~/.local/state/raphi/`; los del nombre
+  anterior se migran solos la primera vez.
+- Licencia AGPL-3.0 (antes MIT) en todo el repositorio, docflow incluido.
+
+#### Añadido
+
+- `scripts/escanear.py`: la guarda pre-push del repositorio público, con el escáner de Tiqsi.
 
 ### [1.0.0] - 2026-07-13
 

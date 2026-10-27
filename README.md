@@ -2,7 +2,7 @@
 tipo: readme
 estado: activo
 ---
-# scripts_document_studio/ — DocFlow Studio: PDF y ofimática (repo scripts_for_libreoffice)
+# raphi/ — Raphi: PDF, ofimática y conversión de archivos (antes DocFlow Studio)
 
 <!-- suite:inicio -->
 **Suite `document_studio`** · objetivo *documentos* · estado *activo* · python · interfaz gui
@@ -39,7 +39,7 @@ Suites de esta carpeta (4); índice global en `meta/INDICE_SCRIPTS.md`. Patrón:
 
 ## Qué es
 
-Una aplicación de escritorio (DocFlow Studio, PySide6) y los tres motores de línea de comandos que
+Una aplicación de escritorio (Raphi escritorio, PySide6; hasta el 2026-10-27, «DocFlow Studio») y los tres motores de línea de comandos que
 envuelve, para convertir y gestionar documentos de oficina y PDF en Linux: `docflow` (Bash; conversión
 documental masiva → Markdown, → PDF, Office ↔ ODF, con caché, paralelización, vigilancia de carpetas y
 reportes), `pdf-suite` (Bash; comprimir, unir, dividir, rotar, OCR, cifrar, marca de agua, reparar,
@@ -48,9 +48,15 @@ blogs Quarto y produce un Excel). Resuelven lo que `pandoc` y `soffice` en un bu
 xlsx que pandoc no lee, LibreOffice que corrompe su perfil al correr en paralelo, y lotes de miles de
 archivos en los que el fallo de uno no debe detener el resto.
 
-Tres nombres para una sola cosa: la carpeta es `scripts_document_studio`; el remoto en GitHub sigue
-llamándose `scripts_for_libreoffice` (los nombres de repo de GitHub no siguen a las carpetas del espacio de
-trabajo); la suite raíz se llama `document_studio` y la GUI, «DocFlow Studio».
+Un solo nombre desde el 2026-10-27: la carpeta, el repositorio de GitHub (`achalmed/raphi`, antes
+`scripts_for_libreoffice`), la suite raíz y la aplicación se llaman **Raphi** («hoja» en quechua).
+
+**Hacia dónde va** (la propuesta aprobada vive en el repo de Qillqa, `docs/plataforma/propuesta-raphi.md`):
+Raphi pasa a ser también un módulo de la plataforma Qillqa (contrato Tiqsi), que funciona solo o dentro de
+ella. Tendrá un motor Python con todas las operaciones (las de pdf-suite, docflow y page-counter, y la
+conversión de imágenes, audio, video, subtítulos y archivos comprimidos) y **una sola interfaz, la web**:
+Raphi escritorio la mostrará en una ventana PySide6, así que toda mejora de la web llega al escritorio.
+Hasta que esa web cubra lo que hace la GUI actual, esta sigue siendo Raphi escritorio.
 
 **No es** una biblioteca y no reescribe los backends: cada motor sigue siendo una CLI independiente, con
 su `suite.yml`, su README y su instalador (docflow, además, con tests Bats y CI); la GUI los invoca como
@@ -61,8 +67,8 @@ fuera de la carpeta que se le pasa y de los directorios XDG de cada backend.
 ## Uso
 
 ```bash
-./install.sh                                          # una vez: .venv con PySide6, lanzador ~/.local/bin/docflow-studio y entrada de escritorio
-docflow-studio                                        # o ./run.sh (usa .venv si existe), python3 main.py, python3 -m studio
+./install.sh                                          # una vez: .venv con PySide6, lanzador ~/.local/bin/raphi y entrada de escritorio
+raphi                                                 # o ./run.sh (usa .venv si existe), python3 main.py, python3 -m studio
 backends/docflow/install.sh                           # dependencias del sistema de docflow (pandoc, LibreOffice, qpdf, gs, ocrmypdf…)
 backends/pdf-suite/main.sh deps                       # dependencias de pdf-suite (su install.sh no sigue al repo: ver su README)
 backends/docflow/bin/docflow doctor                   # qué falta y el comando exacto para tu distro
@@ -92,7 +98,7 @@ es la puerta de entrada.
 
 | carpeta | qué es | dueño / generador |
 |---|---|---|
-| `main.py` · `run.sh` · `install.sh` | entrada de la GUI (equivale a `python3 -m studio`); lanzador que usa `.venv/` si existe; instalador del frontend (venv, ~/.local/bin/docflow-studio, `.desktop`) | a mano |
+| `main.py` · `run.sh` · `install.sh` | entrada de la GUI (equivale a `python3 -m studio`); lanzador que usa `.venv/` si existe; instalador del frontend (venv, ~/.local/bin/raphi, `.desktop`; retira los del nombre anterior) | a mano |
 | `studio/` | la aplicación PySide6: `app.py`, `core/` (rutas, QSettings, tareas), `services/` (GUI → línea de comandos exacta), `ui/` (ventana, páginas por dominio, widgets), `studio/resources/ui/main_window.ui` | a mano; `studio/README.md` |
 | `backends/docflow/` | CLI Bash de conversión documental: `bin/docflow`, `lib/{core,engines,formats,commands,helpers}`, `tests/` Bats, `completions/`, `install.sh`, `LICENSE` | a mano; `backends/docflow/README.md` |
 | `backends/pdf-suite/` | CLI Bash de manipulación PDF: `main.sh` + `config.sh` + `lib/` (un módulo por familia de operaciones), `install.sh` | a mano; `backends/pdf-suite/README.md` |
@@ -101,7 +107,8 @@ es la puerta de entrada.
 | `docs/` | documentación permanente: arquitectura, referencia de docflow y de pdf-suite, decisiones | a mano; el índice `docs/README.md` lo genera `core/docs.py indice` |
 | `requirements.txt` | PySide6, pypdf, openpyxl (frontend y page-counter); las dependencias del sistema las instalan los backends | a mano |
 | `.github/workflows/ci.yml` | ShellCheck + Bats de docflow en Ubuntu y Arch (se dispara solo con cambios en `backends/docflow/`) | a mano |
-| `CHANGELOG.md` · `LICENSE` | versiones con fecha ISO de las cuatro suites; MIT | a mano |
+| `scripts/escanear.py` · `demo/demo.conf` | la guarda del repositorio público: el escáner de Tiqsi sobre cada commit que se envía (pre-push) y lo que acepta | a mano |
+| `CHANGELOG.md` · `LICENSE` | versiones con fecha ISO de las cuatro suites; AGPL-3.0 | a mano |
 | `.venv/` | entorno del frontend creado por `install.sh` (ignorado) | `install.sh` |
 
 ## Documentación
@@ -135,7 +142,10 @@ es la puerta de entrada.
   de los backends están en `docs/decisiones.md` §Pendientes.
 - **Estado fuera del repo**: config TOML de docflow en `~/.config/docflow/`, sesiones y caché en
   ~/.local/state/docflow/ y ~/.cache/docflow/ (se conservan 50 sesiones), log de la GUI en
-  ~/.local/state/docflow-studio/studio.log, ajustes en QSettings (~/.config/achalma/docflow-studio.conf).
+  ~/.local/state/raphi/studio.log, ajustes en QSettings (~/.config/achalma/raphi.conf; los del nombre anterior se
+  migran solos la primera vez).
 - **Lo que no hace**: no edita documentos (convierte, manipula, cuenta), no sincroniza con Calibre ni
   Zotero (eso es `scripts-biblioteca`), no compila LaTeX (`scripts-latex`).
-- Licencia MIT (`LICENSE`; docflow conserva la suya en `backends/docflow/LICENSE`).
+- Licencia **AGPL-3.0** desde el 2026-10-27 (`LICENSE` y `backends/docflow/LICENSE`); las versiones publicadas
+  antes siguen siendo MIT. El repositorio es público: `python3 scripts/escanear.py --instalar-guarda` instala la
+  guarda que escanea cada envío (necesita Tiqsi en el espacio de trabajo).

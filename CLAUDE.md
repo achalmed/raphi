@@ -2,7 +2,7 @@
 tipo: guia_ia
 estado: activo
 ---
-# CLAUDE.md — scripts_document_studio (repo `scripts_for_libreoffice`, suite `document_studio`)
+# CLAUDE.md — raphi (repo `achalmed/raphi`, suite `raphi`; antes DocFlow Studio)
 
 Guía para el asistente. En español, como todo el ecosistema. `AGENTS.md` es un enlace a este archivo.
 Léase antes: `README.md` (qué es, uso, deduplicación), `docs/README.md` (índice), `docs/arquitectura.md`
@@ -11,6 +11,12 @@ que se toque.
 
 ## Reglas que no se negocian
 
+- **Raphi, escritorio y web, es una sola aplicación** (decisión del 2026-10-27, `docs/decisiones.md`; plan en
+  el repo de Qillqa, `docs/plataforma/propuesta-raphi.md`): la interfaz que viene es la web, y el escritorio la
+  mostrará en PySide6 con un puente nativo; ninguna pantalla nueva se escribe solo para el escritorio. Hasta la
+  fase R4, la GUI de `studio/` sigue siendo Raphi escritorio y sus reglas, las de abajo.
+- **El repo es público**: nada del despacho ni de nadie; `python3 scripts/escanear.py` (o la guarda pre-push
+  que instala con `--instalar-guarda`) escanea cada commit antes de que salga. Licencia AGPL-3.0.
 - **Una GUI que orquesta tres backends intactos.** `docflow` y `pdf-suite` se invocan como procesos
   (`QProcess`, línea de comandos construida en `studio/services/`); `page-counter` se importa como módulo
   (`studio/services/pagecounter.py`). Los backends siguen siendo CLIs completas desde la terminal: sus
@@ -32,13 +38,13 @@ que se toque.
   (OOXML, TOML, Markdown, JSON) vive en `backends/docflow/lib/helpers/*.py` sin dependencias externas. El
   núcleo de docflow no conoce formatos: se declaran en `backends/docflow/lib/formats/` con `registry_add`.
 - **Instalación en dos niveles**: `install.sh` crea `.venv/` con `requirements.txt` (PySide6, pypdf,
-  openpyxl) y el lanzador `docflow-studio`; las dependencias del sistema (pandoc, LibreOffice, qpdf, gs,
+  openpyxl) y el lanzador `raphi`; las dependencias del sistema (pandoc, LibreOffice, qpdf, gs,
   ocrmypdf, exiftool…) las instalan `backends/docflow/install.sh` y `backends/pdf-suite/install.sh`.
   `run.sh` usa `.venv/` si existe y el `python3` del sistema si no. Un solo camino documentado.
 - **Simular antes de aplicar**: `-n`/`--dry-run` en docflow y pdf-suite; la GUI no simula por sí misma.
 - **Lo generado no se edita**: los bloques `<!-- suite:inicio -->` y `<!-- suites:inicio -->` de los README
   salen de los `suite.yml` con `core/suites.py generar --aplicar`; `docs/README.md`, con
-  `core/docs.py indice`. `studio/README.md` no lleva bloque: la suite `document_studio` se declara en el
+  `core/docs.py indice`. `studio/README.md` no lleva bloque: la suite `raphi` se declara en el
   `suite.yml` de la raíz.
 - **Raíz y logger de `core/`**: ninguna ruta de máquina en código. Excepciones declaradas: docflow tiene
   logger propio (nota en su `suite.yml`); `page-counter` resuelve `~/Documents` con `Path.home()` en su
@@ -71,6 +77,7 @@ python3 core/suites.py generar                                # ¿bloques de REA
 python3 core/docs.py verificar scripts_document_studio        # índice de docs/ al día
 cd scripts_document_studio
 bash -n backends/docflow/bin/docflow backends/pdf-suite/main.sh
+python3 scripts/escanear.py --trabajo                         # la guarda del repo público (escáner de Tiqsi)
 shellcheck -x -S warning backends/docflow/bin/docflow backends/docflow/lib/*/*.sh  # lo del CI
 bats backends/docflow/tests/                                  # pruebas en sandbox (pandoc, soffice, qpdf)
 python3 -m py_compile main.py studio/**/*.py backends/page-counter/*.py backends/page-counter/lib/*.py
@@ -82,7 +89,7 @@ meta/doctor/main.sh --breve                                   # desde ~/Document
 
 Solo docflow tiene pruebas automáticas; un cambio en la GUI se prueba abriéndola y leyendo la consola
 integrada (comando exacto, stdout, stderr, código de salida y duración) y el log en
-`~/.local/state/docflow-studio/studio.log`.
+`~/.local/state/raphi/studio.log`.
 
 ## Detalles que cuesta redescubrir
 
@@ -101,7 +108,7 @@ integrada (comando exacto, stdout, stderr, código de salida y duración) y el l
   mismo lote rompe esa prevención de bucles. `delete` necesita `python3`; `watermark`/numeración
   necesitan `cpdf` (AGPL, se instala aparte); `--dry-run` sí crea temporales en `/tmp/pdfsuite_*`.
 - **El shell de la GUI es un `.ui`** cargado con `QUiLoader`: los cambios de Qt Designer se ven al
-  reiniciar sin recompilar. Ajustes en QSettings (~/.config/achalma/docflow-studio.conf).
+  reiniciar sin recompilar. Ajustes en QSettings (~/.config/achalma/raphi.conf; migra los de `docflow-studio`).
 
 ## Dónde está cada cosa
 

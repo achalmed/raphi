@@ -32,7 +32,7 @@ verificación de cada salida, caché, paralelización, vigilancia de carpetas y 
 propios que conservan notas del presentador, tablas e imágenes) y LibreOffice corrompe su perfil si corre
 en paralelo (docflow lo aísla en un perfil temporal por invocación, con tiempo límite).
 
-En DocFlow Studio es el motor de conversión y de PDF/A; el resto de operaciones PDF de la app las hace
+En Raphi escritorio es el motor de conversión y de PDF/A; el resto de operaciones PDF de la app las hace
 pdf-suite (`docs/decisiones.md`). Desde la terminal sigue siendo una CLI completa.
 
 ## Uso
@@ -66,7 +66,7 @@ salida: `docs/referencia-docflow.md`.
 | `lib/commands/` | un archivo por subcomando |
 | `lib/helpers/` | Python stdlib: parsers OOXML, limpieza de Markdown, metadatos, reportes |
 | `tests/` · `completions/` | pruebas Bats; autocompletado bash y fish |
-| `install.sh` · `suite.yml` · `LICENSE` | instalador multi-distro; manifiesto de la suite; licencia MIT |
+| `install.sh` · `suite.yml` · `LICENSE` | instalador multi-distro; manifiesto de la suite; licencia AGPL-3.0 |
 
 ## Documentación
 
@@ -90,11 +90,11 @@ salida: `docs/referencia-docflow.md`.
   LibreOffice), no el LuaLaTeX de los frameworks del ecosistema.
 - **Logger propio** con niveles y `--quiet`, excepción declarada al logger de `core/shell-lib` en
   `suite.yml`; la salida al usuario va a stderr y stdout queda para datos (`--json`).
-- **En DocFlow Studio solo se usa su PDF/A**; las demás operaciones de `docflow pdf` existen en la CLI
+- **En Raphi escritorio solo se usa su PDF/A**; las demás operaciones de `docflow pdf` existen en la CLI
   pero la app las hace con pdf-suite.
 - **El bloque generado de arriba cita `main.sh convert`**, que no existe: el manifiesto está pendiente de
   corregir (`docs/decisiones.md` §Pendientes); el comando es `to-pdf`.
 - Estado fuera del repo: `~/.config/docflow/config.toml`, sesiones en `~/.local/state/docflow/sessions/`
   (se conservan 50) y caché en ~/.cache/docflow/.
 
-Licencia MIT (`LICENSE` de esta carpeta, igual que la del repo).
+Licencia AGPL-3.0 (`LICENSE` de esta carpeta, igual que la del repo; MIT hasta el 2026-10-27).

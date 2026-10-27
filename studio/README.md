@@ -2,12 +2,12 @@
 tipo: readme
 estado: activo
 ---
-# studio/ — la aplicación de escritorio DocFlow Studio (PySide6), paquete Python `studio`
+# studio/ — Raphi escritorio (PySide6; antes DocFlow Studio), paquete Python `studio`
 
 Frontend gráfico sobre los tres backends de `../backends/`: `docflow` (conversión documental, se invoca
 por `QProcess`), `pdf-suite` (manipulación PDF, `QProcess`) y `page-counter` (conteo de páginas Quarto, se
 importa directo). Está organizada por **dominios funcionales**, no por scripts de origen; cada función
-existe en un solo lugar. La suite `document_studio` se declara en el `suite.yml` de la raíz del repo, por
+existe en un solo lugar. La suite `raphi` se declara en el `suite.yml` de la raíz del repo, por
 eso este README no lleva bloque generado. Se arranca con `../run.sh`, `python3 ../main.py` o
 `python3 -m studio` desde la raíz.
 
@@ -30,15 +30,15 @@ eso este README no lleva bloque generado. Se arranca con `../run.sh`, `python3 .
 - Consola integrada: salida en vivo de cada tarea (comando, stdout, stderr, código de salida, duración).
 - Panel de tareas: estado, duración y cancelación; las tareas corren en `QProcess`/`QThread` y la interfaz
   nunca se bloquea, ni en lotes de miles de archivos.
-- Visor de logs: histórico persistente en `~/.local/state/docflow-studio/studio.log` (rotado, 3 copias).
-- Configuración persistente (QSettings, ~/.config/achalma/docflow-studio.conf): geometría, última
+- Visor de logs: histórico persistente en `~/.local/state/raphi/studio.log` (rotado, 3 copias).
+- Configuración persistente (QSettings, ~/.config/achalma/raphi.conf; migra los del nombre anterior): geometría, última
   página, últimos directorios, rutas de backends.
 
 ## Estructura
 
 | carpeta o archivo | qué es |
 |---|---|
-| `__init__.py` | nombre, id (`docflow-studio`), versión y organización de la app |
+| `__init__.py` | nombre (`Raphi`), id (`raphi`, y el anterior `docflow-studio` para migrar), versión y organización de la app |
 | `app.py` · `__main__.py` | arranque: logging rotado, `QApplication`, ventana principal, `Ctrl-C` cierra |
 | `core/paths.py` | única fuente de verdad para localizar los backends (`STUDIO_ROOT/backends/…`), con override del usuario en QSettings; rutas XDG del estado y de la config TOML de docflow |
 | `core/settings.py` | envoltorio de QSettings: agrupa las claves para que ninguna página invente las suyas |

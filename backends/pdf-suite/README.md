@@ -30,7 +30,7 @@ main.sh merge a.pdf b.pdf
 La CLI que comprime, une, divide, extrae, rota, reordena y elimina páginas, convierte (PDF ↔ imagen,
 texto, HTML), aplica OCR, lee y escribe metadatos (DocInfo y XMP), cifra, pone marca de agua o numeración,
 repara y valida PDF, en archivos sueltos o en carpetas enteras, con un menú interactivo si se llama sin
-argumentos. En DocFlow Studio es el motor de **toda** operación PDF salvo PDF/A, que hace docflow
+argumentos. En Raphi escritorio es el motor de **toda** operación PDF salvo PDF/A, que hace docflow
 (`docs/decisiones.md`).
 
 | operación | qué hace | motor |

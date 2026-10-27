@@ -1,1 +1,1 @@
-"""studio/ui/widgets/__init__.py — widgets de document_studio."""
+"""studio/ui/widgets/__init__.py — widgets de Raphi escritorio."""

@@ -1,4 +1,4 @@
-"""studio — DocFlow Studio, aplicación de escritorio unificada (PySide6).
+"""studio — Raphi escritorio (antes DocFlow Studio), aplicación PySide6.
 
 Frontend gráfico sobre los backends existentes del proyecto
 scripts_document_studio (repo scripts_for_libreoffice):
@@ -11,7 +11,9 @@ La app está organizada por dominios funcionales (Conversión, PDF, Metadatos,
 Reportes, Vigilancia, Sistema), no por scripts de origen.
 """
 
-APP_NAME = "DocFlow Studio"
-APP_ID = "docflow-studio"
+APP_NAME = "Raphi"
+APP_ID = "raphi"
+# Nombre anterior (hasta 2026-10-27): sus ajustes y su registro se migran solos al arrancar.
+APP_ID_ANTERIOR = "docflow-studio"
 APP_VERSION = "1.0.0"
 APP_ORG = "achalma"

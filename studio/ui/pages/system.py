@@ -70,7 +70,7 @@ class SystemPage(BasePage):
         lay.addWidget(caja_conf)
 
         # --- ajustes de la app -------------------------------------------------------------
-        caja_app = QGroupBox("Ajustes de DocFlow Studio (rutas de backends)")
+        caja_app = QGroupBox("Ajustes de Raphi (rutas de backends)")
         form = QFormLayout(caja_app)
         self._selectores = {}
         for clave, etiqueta, defecto in (
@@ -83,7 +83,7 @@ class SystemPage(BasePage):
             selector.set_ruta(str(settings.value(clave, "")))
             self._selectores[clave] = selector
             form.addRow(etiqueta, selector)
-        nota = QLabel("Vacío = usar el backend incluido en docflow-studio/backends/. "
+        nota = QLabel("Vacío = usar el backend incluido en backends/ de Raphi. "
                       "Los cambios aplican a las próximas tareas.")
         nota.setWordWrap(True)
         form.addRow(nota)

@@ -1,4 +1,4 @@
-# DocFlow Studio — frontend de escritorio (PySide6)
+# Raphi escritorio — frontend PySide6
 PySide6>=6.6
 
 # Backend "Conteo de páginas" (backends/page-counter)

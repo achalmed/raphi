@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# run.sh — Lanzador de DocFlow Studio
+# run.sh — Lanzador de Raphi escritorio
 # Usa el venv local si existe (creado por install.sh); si no, el python3 del sistema.
 set -euo pipefail
 

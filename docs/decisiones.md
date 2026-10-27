@@ -10,7 +10,24 @@ lo revocado se marca «Superada por …» y no se borra. Los pendientes, con fec
 
 ## Producto
 
+### 2026-10-27 · DocFlow Studio se convierte en Raphi, escritorio y web con una sola interfaz
+
+Edison decide que el repo no se separa: la carpeta y el repositorio de GitHub pasan a llamarse `raphi`, la
+aplicación también, y Raphi será a la vez la aplicación de escritorio y un módulo de la plataforma Qillqa
+(contrato Tiqsi) que funciona solo. Escritorio y web son la misma aplicación: hay una sola interfaz, la
+web, y el escritorio la muestra en PySide6 con QtWebEngine más un puente nativo (archivos del disco,
+bandeja del sistema, menús de Dolphin, carpetas vigiladas). `page-counter` no se pierde: pasa al motor como
+«Inventario de páginas» y la lista de los blogs, como una fuente que solo existe en el espacio de trabajo.
+La licencia pasa a AGPL-3.0 (Edison es el único autor; lo publicado antes sigue siendo MIT) y el repo sigue
+público, con la guarda del escáner de Tiqsi en cada envío (`scripts/escanear.py`). Supera a la entrada
+del 2026-07-13 en lo que dice de la plataforma («no una plataforma») y al plan de `gui-suites` de absorber
+el studio. La propuesta completa, con sus fases R0–R8, vive en el repo de Qillqa
+(`docs/plataforma/propuesta-raphi.md`); R0 es este renombre.
+
 ### 2026-07-13 · Una GUI sobre tres backends intactos, no una plataforma
+
+Superada en parte por «2026-10-27 · DocFlow Studio se convierte en Raphi»: Raphi será también un módulo de
+plataforma con su web; lo de no adoptar el núcleo propio de la visión de producto sigue en pie.
 
 DocFlow Studio se construye como una aplicación PySide6 que **orquesta** `docflow`, `pdf-suite` y
 `page-counter` sin reescribirlos: los dos primeros se invocan como procesos y `page-counter` se importa
@@ -80,6 +97,7 @@ conserva el original. Lo que tenía de decisión está en la primera entrada de 
 
 | fecha | pendiente | dueño |
 |---|---|---|
+| 2026-10-27 | Este repo se convierte en **Raphi** (escritorio y web con una sola interfaz; módulo de la plataforma Qillqa): carpeta y GitHub `raphi`, `page-counter` como «Inventario de páginas», `pdf-suite` y `studio/` se retiran al quedar cubiertos; propuesta en `qillqa/docs/plataforma/propuesta-raphi.md`. Supera el plan de `gui-suites` de absorber el studio | Edison |
 | 2026-10-31 | `backends/page-counter/config.py` resuelve `~/Documents` con `Path.home()`: pasar a `core/env.py` | autor |
 | 2026-10-31 | `backends/pdf-suite/install.sh` instala en una ruta fija de otro repo (`scripts-linux/pdf-suite`) y crea con `sudo` un lanzador en `/usr/local/bin` que apunta a esa copia: debe usar la carpeta del propio backend | autor |
 | 2026-10-31 | `backends/pdf-suite/config.sh`: las rutas sugeridas del menú (`PDF_SEARCH_PATHS`) incluyen carpetas que ya no existen en el espacio de trabajo | autor |

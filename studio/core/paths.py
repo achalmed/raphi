@@ -20,7 +20,9 @@ PDFSUITE_MAIN = BACKENDS_DIR / "pdf-suite" / "main.sh"
 PAGECOUNTER_DIR = BACKENDS_DIR / "page-counter"
 
 # Estado de la app (logs, sesiones) según XDG
-STATE_DIR = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state")) / "docflow-studio"
+_STATE_BASE = Path(os.environ.get("XDG_STATE_HOME", Path.home() / ".local" / "state"))
+STATE_DIR = _STATE_BASE / "raphi"
+STATE_DIR_ANTERIOR = _STATE_BASE / "docflow-studio"   # nombre anterior de la app; ensure_state_dir lo mueve
 LOG_FILE = STATE_DIR / "studio.log"
 
 # Config TOML de docflow (la gestiona docflow config init/show)
@@ -28,6 +30,8 @@ DOCFLOW_CONFIG_TOML = Path(os.environ.get("XDG_CONFIG_HOME", Path.home() / ".con
 
 
 def ensure_state_dir() -> None:
+    if STATE_DIR_ANTERIOR.is_dir() and not STATE_DIR.exists():
+        STATE_DIR_ANTERIOR.rename(STATE_DIR)   # el registro del nombre anterior sigue con la app
     STATE_DIR.mkdir(parents=True, exist_ok=True)
 
 
