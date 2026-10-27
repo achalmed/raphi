@@ -168,6 +168,20 @@ cuenta solo ve lo suyo.
 - **Lo que ofrece a los demás** (`raphi/contrato.py`): «pdf.v1» (ejecutar una operación o receta, miniatura, texto,
   info, firmas) y «conversion.v1» (formatos de un archivo, convertir). Los demás la aprovechan, nunca la necesitan.
 
+## La web (`web/`): la única interfaz
+
+`web/` es el módulo web de Tiqsi (`@qillqa/raphi`, `web/src/modulo.ts`): Qillqa lo monta en su menú, `raphi.sola` y
+`raphi.escritorio` lo sirven construido (`web/dist`) con la cáscara mínima de Tiqsi. Sus pantallas: Herramientas
+(cuadrícula con buscador y la zona para soltar un archivo y ver a qué se convierte), cada herramienta
+(`/raphi/h/:id`, también `receta:<id>`), la Mesa de trabajo (miniaturas de varios PDF que se ordenan, giran, duplican
+o quitan, con deshacer; guarda con «componer»), Trabajos, Recetas y Sistema.
+
+- **Ningún formulario escrito a mano**: `web/src/componentes/Formulario.tsx` sale de la ficha de cada operación.
+- **Lógica pura aparte** (`web/src/lib/buscar.ts`, `web/src/lib/mesa.ts`), probada con `npm run web:pruebas`.
+- **Lo del escritorio, solo si está** (`web/src/lib/escritorio.ts`): `hayEscritorio()` ofrece archivos del disco, «Mostrar» en
+  la carpeta, dónde guardar, menús de Dolphin y carpetas vigiladas; en el navegador esas opciones no aparecen.
+- Las miniaturas se piden con la sesión (`descargarBlob`) y el servidor las guarda en WebP junto al archivo.
+
 ## Cómo extender
 
 ### Raphi

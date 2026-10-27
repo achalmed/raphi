@@ -32,6 +32,9 @@ y `APP_VERSION` (`studio/__init__.py`). Sin etiquetas git: por qué se lleva igu
 - La API `/api/raphi` (operaciones, formatos, archivos con miniaturas, trabajos, recetas), la cola de trabajos con
   avance, cancelación, reanudación y purga, la base propia (SQLite o PostgreSQL) y el módulo de Tiqsi (`MANIFIESTO`,
   «pdf.v1», «conversion.v1»); los modos `sola` y `escritorio` (servidor local con ficha de un solo uso).
+- La web (`web/`, `@qillqa/raphi`): Herramientas con buscador y «soltar y convertir», cada herramienta con su formulario
+  generado de la ficha, simular y aplicar, «Seguir con…» para encadenar; la Mesa de trabajo (miniaturas de varios PDF,
+  ordenar, girar, duplicar, página en blanco, deshacer); Trabajos, Recetas (con su editor) y Sistema.
 
 ## Raphi escritorio (GUI; antes DocFlow Studio)
 

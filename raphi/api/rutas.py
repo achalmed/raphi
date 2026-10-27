@@ -40,6 +40,21 @@ async def operaciones(_u: Usuario = Depends(usuario_actual)) -> dict:
             "modo": _cfg().modo, "recetas": [r.a_dict() for r in recetas.todas()]}
 
 
+@router.get("/sistema")
+async def sistema(_u: Usuario = Depends(usuario_actual)) -> dict:
+    """El diagnóstico (lo que la GUI tenía en Sistema → Diagnóstico): qué hay instalado y qué operaciones faltan."""
+    from raphi import VERSION, motor
+    from raphi.motor.base import disponible
+    requeridos = sorted({r for op in motor.REGISTRO.values() for r in op.requiere})
+    cfg = _cfg()
+    return {"version": VERSION, "modo": cfg.modo, "concurrencia": cfg.concurrencia,
+            "retencion_horas": cfg.retencion_horas, "tope_subida_mb": cfg.tope_subida_mb,
+            "requisitos": [{"nombre": r.removeprefix("py:"), "python": r.startswith("py:"), "ok": disponible(r),
+                            "usan": [op.id for op in motor.REGISTRO.values() if r in op.requiere]} for r in requeridos],
+            "no_disponibles": [op.id for op in motor.REGISTRO.values() if op.faltan()],
+            "carpeta": str(cfg.dir) if cfg.escritorio else None}
+
+
 @router.get("/formatos")
 async def formatos(nombre: str = Query(..., description="el nombre del archivo: lo que importa es su extensión"),
                    _u: Usuario = Depends(usuario_actual)) -> list[dict]:

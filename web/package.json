@@ -1,0 +1,20 @@
+{
+  "name": "@qillqa/raphi",
+  "version": "0.1.0",
+  "description": "Raphi web: PDF, ofimática y conversión de archivos, como módulo web de Tiqsi (su manifiesto). Es la única interfaz de Raphi: el escritorio la muestra.",
+  "license": "AGPL-3.0-only",
+  "type": "module",
+  "exports": {
+    "./modulo": "./src/modulo.ts"
+  },
+  "peerDependencies": {
+    "@qillqa/tiqsi": "*",
+    "@emotion/react": "^11",
+    "@emotion/styled": "^11",
+    "@mui/icons-material": "^5",
+    "@mui/material": "^5",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-router": "^7"
+  }
+}

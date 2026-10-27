@@ -12,5 +12,8 @@ backends/page-counter/excel_databases/
 # Paquete, pruebas y web
 *.egg-info/
 .pytest_cache/
-web/node_modules/
+node_modules/
 web/dist/
+
+# Servidores de prueba del asistente (rutas de esta máquina)
+.claude/launch.json
