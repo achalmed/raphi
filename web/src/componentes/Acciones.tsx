@@ -20,6 +20,7 @@ import MenuItem from '@mui/material/MenuItem'
 import Tooltip from '@mui/material/Tooltip'
 import AutoFixHighOutlinedIcon from '@mui/icons-material/AutoFixHighOutlined'
 import SaveAltOutlinedIcon from '@mui/icons-material/SaveAltOutlined'
+import CheckIcon from '@mui/icons-material/Check'
 import { avisar, descargarBlob } from '@qillqa/tiqsi'
 import { BASE, crearTrabajo, formatos, subir, type Archivo, type Formato, type Salida, type Trabajo } from '../lib/api'
 import PanelTrabajo from './PanelTrabajo'
@@ -29,7 +30,8 @@ export interface PropsAcciones {
   nombre: string
   /** Trae el archivo del módulo que pinta la pieza (se llama al abrir el menú, no antes). */
   archivo: () => Promise<Blob>
-  /** Guarda un resultado en ese módulo (adjuntarlo al recibido, al comprobante…); sin ella, solo se descarga. */
+  /** Guarda un resultado en ese módulo (adjuntarlo al recibido, al comprobante…); sin ella, solo se descarga. Si falla,
+   *  lanza un error con el motivo; si sale bien, el botón queda en «Guardado» y el aviso, si quiere darlo, es del módulo. */
   guardar?: (resultado: Blob, nombre: string) => Promise<void>
   /** El texto del botón de guardar («Adjuntar al recibido»). */
   etiquetaGuardar?: string
@@ -47,6 +49,7 @@ export default function Acciones({ nombre, archivo, guardar, etiquetaGuardar = '
   const [error, setError] = useState('')
   const [trabajo, setTrabajo] = useState<Trabajo | null>(null)
   const [guardando, setGuardando] = useState<number | null>(null)
+  const [guardadas, setGuardadas] = useState<Set<string>>(new Set())
 
   // Se sube una sola vez por pieza: abrir el menú de nuevo reusa el mismo archivo de Raphi.
   const abrir = async (e: React.MouseEvent<HTMLElement>) => {
@@ -72,7 +75,7 @@ export default function Acciones({ nombre, archivo, guardar, etiquetaGuardar = '
     setGuardando(s.n)
     try {
       await guardar!(await descargarBlob(`${BASE}/trabajos/${t.id}/salidas/${s.n}`), s.nombre)
-      await avisar(`«${s.nombre}» quedó guardado.`)
+      setGuardadas((g) => new Set(g).add(`${t.id}/${s.n}`))
     } catch (err) {
       await avisar(err instanceof Error ? err.message : 'No se pudo guardar.')
     } finally { setGuardando(null) }
@@ -100,9 +103,10 @@ export default function Acciones({ nombre, archivo, guardar, etiquetaGuardar = '
       <Dialog open={Boolean(trabajo)} onClose={() => setTrabajo(null)} fullWidth maxWidth="sm">
         <DialogContent>
           {trabajo && (
-            <PanelTrabajo trabajo={trabajo} extra={guardar && ((t, s) => !s.carpeta && (
-              <Button size="small" startIcon={guardando === s.n ? <CircularProgress size={14} /> : <SaveAltOutlinedIcon />}
-                disabled={guardando !== null} onClick={() => guardarSalida(t, s)}>{etiquetaGuardar}</Button>
+            <PanelTrabajo trabajo={trabajo} extra={guardar && ((t, s) => !s.carpeta && (guardadas.has(`${t.id}/${s.n}`)
+              ? <Button size="small" startIcon={<CheckIcon />} disabled>Guardado</Button>
+              : <Button size="small" startIcon={guardando === s.n ? <CircularProgress size={14} /> : <SaveAltOutlinedIcon />}
+                  disabled={guardando !== null} onClick={() => guardarSalida(t, s)}>{etiquetaGuardar}</Button>
             ))} />
           )}
         </DialogContent>
