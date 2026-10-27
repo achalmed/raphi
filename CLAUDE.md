@@ -71,11 +71,11 @@ crear un documento.
 ## Cómo se verifica un cambio
 
 ```bash
-python3 core/archivos.py validar scripts_document_studio     # A01–A14 y D01–D12, desde ~/Documents
+python3 core/archivos.py validar raphi                       # A01–A14 y D01–D12, desde ~/Documents
 python3 core/suites.py validar                                # los 4 suite.yml contra el esquema
 python3 core/suites.py generar                                # ¿bloques de README desfasados? (simula)
-python3 core/docs.py verificar scripts_document_studio        # índice de docs/ al día
-cd scripts_document_studio
+python3 core/docs.py verificar raphi                          # índice de docs/ al día
+cd raphi
 bash -n backends/docflow/bin/docflow backends/pdf-suite/main.sh
 python3 scripts/escanear.py --trabajo                         # la guarda del repo público (escáner de Tiqsi)
 shellcheck -x -S warning backends/docflow/bin/docflow backends/docflow/lib/*/*.sh  # lo del CI
