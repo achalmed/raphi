@@ -97,7 +97,7 @@ conserva el original. Lo que tenía de decisión está en la primera entrada de 
 
 | fecha | pendiente | dueño |
 |---|---|---|
-| 2026-10-27 | Este repo se convierte en **Raphi** (escritorio y web con una sola interfaz; módulo de la plataforma Qillqa): carpeta y GitHub `raphi`, `page-counter` como «Inventario de páginas», `pdf-suite` y `studio/` se retiran al quedar cubiertos; propuesta en `qillqa/docs/plataforma/propuesta-raphi.md`. Supera el plan de `gui-suites` de absorber el studio | Edison |
+| 2026-10-27 | Raphi R1–R4 (`qillqa/docs/plataforma/propuesta-raphi.md` §8): el motor Python con su CLI (pdf-suite, PDF/A de docflow, «Inventario de páginas» con la fuente del hub), la API y el modo escritorio, la web con todo lo de `studio/`, y el escritorio que la muestra; entonces se retiran `studio/` y, en R8, `pdf-suite` | asistente |
 | 2026-10-31 | `backends/page-counter/config.py` resuelve `~/Documents` con `Path.home()`: pasar a `core/env.py` | autor |
 | 2026-10-31 | `backends/pdf-suite/install.sh` instala en una ruta fija de otro repo (`scripts-linux/pdf-suite`) y crea con `sudo` un lanzador en `/usr/local/bin` que apunta a esa copia: debe usar la carpeta del propio backend | autor |
 | 2026-10-31 | `backends/pdf-suite/config.sh`: las rutas sugeridas del menú (`PDF_SEARCH_PATHS`) incluyen carpetas que ya no existen en el espacio de trabajo | autor |
