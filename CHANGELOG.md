@@ -40,6 +40,8 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 - La web (`web/`, `@qillqa/raphi`): Herramientas con buscador y «soltar y convertir», cada herramienta con su formulario
   generado de la ficha, simular y aplicar, «Seguir con…» para encadenar; la Mesa de trabajo (miniaturas de varios PDF,
   ordenar, girar, duplicar, página en blanco, deshacer); Trabajos, Recetas (con su editor) y Sistema.
+- La pieza «raphi.Acciones» (`@qillqa/raphi/publico`): «Raphi ▸» junto a un archivo de otro módulo, con sus
+  sugeridas, «Convertir a», las herramientas y «Guardar aquí» de vuelta por la API de ese módulo.
 
 ## Raphi escritorio (GUI; antes DocFlow Studio)
 

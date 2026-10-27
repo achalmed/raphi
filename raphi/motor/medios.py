@@ -432,7 +432,7 @@ def formatos_de(ruta: str | Path) -> list[dict]:
     """A qué se puede convertir este archivo: [{"a": "jpg", "operacion": "convertir_imagen", "params": {...}}, …],
     más las herramientas que le sirven (comprimir, recortar, quitar metadatos…). Es lo que muestra el menú al soltar."""
     from raphi.motor.base import REGISTRO
-    from raphi.motor.documentos import DESTINOS, OFIMATICA
+    from raphi.motor.documentos import OFIMATICA, destinos_de
     p = Path(ruta)
     ext = p.suffix.lower()
     if p.name.lower().endswith((".tar.gz", ".tgz")):
@@ -475,9 +475,8 @@ def formatos_de(ruta: str | Path) -> list[dict]:
     elif ext in OFIMATICA:
         a("pdf", "a_pdf")
         a("md", "a_markdown")
-        for f in DESTINOS:
-            if f != ext.lstrip("."):
-                a(f, "ofimatica", formato=f)
+        for f in destinos_de(ext)[1]:
+            a(f, "ofimatica", formato=f)
     if ext not in ARC:
         a("zip", "comprimir_archivos", formato="zip")
     return salida

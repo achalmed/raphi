@@ -84,6 +84,15 @@ def test_menu_de_tangerine(corpus):
     pdf = {f["operacion"] for f in formatos_de(corpus["texto"])}
     assert {"pdf_a_word", "comprimir", "ocr", "foliar"} <= pdf
     assert {f["a"] for f in formatos_de(corpus["srt"]) if f["a"]} >= {"vtt"}
+    from pathlib import Path
+    texto = {f["a"] for f in formatos_de(Path("carta.docx")) if f["operacion"] == "ofimatica"}
+    assert texto == {"odt", "rtf", "txt", "html"}                    # un texto no se vuelve hoja ni presentación
+    assert {f["a"] for f in formatos_de(Path("cuadro.ods")) if f["operacion"] == "ofimatica"} == {"xlsx", "html"}
+
+
+def test_ofimatica_rechaza_otra_familia(corpus, salida):
+    inf = motor.ejecutar("ofimatica", [corpus["txt"]], {"formato": "xlsx"}, destino=salida)
+    assert not inf.ok and "no a .xlsx" in inf.elementos[0].error
 
 
 # --- recetas -----------------------------------------------------------------------------------------------------

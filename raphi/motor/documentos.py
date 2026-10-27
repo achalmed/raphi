@@ -19,6 +19,21 @@ IMAGENES = (".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".avif", ".tif",
 DESTINOS = {"docx": ("docx", "docx:MS Word 2007 XML"), "odt": ("odt", "odt"), "xlsx": ("xlsx", "xlsx:Calc MS Excel 2007 XML"),
             "ods": ("ods", "ods"), "pptx": ("pptx", "pptx:Impress MS PowerPoint 2007 XML"), "odp": ("odp", "odp"),
             "rtf": ("rtf", "rtf"), "txt": ("txt", "txt:Text"), "html": ("html", "html")}
+# LibreOffice convierte dentro de una familia: un texto no se vuelve hoja de cálculo ni presentación.
+FAMILIAS = {
+    "texto": ((".doc", ".docx", ".dotx", ".odt", ".rtf", ".txt", ".html", ".htm", ".epub"), ("docx", "odt", "rtf", "txt", "html")),
+    "hoja de cálculo": ((".xls", ".xlsx", ".ods", ".csv"), ("xlsx", "ods", "html")),
+    "presentación": ((".ppt", ".pptx", ".odp"), ("pptx", "odp")),
+}
+
+
+def destinos_de(extension: str) -> tuple[str, tuple[str, ...]]:
+    """La familia de una extensión de oficina y los formatos a los que se convierte (sin el suyo)."""
+    extension = extension.lower()
+    for familia, (extensiones, destinos) in FAMILIAS.items():
+        if extension in extensiones:
+            return familia, tuple(d for d in destinos if f".{d}" != extension)
+    return "", ()
 
 
 @operacion("a_pdf", "Convertir", "Documento a PDF", "Word, Excel, PowerPoint, LibreOffice, RTF, texto o HTML a PDF.",
@@ -42,6 +57,9 @@ def ofimatica(ctx):
     ext, filtro = DESTINOS[ctx.p("formato")]
     if ctx.entrada.suffix.lower() == f".{ext}":
         raise ErrorOperacion(f"{ctx.entrada.name} ya es .{ext}.")
+    familia, destinos = destinos_de(ctx.entrada.suffix)
+    if ext not in destinos:
+        raise ErrorOperacion(f"{ctx.entrada.name} es {familia or 'otro formato'}: se convierte a {', '.join(destinos) or 'PDF'}, no a .{ext}.")
     destino = ctx.salida(extension=f".{ext}", nombre=ctx.entrada.stem)
     if ctx.simular:
         return Resultado(plan=[f"{ctx.entrada.name} → {destino.name}"])

@@ -180,6 +180,10 @@ o quitan, con deshacer; guarda con «componer»), Trabajos, Recetas y Sistema.
 - **Lo del escritorio, solo si está** (`web/src/lib/escritorio.ts`): `hayEscritorio()` ofrece archivos del disco, «Mostrar» en
   la carpeta, dónde guardar, menús de Dolphin y carpetas vigiladas; en el navegador esas opciones no aparecen.
 - Las miniaturas se piden con la sesión (`descargarBlob`) y el servidor las guarda en WebP junto al archivo.
+- **La pieza para los demás módulos** (`@qillqa/raphi/publico`, `web/src/componentes/Acciones.tsx`): el anfitrión la
+  registra como «raphi.Acciones» y un módulo la pinta junto a un archivo suyo con `<Pieza pieza="raphi.Acciones" />`.
+  Recibe cómo traer el archivo (`archivo`) y, si el módulo quiere, cómo guardar el resultado (`guardar`, por su
+  API): Raphi nunca escribe en la carpeta ni en la base de otro. Sin Raphi montada, la pieza no existe.
 
 ## Cómo extender
 

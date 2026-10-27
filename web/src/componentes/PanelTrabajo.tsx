@@ -1,9 +1,10 @@
 /**
  * Un trabajo mientras avanza y cuando termina: avance, lo que pasó con cada archivo (o lo que haría, al simular), las
  * salidas para descargar (o abrir, en el escritorio) y «Seguir con…»: una salida pasa a ser la entrada de otra
- * herramienta sin descargarla ni volver a subirla.
+ * herramienta sin descargarla ni volver a subirla. `extra` añade un botón por salida (la pieza «raphi.Acciones» pone
+ * ahí el de guardar en el módulo que la pinta).
  */
-import { useEffect, useState } from 'react'
+import { useEffect, useState, type ReactNode } from 'react'
 import { useNavigate } from 'react-router'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
@@ -69,7 +70,7 @@ function SeguirCon({ trabajo, salida }: { trabajo: Trabajo; salida: Salida }) {
   )
 }
 
-export default function PanelTrabajo({ trabajo: inicial }: { trabajo: Trabajo }) {
+export default function PanelTrabajo({ trabajo: inicial, extra }: { trabajo: Trabajo; extra?: (t: Trabajo, s: Salida) => ReactNode }) {
   const t = useTrabajo(inicial) ?? inicial
   const terminado = TERMINADOS.has(t.estado)
   const estado = ESTADO[t.estado]
@@ -115,6 +116,7 @@ export default function PanelTrabajo({ trabajo: inicial }: { trabajo: Trabajo })
               {hayEscritorio() && s.ruta
                 ? <Button size="small" startIcon={<FolderOpenOutlinedIcon />} onClick={() => puente()?.abrirCarpeta(s.ruta!)}>Mostrar</Button>
                 : <Button size="small" startIcon={<DownloadOutlinedIcon />} onClick={() => descargarSalida(t, s)}>Descargar</Button>}
+              {extra?.(t, s)}
               <SeguirCon trabajo={t} salida={s} />
             </Stack>
           ))}
