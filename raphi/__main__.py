@@ -5,6 +5,7 @@
     python -m raphi comprimir a.pdf b.pdf --hasta 10 -n    # simular (-n) y luego aplicar
     python -m raphi formatos foto.heic                     # a qué se puede convertir (el menú de Tangerine)
     python -m raphi recetas                                # las recetas guardadas
+    python -m raphi referencia [--aplicar]                 # docs/referencia-operaciones.md desde el registro (simula)
     python -m raphi receta escaneo-mesa-de-partes *.pdf -o salida/
     python -m raphi doctor                                 # qué falta en esta máquina
     python -m raphi accion comprimir a.pdf --hasta 10      # lo de los menús de Dolphin: junto al original y aviso al final
@@ -16,6 +17,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+from pathlib import Path
 
 from raphi import VERSION, motor
 from raphi.motor.base import ErrorOperacion, OperacionDesconocida, obtener
@@ -65,6 +67,51 @@ def _lista() -> int:
     return 0
 
 
+REFERENCIA = Path(__file__).resolve().parents[1] / "docs" / "referencia-operaciones.md"
+
+
+def referencia_md() -> str:
+    """La referencia de todas las operaciones, desde sus fichas (una operación nueva aparece sola)."""
+    lineas = ["---", "tipo: doc", "titulo: Referencia de las operaciones de Raphi", "estado: activo", "genero: referencia", "---",
+              "# Referencia de las operaciones de Raphi", "",
+              "GENERADO por `python -m raphi referencia --aplicar` desde el registro del motor (`raphi/motor/`); no editar.",
+              "Cada operación se usa igual desde la CLI (`raphi <id> archivos --opción valor`, `-n` simula), la API",
+              "(`POST /api/raphi/trabajos` con `operacion` y `params`) y la web, que arma su formulario con esta misma ficha.", ""]
+    for categoria in motor.categorias():
+        lineas += [f"## {categoria}", ""]
+        for f in motor.operaciones():
+            if f["categoria"] != categoria:
+                continue
+            requiere = ", ".join(r.removeprefix("py:") for r in f["requiere"]) or "nada aparte"
+            lineas += [f"### `{f['id']}` — {f['titulo']}", "", f["descripcion"], "",
+                       f"Entrada: {f['entrada']}{' (cada archivo por su lado)' if f['lote'] else ' (todas juntas)'}"
+                       f"{' · ' + ' '.join(f['extensiones']) if f['extensiones'] else ''} · necesita: {requiere}.", ""]
+            if f["parametros"]:
+                lineas += ["| opción | qué es | tipo | por omisión |", "|---|---|---|---|"]
+                for p in f["parametros"]:
+                    tipo = p["tipo"] + (": " + " · ".join(v for v, _ in p["opciones"]) if p["opciones"] else "")
+                    defecto = "" if p["defecto"] in (None, "") else f"`{p['defecto']}`"
+                    ayuda = f" ({p['ayuda']})" if p["ayuda"] else ""
+                    lineas.append(f"| `--{p['clave'].replace('_', '-')}` | {p['etiqueta']}{ayuda} | {tipo} | {defecto} |"
+                                  .replace("\n", " "))
+                lineas.append("")
+    return "\n".join(lineas).rstrip() + "\n"
+
+
+def _referencia(aplicar: bool) -> int:
+    nuevo = referencia_md()
+    actual = REFERENCIA.read_text(encoding="utf-8") if REFERENCIA.is_file() else ""
+    if nuevo == actual:
+        print(f"{REFERENCIA.name}: al día")
+        return 0
+    if not aplicar:
+        print(f"{REFERENCIA.name}: desfasado (python -m raphi referencia --aplicar)")
+        return 1
+    REFERENCIA.write_text(nuevo, encoding="utf-8")
+    print(f"escrito {REFERENCIA}")
+    return 0
+
+
 def _doctor() -> int:
     from raphi.motor.base import disponible
     requeridos = sorted({r for op in motor.REGISTRO.values() for r in op.requiere})
@@ -104,6 +151,8 @@ def main(argv: list[str] | None = None) -> int:
             return _lista()
         if orden == "doctor":
             return _doctor()
+        if orden == "referencia":
+            return _referencia("--aplicar" in resto)
         if orden == "ayuda":
             op = obtener(resto[0]) if resto else None
             if not op:

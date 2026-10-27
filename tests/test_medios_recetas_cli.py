@@ -139,3 +139,8 @@ def test_cli(corpus, tmp_path, capsys):
     assert main(["receta", "para-enviar", str(corpus["texto"]), "-o", str(tmp_path / "r"), "-n"]) == 0
     capsys.readouterr()
     assert main(["formatos", str(corpus["jpg"])]) == 0 and "convertir_imagen" in capsys.readouterr().out
+
+
+def test_la_referencia_de_operaciones_esta_al_dia():
+    from raphi.__main__ import REFERENCIA, referencia_md
+    assert REFERENCIA.read_text(encoding="utf-8") == referencia_md(), "python -m raphi referencia --aplicar"
