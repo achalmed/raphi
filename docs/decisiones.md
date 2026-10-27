@@ -1,6 +1,6 @@
 ---
 tipo: decision
-titulo: Decisiones de scripts_document_studio y sus pendientes
+titulo: Decisiones de raphi y sus pendientes
 estado: activo
 ---
 # Decisiones

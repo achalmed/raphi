@@ -5,9 +5,9 @@ estado: activo
 # raphi/ — Raphi: PDF, ofimática y conversión de archivos (antes DocFlow Studio)
 
 <!-- suite:inicio -->
-**Suite `document_studio`** · objetivo *documentos* · estado *activo* · python · interfaz gui
+**Suite `raphi`** · objetivo *documentos* · estado *activo* · python · interfaz gui
 
-Interfaz de escritorio (PySide6) sobre docflow, pdf-suite y page-counter.
+Raphi escritorio (PySide6; antes DocFlow Studio) sobre docflow, pdf-suite y page-counter.
 
 - Escribe en: archivos · simula por defecto: no
 - Depende de: PySide6
@@ -19,9 +19,10 @@ Comandos:
 main.py
 ./run.sh                 # usa el .venv si existe
 python3 -m studio
+raphi
 ```
 
-<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-10-04); no se edita a mano.</sub>
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-10-27); no se edita a mano.</sub>
 <!-- suite:fin -->
 
 <!-- suites:inicio -->
@@ -29,12 +30,12 @@ Suites de esta carpeta (4); índice global en `meta/INDICE_SCRIPTS.md`. Patrón:
 
 | Suite | Carpeta | Objetivo | Escribe en | Simula | Timer | Estado | Patrón |
 |---|---|---|---|---|---|---|---|
-| `docflow` | [scripts_document_studio/backends/docflow](backends/docflow/) | documentos | archivos | no |  | activo | `MCL` |
-| `page_counter` | [scripts_document_studio/backends/page-counter](backends/page-counter/) | documentos | archivos | no |  | activo | `MCL` |
-| `pdf_suite` | [scripts_document_studio/backends/pdf-suite](backends/pdf-suite/) | documentos | archivos | no |  | activo | `MCL` |
-| `document_studio` | [scripts_document_studio](./) | documentos | archivos | no |  | activo | `MCL` |
+| `docflow` | [raphi/backends/docflow](backends/docflow/) | documentos | archivos | no |  | activo | `MCL` |
+| `page_counter` | [raphi/backends/page-counter](backends/page-counter/) | documentos | archivos | no |  | activo | `MCL` |
+| `pdf_suite` | [raphi/backends/pdf-suite](backends/pdf-suite/) | documentos | archivos | no |  | activo | `MCL` |
+| `raphi` | [raphi](./) | documentos | archivos | no |  | activo | `MCL` |
 
-<sub>Bloque generado desde los `suite.yml` por `core/suites.py generar` (2026-10-04); no se edita a mano.</sub>
+<sub>Bloque generado desde los `suite.yml` por `core/suites.py generar` (2026-10-27); no se edita a mano.</sub>
 <!-- suites:fin -->
 
 ## Qué es

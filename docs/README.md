@@ -2,7 +2,7 @@
 tipo: readme
 estado: activo
 ---
-# docs/ — documentación permanente de `scripts_document_studio`
+# docs/ — documentación permanente de `raphi`
 
 Orden de lectura: `arquitectura.md` (principios comunes, diseño de docflow, cómo extender), las dos
 referencias (todas las opciones de cada CLI) y `decisiones.md` (por qué el repo es así, y sus pendientes).
@@ -13,9 +13,9 @@ generado por `core/docs.py indice` desde el frontmatter (NORMATIVA §15.6).
 | documento | tipo | estado | qué es |
 |---|---|---|---|
 | [arquitectura.md](arquitectura.md) | `doc` | `activo` | Arquitectura de docflow y principios comunes a las cuatro suites |
-| [decisiones.md](decisiones.md) | `decision` | `activo` | Decisiones de scripts_document_studio y sus pendientes |
+| [decisiones.md](decisiones.md) | `decision` | `activo` | Decisiones de raphi y sus pendientes |
 | [referencia-docflow.md](referencia-docflow.md) | `doc` | `activo` | Referencia de docflow, la CLI de conversión documental |
 | [referencia-pdf-suite.md](referencia-pdf-suite.md) | `doc` | `activo` | Referencia de pdf-suite, la CLI de manipulación de PDF |
 
-<sub>Bloque generado por `core/docs.py indice` desde el frontmatter de docs/ (2026-10-04); no se edita a mano.</sub>
+<sub>Bloque generado por `core/docs.py indice` desde el frontmatter de docs/ (2026-10-27); no se edita a mano.</sub>
 <!-- docs:fin -->

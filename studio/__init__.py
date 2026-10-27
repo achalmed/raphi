@@ -1,7 +1,7 @@
 """studio — Raphi escritorio (antes DocFlow Studio), aplicación PySide6.
 
 Frontend gráfico sobre los backends existentes del proyecto
-scripts_document_studio (repo scripts_for_libreoffice):
+raphi (repo scripts_for_libreoffice):
 
 - backends/docflow      → conversión documental (CLI Bash, se invoca por QProcess)
 - backends/pdf-suite    → manipulación PDF (CLI Bash, se invoca por QProcess)
