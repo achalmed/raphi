@@ -6,10 +6,9 @@ estado: activo
 # Arquitectura de docflow y principios comunes a las cuatro suites
 
 Este documento explica las decisiones de diseño de docflow v3 y cómo extender el sistema. Léelo antes
-de modificar el núcleo. Sus **Principios** son los de las cuatro suites del repo (`raphi`,
-`docflow`, `page_counter`, `pdf_suite`); el resto describe docflow y sus rutas son relativas a
-`backends/docflow/`, salvo las dos secciones finales de «Cómo extender», que tratan pdf-suite y
-page-counter. El motor, la API, la web y el escritorio de Raphi tienen sus secciones más abajo.
+de modificar el núcleo. Sus **Principios** son los de las dos suites del repo (`raphi` y
+`docflow`; pdf-suite y page-counter se retiraron en R8); lo de docflow tiene sus rutas relativas a
+`backends/docflow/`. El motor, la API, la web y el escritorio de Raphi tienen sus secciones más abajo.
 
 ## Principios
 
@@ -207,32 +206,6 @@ descubre por convención de nombres; no hay lista central que mantener.
 **Opción de configuración nueva (docflow):** valor por defecto en
 `backends/docflow/config/defaults.conf`, mapeo TOML en `KEYMAP` de `backends/docflow/lib/core/config.sh`,
 flag en `backends/docflow/lib/core/cli.sh` y plantilla en `config_write_template`.
-
-### pdf-suite
-
-Una operación nueva (`backends/pdf-suite/`):
-
-1. `lib/<operacion>.sh` con una función `run_<operacion>()` que siga el patrón de los módulos existentes:
-   parsea sus flags, pide por el menú lo que falte y valida con `validate_pdf_file` y
-   `validate_output_path` antes de escribir.
-2. En `main.sh`, cargarlo con `source "${_MAIN_DIR}/lib/<operacion>.sh"` y añadir la rama al
-   `case "$operation"` de `main()`.
-3. En `backends/pdf-suite/lib/cli.sh`, la opción del menú en `show_interactive_menu()` y la línea de `show_help`.
-4. La entrada en `docs/referencia-pdf-suite.md`. En Raphi, una operación nueva se escribe en el motor
-   (§Raphi), no aquí: pdf-suite se retira en R8.
-
-Convenciones del backend: funciones `verbo_sustantivo()` cortas que comentan el porqué; toda salida
-visible pasa por `log_success`, `log_failure` o `log_skip`; se prueban los casos de error (archivo
-inexistente, sin permisos, PDF corrupto).
-
-### page-counter
-
-Un módulo nuevo (`backends/page-counter/`) va a `lib/<modulo>.py` con una sola responsabilidad; sus flags
-en `backends/page-counter/lib/cli.py` y sus constantes en `config.py` (única fuente de rutas y constantes); `main.py` lo importa
-y sigue siendo un orquestador puro (validar → escanear → reportar → resumen). Nada de
-`except Exception: pass`: se capturan tipos concretos o se registra la causa. Un blog nuevo se declara en
-`BLOGS_ESTANDAR` de `config.py`. Se comprueba con
-`python3 -m py_compile backends/page-counter/main.py backends/page-counter/config.py backends/page-counter/lib/*.py`.
 
 ## Convenciones de docflow
 

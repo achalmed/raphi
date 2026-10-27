@@ -7,11 +7,11 @@ estado: activo
 <!-- suite:inicio -->
 **Suite `raphi`** · objetivo *documentos* · estado *activo* · python · interfaz gui
 
-Raphi escritorio (PySide6; antes DocFlow Studio) sobre docflow, pdf-suite y page-counter.
+PDF, ofimática y conversión de archivos (motor, CLI, web y escritorio; antes DocFlow Studio).
 
 - Escribe en: archivos · simula por defecto: no
 - Depende de: PySide6, pikepdf, PyMuPDF
-- Nota: motor y CLI en raphi/ (python -m raphi); la web en web/ y la ventana en escritorio/ (la misma interfaz); backends docflow, pdf-suite y page-counter en backends/
+- Nota: motor y CLI en raphi/ (python -m raphi); la web en web/ y la ventana en escritorio/ (la misma interfaz); docflow, en backends/docflow (pdf-suite y page-counter se retiraron en R8)
 
 Comandos:
 
@@ -28,13 +28,11 @@ python3 -m pytest -q tests
 <!-- suite:fin -->
 
 <!-- suites:inicio -->
-Suites de esta carpeta (4); índice global en `meta/INDICE_SCRIPTS.md`. Patrón: M main · C config · L lib.
+Suites de esta carpeta (2); índice global en `meta/INDICE_SCRIPTS.md`. Patrón: M main · C config · L lib.
 
 | Suite | Carpeta | Objetivo | Escribe en | Simula | Timer | Estado | Patrón |
 |---|---|---|---|---|---|---|---|
 | `docflow` | [raphi/backends/docflow](backends/docflow/) | documentos | archivos | no |  | activo | `MCL` |
-| `page_counter` | [raphi/backends/page-counter](backends/page-counter/) | documentos | archivos | no |  | activo | `MCL` |
-| `pdf_suite` | [raphi/backends/pdf-suite](backends/pdf-suite/) | documentos | archivos | no |  | activo | `MCL` |
 | `raphi` | [raphi](./) | documentos | archivos | no |  | activo | `MCL` |
 
 <sub>Bloque generado desde los `suite.yml` por `core/suites.py generar` (2026-10-27); no se edita a mano.</sub>
@@ -59,8 +57,8 @@ un servicio ajeno.
   soltar). Toda mejora de la web aparece en el escritorio.
 - **Dentro de Qillqa** es un módulo de Tiqsi que ofrece «pdf.v1» y «conversion.v1» a los demás.
 
-Los motores de antes siguen como CLIs completas hasta su retiro (R8): `backends/docflow` (conversión documental
-masiva, con caché, paralelización y tests Bats), `backends/pdf-suite` y `backends/page-counter`. El plan por fases
+docflow sigue como CLI completa (`backends/docflow`: conversión documental masiva, con caché, paralelización y tests
+Bats); pdf-suite y page-counter se retiraron en R8 porque el motor hace todo lo suyo. El plan por fases
 vive en el repo de Qillqa: `qillqa/docs/plataforma/propuesta-raphi.md`.
 
 ## Uso
@@ -88,10 +86,10 @@ carpeta de trabajos de Raphi o a la que se elija.
 | `raphi/` | la CLI (`__main__.py`), las recetas (`recetas.py`, `recetas/`), las fuentes, la API (`api/`), la cola (`trabajos.py`), la base (`db.py`), el módulo de Tiqsi (`manifiesto.py`, `contrato.py`) y sus modos (`sola.py`, `escritorio.py`) |
 | `web/` | la única interfaz: el módulo web de Tiqsi `@qillqa/raphi` (pantallas, componentes, lógica pura con sus pruebas) |
 | `escritorio/` | la ventana PySide6: servidor local, puente QWebChannel, carpetas vigiladas, menús de Dolphin |
-| `backends/` | docflow, pdf-suite y page-counter, CLIs completas con su `suite.yml` y su README |
+| `backends/docflow/` | docflow, la CLI de conversión documental, con su `suite.yml`, su README, sus tests y su CI |
 | `tests/` | pruebas del motor, la CLI, la API y el escritorio, con su corpus generado |
 | `scripts/escanear.py` · `demo/demo.conf` | la guarda del repositorio público (escáner de Tiqsi en cada envío) |
-| `docs/` | arquitectura, referencias de docflow y pdf-suite, decisiones (índice generado por `core/docs.py indice`) |
+| `docs/` | arquitectura, referencia de las operaciones (generada) y de docflow, decisiones (índice por `core/docs.py indice`) |
 | `suite.yml` · `pyproject.toml` · `package.json` · `requirements.txt` | manifiestos y dependencias |
 | `CHANGELOG.md` · `LICENSE` | versiones por herramienta; AGPL-3.0 |
 

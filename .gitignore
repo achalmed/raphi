@@ -6,8 +6,6 @@ __pycache__/
 # Entorno del frontend (lo crea install.sh)
 .venv/
 
-# Reportes Excel generados por page-counter (su único producto)
-backends/page-counter/excel_databases/
 
 # Paquete, pruebas y web
 *.egg-info/

@@ -8,7 +8,6 @@ PySide6>=6.6
 # Motor
 pikepdf==10.17.0
 pymupdf==1.28.2                 # AGPL-3.0, como Raphi: miniaturas, texto, foliar, sellos, marca de agua
-pypdf>=3.0                      # page-counter, hasta que se retire (R8)
 Pillow==12.3.0
 pillow-heif==1.8.1
 openpyxl==3.1.5

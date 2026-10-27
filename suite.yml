@@ -1,8 +1,8 @@
-# suite.yml — suite raphi: Raphi escritorio (PySide6; antes DocFlow Studio) sobre docflow, pdf-suite y page-counter.
+# suite.yml — suite raphi: PDF, ofimática y conversión de archivos (motor, CLI, web y escritorio; antes DocFlow Studio).
 # Contrato: core/suite.schema.yml; core/suites.py validar lo comprueba y generar escribe los índices y README.
 id: raphi
 objetivo: documentos
-resumen: Raphi escritorio (PySide6; antes DocFlow Studio) sobre docflow, pdf-suite y page-counter.
+resumen: PDF, ofimática y conversión de archivos (motor, CLI, web y escritorio; antes DocFlow Studio).
 escribe_en:
 - archivos
 simula_por_defecto: false
@@ -19,4 +19,4 @@ depende_de:
 - PySide6
 - pikepdf
 - PyMuPDF
-nota: motor y CLI en raphi/ (python -m raphi); la web en web/ y la ventana en escritorio/ (la misma interfaz); backends docflow, pdf-suite y page-counter en backends/
+nota: motor y CLI en raphi/ (python -m raphi); la web en web/ y la ventana en escritorio/ (la misma interfaz); docflow, en backends/docflow (pdf-suite y page-counter se retiraron en R8)

@@ -10,6 +10,15 @@ lo revocado se marca «Superada por …» y no se borra. Los pendientes, con fec
 
 ## Producto
 
+### 2026-10-27 · R8: se retiran pdf-suite y page-counter
+
+El motor de Raphi hace todo lo que hacían (las 22 operaciones de pdf-suite, con las mismas opciones de compresión, y
+el Excel de page-counter con su fuente «blogs del hub» y la receta `paginas-de-los-blogs`), con pruebas que ellos no
+tenían. Se retiran con la etiqueta `antes-retirar-backends-2026-10-27`; su referencia pasa a
+`docs/referencia-operaciones.md`, que genera `python -m raphi referencia --aplicar` desde el registro. docflow se
+queda entero: es el motor de «a Markdown» y tiene sus tests y su CI; su `docflow pdf` sigue en su CLI, duplicado
+con el motor, y no se usa desde Raphi. Los pendientes de los dos backends retirados quedan resueltos por el retiro.
+
 ### 2026-10-27 · R4: la ventana nueva y el retiro de la GUI nativa
 
 La GUI PySide6 nativa (`studio/`) se retira: sus seis páginas las cubre la web (Conversión y PDF por las
@@ -83,7 +92,7 @@ y el README de docflow lo enlaza. El CI se dispara solo con cambios en `backends
 Los README de docflow y pdf-suite habían crecido hasta ser manuales de cientos de líneas con instalación,
 referencia, changelog y bitácora de bugs mezclados. Cada backend conserva una puerta corta (qué es, uso,
 estructura, límite honesto); la referencia completa va a `docs/referencia-docflow.md` y
-`docs/referencia-pdf-suite.md`, el «cómo extender» a `docs/arquitectura.md`, y la historia de versiones y
+docs/referencia-pdf-suite.md (retirado el 2026-10-27), el «cómo extender» a `docs/arquitectura.md`, y la historia de versiones y
 correcciones a `CHANGELOG.md`. page-counter cabe en su README y no tiene referencia aparte.
 
 ### 2026-10-04 · CHANGELOG.md se conserva aunque la versión viva en el código
@@ -91,8 +100,8 @@ correcciones a `CHANGELOG.md`. page-counter cabe en su README y no tiene referen
 Desviación del perfil del ecosistema (NORMATIVA §15.11 pide un manifiesto que declare versión y alguien
 que la consuma): aquí ningún `suite.yml` declara versión y no hay etiquetas. Se conserva porque las
 cuatro herramientas muestran su versión al usuario (`--version` y la ventana de la app) y el repo es
-público. La versión se declara en `backends/docflow/lib/core/constants.sh`, `backends/pdf-suite/config.sh`,
-`backends/page-counter/config.py` y studio/__init__.py (hoy `raphi/__init__.py`); `CHANGELOG.md` la sigue por herramienta y no
+público. La versión se declara en `backends/docflow/lib/core/constants.sh`, backends/pdf-suite/config.sh (retirado el 2026-10-27),
+backends/page-counter/config.py (retirado el 2026-10-27) y studio/__init__.py (hoy `raphi/__init__.py`); `CHANGELOG.md` la sigue por herramienta y no
 registra fases internas del ecosistema, que quedan en el `git log`.
 
 ### 2026-10-04 · La visión de producto sale del repo
@@ -106,11 +115,6 @@ conserva el original. Lo que tenía de decisión está en la primera entrada de 
 
 | fecha | pendiente | dueño |
 |---|---|---|
-| 2026-10-27 | Raphi R1–R4 (`qillqa/docs/plataforma/propuesta-raphi.md` §8): el motor Python con su CLI (pdf-suite, PDF/A de docflow, «Inventario de páginas» con la fuente del hub), la API y el modo escritorio, la web con todo lo de `studio/`, y el escritorio que la muestra; entonces se retiran `studio/` y, en R8, `pdf-suite` | asistente |
-| 2026-10-31 | `backends/page-counter/config.py` resuelve `~/Documents` con `Path.home()`: pasar a `core/env.py` | autor |
-| 2026-10-31 | `backends/pdf-suite/install.sh` instala en una ruta fija de otro repo (`scripts-linux/pdf-suite`) y crea con `sudo` un lanzador en `/usr/local/bin` que apunta a esa copia: debe usar la carpeta del propio backend | autor |
-| 2026-10-31 | `backends/pdf-suite/config.sh`: las rutas sugeridas del menú (`PDF_SEARCH_PATHS`) incluyen carpetas que ya no existen en el espacio de trabajo | autor |
-| 2026-10-31 | `backends/page-counter/install.sh` crea un entorno conda propio: tercer camino de instalación frente al `.venv` del repo | autor |
-| 2026-10-31 | `backends/docflow/suite.yml` y `backends/page-counter/suite.yml` citan comandos que no existen (`main.sh convert … --to pdf`, `main.py --hub`); el bloque generado de sus README los repite hasta que se corrija el manifiesto y se regenere | orquestador del ecosistema |
-| 2026-10-31 | `backends/page-counter/suite.yml` declara `escribe_en: ninguno` y `simula_por_defecto: true`, pero la herramienta escribe su Excel en `excel_databases/` sin pedir ningún flag; `backends/pdf-suite/suite.yml` da como dependencias `ocrmypdf` y `exiftool`, que son opcionales (las obligatorias son `gs`, `qpdf` y `pdfinfo`) | orquestador del ecosistema |
+| 2026-10-27 | Raphi R6 (`qillqa/docs/plataforma/propuesta-raphi.md` §8): montar Raphi en Qillqa y poner sus piezas en Punku, Qillqasqa, Yupay, Rimay y Rikchay; toca la carpeta de producción y los módulos instalados en ella, así que espera el visto bueno de Edison y su procedimiento de publicación | Edison |
+| 2026-10-31 | `backends/docflow/suite.yml` cita un comando que no existe (`main.sh convert … --to pdf`); el bloque generado de su README lo repite hasta que se corrija el manifiesto y se regenere | orquestador del ecosistema |
 | 2026-10-31 | docflow convierte Markdown y LaTeX a PDF con XeLaTeX; el ecosistema usa LuaLaTeX en sus frameworks: decidir si docflow lo sigue | autor |

@@ -22,8 +22,8 @@ del backend que se toque. El plan por fases vive en el repo de Qillqa: `qillqa/d
   pida de otro módulo, por una capacidad de Tiqsi que se APROVECHA.
 - **El repo es público**: nada del despacho ni de nadie; `python3 scripts/escanear.py` (y la guarda pre-push que
   instala `--instalar-guarda`) escanea cada envío. Licencia AGPL-3.0.
-- **Los backends siguen siendo CLIs completas** (`backends/docflow` con sus tests Bats y su CI, `backends/pdf-suite`,
-  `backends/page-counter`) hasta que R8 los retire; el motor no los invoca, salvo docflow para «a Markdown».
+- **docflow sigue siendo una CLI completa** (`backends/docflow`, con sus tests Bats y su CI): el motor lo usa solo para
+  «a Markdown» (sus parsers de pptx y xlsx). pdf-suite y page-counter se retiraron en R8: sus operaciones están en el motor.
 - **El entorno es el Python del sistema**, no el de conda: el de Anaconda trae una libbrotli vieja y QtWebEngine no
   abre (`install.sh` lo elige y rehace un `.venv` de conda).
 - **Lo generado no se edita**: los bloques `<!-- suite:inicio -->` y `<!-- suites:inicio -->` salen de los `suite.yml`

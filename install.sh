@@ -6,7 +6,7 @@
 # 3. Instala la entrada de escritorio (menú de aplicaciones).
 # 4. Retira el lanzador y la entrada del nombre anterior (docflow-studio), si existen.
 #
-# Los backends Bash (docflow, pdf-suite) tienen sus propios instaladores en
+# El backend docflow tiene su propio instalador en
 # backends/*/install.sh para dependencias del sistema (pandoc, qpdf, gs…);
 # este script solo prepara el frontend.
 set -euo pipefail
@@ -66,6 +66,5 @@ fi
 
 echo
 echo "Listo. Ejecuta 'raphi' (o búscala en el menú de aplicaciones)."
-echo "Sugerencia: instala también las dependencias de los backends:"
+echo "Sugerencia: las dependencias del sistema (gs, qpdf, ocrmypdf, LibreOffice, pandoc, ffmpeg…) las instala:"
 echo "  ${DIR}/backends/docflow/install.sh"
-echo "  ${DIR}/backends/pdf-suite/install.sh"

@@ -139,6 +139,11 @@ Reescritura completa: de suite de scripts (`script_doc_suite`, v2) a herramienta
 
 ## pdf-suite
 
+### Retirado - 2026-10-27
+
+- La herramienta se retira (R8 de Raphi): todo lo que hacía está en el motor de Raphi (`raphi lista`); etiqueta
+  `antes-retirar-backends-2026-10-27`.
+
 ### [3.0.0] - 2026-06
 
 Une tres scripts previos: `compress_pdf.sh` 2.0 (hoy `lib/compress.sh`),
@@ -170,6 +175,11 @@ Une tres scripts previos: `compress_pdf.sh` 2.0 (hoy `lib/compress.sh`),
 - Primera versión: compresión y metadatos.
 
 ## page-counter
+
+### Retirado - 2026-10-27
+
+- La herramienta se retira (R8 de Raphi): todo lo que hacía está en el motor de Raphi (`raphi lista`); etiqueta
+  `antes-retirar-backends-2026-10-27`.
 
 ### Sin publicar
 
