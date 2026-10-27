@@ -13,6 +13,7 @@ Pillow==12.3.0
 pillow-heif==1.8.1
 openpyxl==3.1.5
 PyYAML==6.0.3
+pyhanko==0.29.0                 # MIT: verificar firmas digitales (PAdES) con su cadena
 
 # API y módulo de Tiqsi
 fastapi==0.136.3

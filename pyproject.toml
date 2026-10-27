@@ -10,7 +10,7 @@ description = "Raphi: PDF, ofimática y conversión de archivos (motor, CLI, API
 readme = "README.md"
 license = "AGPL-3.0-only"
 requires-python = ">=3.11"
-dependencies = ["pikepdf>=9", "pymupdf>=1.24,<2", "Pillow>=10", "pillow-heif>=0.16", "openpyxl>=3.1", "PyYAML>=6"]
+dependencies = ["pikepdf>=9", "pymupdf>=1.24,<2", "Pillow>=10", "pillow-heif>=0.16", "openpyxl>=3.1", "PyYAML>=6", "pyhanko>=0.25"]
 
 [project.optional-dependencies]
 web = ["tiqsi", "fastapi>=0.110", "sqlalchemy[asyncio]>=2", "aiosqlite>=0.20", "python-multipart>=0.0.9", "PyJWT>=2.8",

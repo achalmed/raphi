@@ -1,4 +1,4 @@
-"""Seguridad: cifrar (AES-256), descifrar y ver las firmas digitales de un PDF."""
+"""Seguridad: cifrar (AES-256), descifrar y leer las firmas incrustadas (la verificación, en pdf_avanzado.py)."""
 from __future__ import annotations
 
 import pikepdf
@@ -64,16 +64,3 @@ def firmas(pdf: pikepdf.Pdf) -> list[dict]:
                            "fecha": str(v.get("/M", "")), "motivo": str(v.get("/Reason", "")),
                            "lugar": str(v.get("/Location", "")), "subfiltro": str(v.get("/SubFilter", ""))})
     return salida
-
-
-@operacion("firmas", "Seguridad", "Ver firmas digitales",
-           "Lista las firmas incrustadas (quién, cuándo, motivo). No verifica la cadena del certificado: eso llega en R7.",
-           palabras=("firma digital", "pades", "firma perú", "refirma", "certificado"))
-def ver_firmas(ctx):
-    if ctx.simular:
-        return Resultado(plan=[f"leer las firmas de {ctx.entrada.name}"])
-    from raphi.motor.pdf_organizar import abrir
-    with abrir(ctx.entrada) as pdf:
-        lista = firmas(pdf)
-    return Resultado(datos={"firmas": lista},
-                     mensajes=[f"{f['nombre'] or f['campo']} · {f['fecha']}" for f in lista] or ["Sin firmas digitales."])

@@ -32,6 +32,11 @@ y `APP_VERSION` (`studio/__init__.py`). Sin etiquetas git: por qué se lleva igu
 - La API `/api/raphi` (operaciones, formatos, archivos con miniaturas, trabajos, recetas), la cola de trabajos con
   avance, cancelación, reanudación y purga, la base propia (SQLite o PostgreSQL) y el módulo de Tiqsi (`MANIFIESTO`,
   «pdf.v1», «conversion.v1»); los modos `sola` y `escritorio` (servidor local con ficha de un solo uso).
+- Lo avanzado (R7, `raphi/motor/pdf_avanzado.py`): tachar de verdad (términos, DNI, RUC, correos, celulares; se
+  comprueba que no quede nada legible), resaltar, notas, estampar una firma o un sello en imagen, rellenar y listar
+  formularios, aplanar, comparar dos PDF con un informe HTML, verificar firmas digitales con pyHanko (integridad,
+  firmante, fecha y la cadena si hay raíces en `RAPHI_RAICES`), tablas a Excel y leer comprobantes (RUC, serie,
+  número, fecha, total).
 - La web (`web/`, `@qillqa/raphi`): Herramientas con buscador y «soltar y convertir», cada herramienta con su formulario
   generado de la ficha, simular y aplicar, «Seguir con…» para encadenar; la Mesa de trabajo (miniaturas de varios PDF,
   ordenar, girar, duplicar, página en blanco, deshacer); Trabajos, Recetas (con su editor) y Sistema.

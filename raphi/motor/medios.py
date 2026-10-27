@@ -469,7 +469,8 @@ def formatos_de(ruta: str | Path) -> list[dict]:
                           ("jpg", "pdf_a_imagen", {"formato": "jpg"}), ("html", "pdf_a_html", {}),
                           ("md", "a_markdown", {}), ("pdf/a", "pdfa", {})):
             a(f, op, **kw)
-        for op in ("comprimir", "ocr", "dividir", "rotar", "foliar", "sello", "cifrar", "quitar_metadatos"):
+        for op in ("comprimir", "ocr", "dividir", "rotar", "foliar", "sello", "tachar", "firmas", "tablas_a_excel",
+                   "leer_comprobante", "cifrar", "quitar_metadatos"):
             a(None, op)
     elif ext in OFIMATICA:
         a("pdf", "a_pdf")

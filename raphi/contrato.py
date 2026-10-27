@@ -60,13 +60,9 @@ async def info(ruta: str | Path) -> dict:
 
 
 async def verificar_firmas(ruta: str | Path) -> list[dict]:
-    """Las firmas incrustadas (quién, cuándo, motivo). La verificación de la cadena llega en R7."""
-    def hacer():
-        import pikepdf
-        from raphi.motor.pdf_seguridad import firmas
-        with pikepdf.open(ruta) as pdf:
-            return firmas(pdf)
-    return await asyncio.to_thread(hacer)
+    """Cada firma: firmante, fecha, integridad y, con raíces de confianza (RAPHI_RAICES), su cadena."""
+    from raphi.motor.pdf_avanzado import verificar
+    return await asyncio.to_thread(verificar, Path(ruta))
 
 
 async def formatos_de(nombre: str) -> list[dict]:
