@@ -28,6 +28,10 @@ export interface PropsElegir {
   multiple?: boolean
   ordenable?: boolean
   texto?: string
+  /** Qué se puede soltar, dicho para la persona (sin él, las extensiones admitidas). */
+  ayuda?: string
+  /** En una franja (ícono, texto y botones en fila), para cuando la zona encabeza una página. */
+  franja?: boolean
 }
 
 /** La zona para soltar: también recibe las rutas que el escritorio entrega (soltadas sobre su ventana o su bandeja). */
@@ -57,8 +61,10 @@ export function ZonaSoltar({ alSoltar, alSoltarRutas, children, activa = true }:
         if (f.length) alSoltar(f)
       }}
       sx={{
-        border: '2px dashed', borderColor: encima ? 'primary.main' : 'divider', borderRadius: 3, p: { xs: 2, sm: 3 },
-        bgcolor: encima ? 'action.hover' : 'transparent', transition: 'all .15s', textAlign: 'center',
+        border: '1.5px dashed', borderColor: encima ? (PALETA.acento ?? 'primary.main') : (PALETA.bordeFuerte ?? 'divider'),
+        borderRadius: '18px', p: { xs: 2.5, sm: 4 }, textAlign: 'center',
+        bgcolor: encima ? (PALETA.focoVelo ?? 'action.hover') : (PALETA.superficie ?? 'background.paper'),
+        transition: 'border-color .15s ease, background-color .15s ease',
       }}
     >
       {children}
@@ -66,7 +72,7 @@ export function ZonaSoltar({ alSoltar, alSoltarRutas, children, activa = true }:
   )
 }
 
-export default function ElegirArchivos({ archivos, alCambiar, extensiones = [], multiple = true, ordenable = false, texto }: PropsElegir) {
+export default function ElegirArchivos({ archivos, alCambiar, extensiones = [], multiple = true, ordenable = false, texto, ayuda, franja = false }: PropsElegir) {
   const entrada = useRef<HTMLInputElement>(null)
   const [subiendo, setSubiendo] = useState(false)
   const [error, setError] = useState('')
@@ -106,12 +112,19 @@ export default function ElegirArchivos({ archivos, alCambiar, extensiones = [], 
   return (
     <Stack spacing={1.5}>
       <ZonaSoltar alSoltar={desdeEquipo} alSoltarRutas={hayEscritorio() ? desdeRutas : undefined}>
-        <UploadFileOutlinedIcon sx={{ fontSize: 40, color: 'text.secondary' }} />
-        <Typography sx={{ mt: 1 }}>{texto ?? (multiple ? 'Suelte aquí los archivos' : 'Suelte aquí el archivo')}</Typography>
-        <Typography variant="body2" color="text.secondary" sx={{ mb: 1.5 }}>
-          {extensiones.length ? extensiones.join(' · ') : 'cualquier archivo'}
-        </Typography>
-        <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" useFlexGap>
+        <Stack direction={franja ? { xs: 'column', sm: 'row' } : 'column'} alignItems="center" spacing={franja ? 2 : 0}
+          sx={{ textAlign: franja ? { xs: 'center', sm: 'left' } : 'center' }}>
+        <Box sx={{ width: 56, height: 56, flexShrink: 0, borderRadius: '50%', display: 'grid', placeItems: 'center',
+                   bgcolor: PALETA.velo ?? 'action.hover', color: PALETA.acento ?? 'primary.main' }}>
+          <UploadFileOutlinedIcon sx={{ fontSize: 28 }} />
+        </Box>
+        <Box sx={{ flex: franja ? 1 : undefined, minWidth: 0, mt: franja ? 0 : 1.5 }}>
+          <Typography sx={{ fontWeight: 600, fontSize: 16 }}>{texto ?? (multiple ? 'Suelte aquí los archivos' : 'Suelte aquí el archivo')}</Typography>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: franja ? 0 : 1.5 }}>
+            {ayuda ?? (extensiones.length ? `Acepta ${extensiones.map((e) => e.slice(1).toUpperCase()).join(', ')}` : 'Acepta cualquier archivo')}
+          </Typography>
+        </Box>
+        <Stack direction="row" spacing={1} justifyContent="center" flexWrap="wrap" useFlexGap sx={{ flexShrink: 0 }}>
           <Button variant="contained" startIcon={<UploadFileOutlinedIcon />} onClick={() => entrada.current?.click()} disabled={subiendo}>
             Elegir del equipo
           </Button>
@@ -121,6 +134,7 @@ export default function ElegirArchivos({ archivos, alCambiar, extensiones = [], 
         </Stack>
         <input ref={entrada} type="file" hidden multiple={multiple} accept={extensiones.join(',') || undefined}
           onChange={(e) => { desdeEquipo(Array.from(e.target.files ?? [])); e.target.value = '' }} />
+        </Stack>
       </ZonaSoltar>
       {subiendo && <LinearProgress />}
       {error && <Typography color="error" variant="body2">{error}</Typography>}

@@ -42,6 +42,10 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
   ordenar, girar, duplicar, página en blanco, deshacer); Trabajos, Recetas (con su editor) y Sistema.
 - La pieza «raphi.Acciones» (`@qillqa/raphi/publico`): «Raphi ▸» junto a un archivo de otro módulo, con sus
   sugeridas, «Convertir a», las herramientas y «Guardar aquí» de vuelta por la API de ese módulo.
+- Herramientas con otra cara: cada herramienta con su ícono y el tono de su categoría, qué acepta («PDF», «Dos o
+  más PDF», «JPG, PNG y 5 más») y **soltarle un archivo encima la abre con él**; categorías con su resumen, filtros con
+  su color (en el celular, una fila que se desliza), la zona para soltar en franja y las recetas con su título. El
+  mismo ícono en la cabecera de cada herramienta y en Trabajos (`web/src/lib/identidad.ts`, `componentes/Icono.tsx`).
 - Sistema muestra docflow: su versión, dónde está su configuración y su caché, que un administrador compacta o vacía
   (`POST /api/raphi/sistema/docflow/cache`); antes solo con `docflow cache` en la terminal.
 

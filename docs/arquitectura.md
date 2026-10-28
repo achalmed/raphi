@@ -180,6 +180,9 @@ o quitan, con deshacer; guarda con «componer»), Trabajos, Recetas y Sistema.
 - **Lo del escritorio, solo si está** (`web/src/lib/escritorio.ts`): `hayEscritorio()` ofrece archivos del disco, «Mostrar» en
   la carpeta, dónde guardar, menús de Dolphin y carpetas vigiladas; en el navegador esas opciones no aparecen.
 - Las miniaturas se piden con la sesión (`descargarBlob`) y el servidor las guarda en WebP junto al archivo.
+- **La identidad de las herramientas** (`web/src/lib/identidad.ts`, `web/src/componentes/Icono.tsx`): el marco es del
+  anfitrión y es neutro; el color vive solo en el ícono de cada herramienta (un tono por categoría) y en lo que pasa al
+  tocarla o al soltarle un archivo. Una operación nueva elige su ícono en `ICONOS`; sin él, lleva el genérico.
 - **La pieza para los demás módulos** (`@qillqa/raphi/publico`, `web/src/componentes/Acciones.tsx`): el anfitrión la
   registra como «raphi.Acciones» y un módulo la pinta junto a un archivo suyo con `<Pieza pieza="raphi.Acciones" />`.
   Recibe cómo traer el archivo (`archivo`) y, si el módulo quiere, cómo guardar el resultado (`guardar`, por su

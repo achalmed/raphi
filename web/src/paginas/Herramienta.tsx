@@ -15,6 +15,7 @@ import PlayArrowIcon from '@mui/icons-material/PlayArrow'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import { Marco, api } from '@qillqa/tiqsi'
 import ElegirArchivos from '../componentes/Archivos'
+import IconoOperacion from '../componentes/Icono'
 import Formulario, { cambiados, iniciales, type Valores } from '../componentes/Formulario'
 import PanelTrabajo from '../componentes/PanelTrabajo'
 import { BASE, cargarCatalogo, crearTrabajo, type Archivo, type Catalogo, type Trabajo } from '../lib/api'
@@ -64,7 +65,10 @@ export default function Herramienta() {
   return (
     <Marco modulo="raphi" titulo={titulo} volver="/raphi">
       <Stack spacing={2.5} sx={{ maxWidth: 860, mx: 'auto', p: { xs: 1, sm: 2 } }}>
-        <Typography color="text.secondary">{descripcion}</Typography>
+        <Stack direction="row" spacing={1.75} alignItems="center">
+          {op && <IconoOperacion id={op.id} categoria={op.categoria} tamano={48} />}
+          <Typography color="text.secondary" sx={{ maxWidth: '68ch' }}>{descripcion}</Typography>
+        </Stack>
         {receta && (
           <Typography variant="body2" color="text.secondary">
             Pasos: {receta.pasos.map((p) => cat?.operaciones.find((o) => o.id === p.operacion)?.titulo ?? p.operacion).join(' → ')}
@@ -72,7 +76,7 @@ export default function Herramienta() {
         )}
         {faltan.length > 0 && <Alert severity="warning">Esta máquina no tiene {faltan.map((f) => f.replace('py:', '')).join(', ')}.</Alert>}
         {!sinEntradas && (
-          <ElegirArchivos archivos={archivos} alCambiar={setArchivos} extensiones={op?.extensiones ?? (esReceta ? [] : [])}
+          <ElegirArchivos archivos={archivos} alCambiar={setArchivos} franja={archivos.length > 0} extensiones={op?.extensiones ?? (esReceta ? [] : [])}
             multiple={op ? op.lote || op.minimo_entradas !== 1 || op.entrada !== 'pdf' : true}
             ordenable={Boolean(op && !op.lote)} />
         )}
