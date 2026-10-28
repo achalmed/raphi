@@ -22,7 +22,7 @@ Formatos: $(registry_exts_for pdf | paste -sd' ')
 
 MOTORES (selección automática por tipo de documento):
   LibreOffice headless   Office/ODF: máxima fidelidad de layout
-  pandoc + xelatex       Markdown/LaTeX/HTML: tipografía de alta calidad
+  pandoc + lualatex      Markdown/LaTeX/HTML: tipografía de alta calidad
   wkhtmltopdf/weasyprint alternativas para HTML
 
 OPCIONES ESPECÍFICAS:

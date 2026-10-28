@@ -3,7 +3,7 @@
 # Selecciona automáticamente el mejor motor disponible por tipo de documento:
 #   · Office/ODF → LibreOffice headless (máxima fidelidad de layout)
 #   · Markdown/LaTeX/HTML → pandoc con el mejor --pdf-engine presente
-#     (xelatex → wkhtmltopdf → weasyprint), con fallback a LibreOffice
+#     (lualatex → wkhtmltopdf → weasyprint), con fallback a LibreOffice
 # Post-proceso opcional: PDF/A (ghostscript) y compresión.
 # Las operaciones sobre PDFs existentes viven en pdf_ops.sh.
 
@@ -59,8 +59,8 @@ _pdf_via_pandoc() {
     deps_has pandoc || return 1
     local -a cmd=(pandoc "$input" -o "$output")
     # Mejor motor tipográfico disponible
-    if deps_has xelatex; then
-        cmd+=(--pdf-engine=xelatex -V lang=es -V geometry:margin=2.5cm)
+    if deps_has lualatex; then
+        cmd+=(--pdf-engine=lualatex -V lang=es -V geometry:margin=2.5cm)
     elif deps_has wkhtmltopdf; then
         cmd+=(--pdf-engine=wkhtmltopdf)
     elif deps_has weasyprint; then

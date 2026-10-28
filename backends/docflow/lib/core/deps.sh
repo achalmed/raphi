@@ -18,7 +18,7 @@ declare -gA _DEP_PACKAGES=(
     [wkhtmltopdf]="wkhtmltopdf:wkhtmltopdf:wkhtmltopdf:wkhtmltopdf"
     [weasyprint]="python-weasyprint:weasyprint:weasyprint:python3-weasyprint"
     [exiftool]="perl-image-exiftool:libimage-exiftool-perl:perl-Image-ExifTool:exiftool"
-    [xelatex]="texlive-xetex:texlive-xetex:texlive-xetex:texlive-xetex"
+    [lualatex]="texlive-luatex:texlive-luatex:texlive-luatex:texlive-luatex"
     [cwebp]="libwebp:webp:libwebp-tools:libwebp-tools"
 )
 
@@ -36,7 +36,7 @@ declare -gA _DEP_ROLES=(
     [wkhtmltopdf]="Motor alternativo HTML → PDF"
     [weasyprint]="Motor alternativo HTML/CSS → PDF"
     [exiftool]="Lectura/escritura avanzada de metadatos"
-    [xelatex]="Motor LaTeX para pandoc → PDF de alta calidad"
+    [lualatex]="Motor LaTeX (LuaLaTeX, el del ecosistema) para pandoc → PDF de alta calidad"
     [cwebp]="Conversión de imágenes a WebP sin ImageMagick"
 )
 
@@ -93,7 +93,7 @@ deps_version() {
     local tool="$1" v=""
     case "$tool" in
         soffice)  v="$(soffice --version 2>/dev/null | head -1)" ;;
-        xelatex)  v="$(xelatex --version 2>/dev/null | head -1)" ;;
+        lualatex) v="$(lualatex --version 2>/dev/null | head -1)" ;;
         gs)       v="gs $(gs --version 2>/dev/null)" ;;
         *)        v="$("$tool" --version 2>/dev/null | head -1)" ;;
     esac

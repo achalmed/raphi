@@ -116,5 +116,3 @@ conserva el original. Lo que tenía de decisión está en la primera entrada de 
 | fecha | pendiente | dueño |
 |---|---|---|
 | 2026-10-27 | Raphi R6 (`qillqa/docs/plataforma/propuesta-raphi.md` §8): montar Raphi en Qillqa y poner sus piezas en Punku, Qillqasqa, Yupay, Rimay y Rikchay; toca la carpeta de producción y los módulos instalados en ella, así que espera el visto bueno de Edison y su procedimiento de publicación | Edison |
-| 2026-10-31 | `backends/docflow/suite.yml` cita un comando que no existe (`main.sh convert … --to pdf`); el bloque generado de su README lo repite hasta que se corrija el manifiesto y se regenere | orquestador del ecosistema |
-| 2026-10-31 | docflow convierte Markdown y LaTeX a PDF con XeLaTeX; el ecosistema usa LuaLaTeX en sus frameworks: decidir si docflow lo sigue | autor |

@@ -86,8 +86,8 @@ salida: `docs/referencia-docflow.md`.
 - **Los parsers OOXML** cubren texto, tablas, imágenes y notas del presentador, no animaciones ni macros;
   `soffice` devuelve 0 aunque no convierta (protegidos), por eso se comprueba que la salida exista, con
   300 s de tiempo límite por archivo (`DOCFLOW_SOFFICE_TIMEOUT`).
-- **Markdown y LaTeX → PDF usan XeLaTeX** si está instalado (después wkhtmltopdf, weasyprint o
-  LibreOffice), no el LuaLaTeX de los frameworks del ecosistema.
+- **Markdown y LaTeX → PDF usan LuaLaTeX**, el motor del ecosistema, si está instalado (después wkhtmltopdf,
+  weasyprint o LibreOffice).
 - **Logger propio** con niveles y `--quiet`, excepción declarada al logger de `core/shell-lib` en
   `suite.yml`; la salida al usuario va a stderr y stdout queda para datos (`--json`).
 - **En Raphi escritorio solo se usa su PDF/A**; las demás operaciones de `docflow pdf` existen en la CLI

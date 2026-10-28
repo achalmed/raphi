@@ -5,7 +5,7 @@ cmd_doctor() {
     log_header "docflow doctor — diagnóstico del sistema"
 
     local -a required=(pandoc python3 soffice)
-    local -a optional=(qpdf gs pdftotext xelatex magick cwebp exiftool
+    local -a optional=(qpdf gs pdftotext lualatex magick cwebp exiftool
                        ocrmypdf tesseract inotifywait wkhtmltopdf weasyprint)
     local missing_required=0
 

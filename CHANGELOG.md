@@ -95,6 +95,8 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 - El frontmatter que escribe `to-md` usa las claves en español del ecosistema (`tipo: original`,
   `titulo`, `origen`, `convertidor`, `convertido`…) en lugar de `source`, `converter` y `converted`
   (2026-09-15).
+- Markdown y LaTeX → PDF con **LuaLaTeX**, el motor del ecosistema (antes XeLaTeX); `doctor` y el instalador
+  piden `texlive-luatex` (2026-10-27).
 
 #### Corregido
 

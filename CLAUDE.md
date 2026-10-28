@@ -75,5 +75,7 @@ escritorio, abriendo `raphi` y soltando archivos desde Dolphin.
 - **soffice devuelve 0 aunque no convierta** y corrompe su perfil en paralelo: la función `soffice` de `raphi/motor/utiles.py` usa un
   perfil por llamada, tope de tiempo y comprueba el archivo esperado (lo mismo hace docflow).
 - **El CI se dispara solo con cambios en `backends/docflow/`** (`.github/workflows/ci.yml`).
+- **El `qpdf` de Ubuntu no abre archivos bajo una carpeta oculta del inicio** (su perfil de AppArmor, `/etc/apparmor.d/qpdf`):
+  `docflow` falla su verificación ahí («Permission denied»); en `/tmp` o en `~/Documents` funciona. El motor no lo sufre: usa pikepdf.
 - **Estado fuera del repo**: `RAPHI_DIR` (por omisión ~/.local/share/raphi: subidos, trabajos, base SQLite), las
   recetas propias en ~/.config/raphi/recetas/, los ajustes de la ventana en ~/.config/achalma/raphi.conf.
