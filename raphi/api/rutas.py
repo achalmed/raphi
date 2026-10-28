@@ -20,7 +20,8 @@ from sqlalchemy import select
 from raphi import config as configuracion
 from raphi import db, recetas, trabajos
 from raphi.motor import ErrorOperacion, OperacionDesconocida
-from tiqsi.puertos import Usuario, usuario_actual
+from raphi.motor.documentos import estado_docflow, limpiar_cache_docflow
+from tiqsi.puertos import Usuario, solo_administrador, usuario_actual
 
 router = APIRouter(prefix="/api/raphi", tags=["raphi"])
 
@@ -52,7 +53,23 @@ async def sistema(_u: Usuario = Depends(usuario_actual)) -> dict:
             "requisitos": [{"nombre": r.removeprefix("py:"), "python": r.startswith("py:"), "ok": disponible(r),
                             "usan": [op.id for op in motor.REGISTRO.values() if r in op.requiere]} for r in requeridos],
             "no_disponibles": [op.id for op in motor.REGISTRO.values() if op.faltan()],
-            "carpeta": str(cfg.dir) if cfg.escritorio else None}
+            "carpeta": str(cfg.dir) if cfg.escritorio else None,
+            "docflow": estado_docflow()}
+
+
+class LimpiarCache(BaseModel):
+    vaciar: bool = False
+
+
+@router.post("/sistema/docflow/cache")
+async def cache_docflow(cuerpo: LimpiarCache, _u: Usuario = Depends(solo_administrador)) -> dict:
+    """Compacta la caché de docflow (o la vacía, con `vaciar`): lo que antes se hacía con `docflow cache` en la terminal."""
+    import asyncio
+    try:
+        mensaje = await asyncio.to_thread(limpiar_cache_docflow, cuerpo.vaciar)
+    except ErrorOperacion as e:
+        raise HTTPException(409, str(e)) from e
+    return {"mensaje": mensaje, "docflow": estado_docflow()}
 
 
 @router.get("/formatos")

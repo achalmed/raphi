@@ -112,6 +112,18 @@ export interface Sistema {
   requisitos: { nombre: string; python: boolean; ok: boolean; usan: string[] }[]
   no_disponibles: string[]
   carpeta: string | null
+  /** docflow, si está: su versión, su configuración y su caché. */
+  docflow: EstadoDocflow | null
+}
+
+export interface EstadoDocflow {
+  programa: string
+  version: string
+  config: string
+  config_existe: boolean
+  cache: string
+  entradas: number
+  bytes: number
 }
 
 export const TERMINADOS = new Set(['hecho', 'parcial', 'fallido', 'cancelado'])
@@ -142,6 +154,8 @@ export const cancelar = (id: string) => api<{ cancelado: boolean }>(`${BASE}/tra
 export const salidaComoArchivo = (id: string, n: number) => api<Archivo>(`${BASE}/trabajos/${id}/salidas/${n}/a-archivo`, { method: 'POST' })
 export const formatos = (nombre: string) => api<Formato[]>(`${BASE}/formatos?nombre=${encodeURIComponent(nombre)}`)
 export const sistema = () => api<Sistema>(`${BASE}/sistema`)
+export const limpiarCacheDocflow = (vaciar: boolean) =>
+  api<{ mensaje: string; docflow: EstadoDocflow | null }>(`${BASE}/sistema/docflow/cache`, { method: 'POST', body: JSON.stringify({ vaciar }) })
 export const recetas = () => api<Receta[]>(`${BASE}/recetas`)
 export const guardarReceta = (r: Omit<Receta, 'origen' | 'sin_entradas'>) =>
   api<Receta>(`${BASE}/recetas`, { method: 'POST', body: JSON.stringify(r) })

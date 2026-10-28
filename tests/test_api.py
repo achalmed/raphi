@@ -46,6 +46,16 @@ def test_sin_ficha_no_entra(escritorio):
     assert r.status_code == 401
 
 
+def test_docflow_en_sistema(escritorio, entorno, monkeypatch):
+    monkeypatch.setenv("XDG_CACHE_HOME", str(entorno / "cache"))
+    (entorno / "cache" / "docflow").mkdir(parents=True)
+    (entorno / "cache" / "docflow" / "index.tsv").write_text("a\tb\nc\td\n")
+    d = escritorio.get("/api/raphi/sistema").json()["docflow"]
+    assert d["entradas"] == 2 and d["version"].startswith("docflow") and not d["config_existe"]
+    r = escritorio.post("/api/raphi/sistema/docflow/cache", json={"vaciar": True})
+    assert r.status_code == 200 and r.json()["docflow"]["entradas"] == 0
+
+
 def test_operaciones_y_formatos(escritorio):
     d = escritorio.get("/api/raphi/operaciones").json()
     assert d["modo"] == "escritorio" and len(d["operaciones"]) >= 45 and "Organizar" in d["categorias"]
@@ -182,6 +192,10 @@ def test_fuera_del_escritorio_no_hay_disco(entorno, monkeypatch):
         assert c.get("/api/raphi/operaciones").json()["modo"] == "sola"
         assert c.post("/api/raphi/locales", json={"rutas": ["/etc/hostname"]}).status_code == 403
         assert c.post("/api/raphi/trabajos", json={"operacion": "rotar", "destino": "junto"}).status_code == 403
+        # La caché de docflow solo la limpia un administrador.
+        Cuentas(cuentas).crear("beto", "clave-larga-456", rol="asesor", nombre="Beto")
+        otro = c.post("/api/auth/login", json={"usuario": "beto", "clave": "clave-larga-456"}).json()["token"]
+        assert c.post("/api/raphi/sistema/docflow/cache", json={}, headers={"Authorization": f"Bearer {otro}"}).status_code == 403
     asyncio.run(db.cerrar())
 
 

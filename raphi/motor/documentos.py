@@ -5,6 +5,8 @@ no, el de PATH. Si no hay docflow, la operación no aparece como disponible.
 """
 from __future__ import annotations
 
+import os
+import re
 import shutil
 from pathlib import Path
 
@@ -113,6 +115,35 @@ def imagenes_a_pdf(ctx):
 def _docflow() -> str | None:
     propio = Path(__file__).resolve().parents[2] / "backends" / "docflow" / "bin" / "docflow"
     return str(propio) if propio.is_file() else shutil.which("docflow")
+
+
+def estado_docflow() -> dict | None:
+    """Lo que la página Sistema muestra de docflow: su versión, su configuración y su caché, en las carpetas de XDG que
+    él mismo usa (`backends/docflow/lib/core/constants.sh`). None si no hay docflow."""
+    programa = _docflow()
+    if not programa:
+        return None
+    config = Path(os.environ.get("XDG_CONFIG_HOME") or Path.home() / ".config") / "docflow" / "config.toml"
+    cache = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "docflow"
+    indice = cache / "index.tsv"
+    try:
+        version = correr([programa, "--version"], timeout=20).stdout.strip().splitlines()[0]
+    except (ErrorOperacion, IndexError):
+        version = ""
+    entradas = sum(1 for linea in indice.read_text(encoding="utf-8", errors="replace").splitlines() if linea.strip()) \
+        if indice.is_file() else 0
+    peso = sum(a.stat().st_size for a in cache.rglob("*") if a.is_file()) if cache.is_dir() else 0
+    return {"programa": programa, "version": version, "config": str(config), "config_existe": config.is_file(),
+            "cache": str(cache), "entradas": entradas, "bytes": peso}
+
+
+def limpiar_cache_docflow(vaciar: bool = False) -> str:
+    """`docflow cache prune` (quita lo que ya no existe) o `cache clear` (todo); devuelve lo que dijo docflow."""
+    programa = _docflow()
+    if not programa:
+        raise ErrorOperacion("Falta docflow (backends/docflow o en PATH).")
+    r = correr([programa, "cache", "clear" if vaciar else "prune"], timeout=120)
+    return re.sub(r"\x1b\[[0-9;]*m", "", (r.stderr + r.stdout)).strip()
 
 
 @operacion("a_markdown", "Convertir", "Documento a Markdown",

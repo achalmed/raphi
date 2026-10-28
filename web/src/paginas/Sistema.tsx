@@ -1,6 +1,7 @@
 /**
  * Sistema: lo que esta máquina tiene y lo que le falta (antes «Sistema → Diagnóstico» de la GUI), y, en el escritorio,
- * sus ajustes propios: los menús de Dolphin y las carpetas vigiladas (antes «Vigilancia»).
+ * sus ajustes propios: los menús de Dolphin y las carpetas vigiladas (antes «Vigilancia»). También docflow: su versión,
+ * dónde está su configuración y su caché, que se compacta o se vacía desde aquí (antes, `docflow cache` en la terminal).
  */
 import { useEffect, useState } from 'react'
 import { useNavigate } from 'react-router'
@@ -16,9 +17,9 @@ import Switch from '@mui/material/Switch'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import DeleteOutlineIcon from '@mui/icons-material/DeleteOutline'
-import { Marco } from '@qillqa/tiqsi'
+import { Marco, confirmar, rol } from '@qillqa/tiqsi'
 import { OPCIONES } from '../modulo'
-import { cargarCatalogo, sistema as pedirSistema, type Receta, type Sistema as Datos } from '../lib/api'
+import { cargarCatalogo, limpiarCacheDocflow, sistema as pedirSistema, tamano, type EstadoDocflow, type Receta, type Sistema as Datos } from '../lib/api'
 import { hayEscritorio, puente } from '../lib/escritorio'
 
 function Escritorio() {
@@ -59,6 +60,46 @@ function Escritorio() {
   )
 }
 
+function Docflow({ inicial }: { inicial: EstadoDocflow }) {
+  const [d, setD] = useState(inicial)
+  const [mensaje, setMensaje] = useState('')
+  const [ocupado, setOcupado] = useState(false)
+  const p = puente()
+  const limpiar = async (vaciar: boolean) => {
+    if (vaciar && !(await confirmar('¿Vaciar la caché de docflow? Lo ya convertido se volverá a convertir la próxima vez.', { aceptar: 'Vaciar' }))) return
+    setOcupado(true)
+    try { const r = await limpiarCacheDocflow(vaciar); setD(r.docflow ?? d); setMensaje(r.mensaje || 'Listo.') }
+    catch (e) { setMensaje((e as Error).message) }
+    finally { setOcupado(false) }
+  }
+  return (
+    <Stack spacing={1}>
+      <Typography variant="h6">docflow</Typography>
+      <Typography variant="body2" color="text.secondary">
+        {d.version || 'docflow'} · lo usa «Documento a Markdown» (sus lectores propios de PowerPoint y Excel).
+      </Typography>
+      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Typography variant="body2" sx={{ flex: 1, minWidth: 220 }} noWrap title={d.config}>
+          Configuración: {d.config}{d.config_existe ? '' : ' (sin crear: usa los valores de fábrica)'}
+        </Typography>
+        {p && d.config_existe && <Button size="small" onClick={() => p.abrirCarpeta(d.config)}>Mostrar</Button>}
+      </Stack>
+      <Stack direction="row" spacing={1} alignItems="center" flexWrap="wrap" useFlexGap>
+        <Typography variant="body2" sx={{ flex: 1, minWidth: 220 }} noWrap title={d.cache}>
+          Caché: {d.entradas} conversión(es) recordada(s) · {tamano(d.bytes)}
+        </Typography>
+        {rol() === 'administrador' && (
+          <>
+            <Button size="small" disabled={ocupado} onClick={() => void limpiar(false)}>Compactar</Button>
+            <Button size="small" color="error" disabled={ocupado || !d.entradas} onClick={() => void limpiar(true)}>Vaciar</Button>
+          </>
+        )}
+      </Stack>
+      {mensaje && <Alert severity="info" onClose={() => setMensaje('')}>{mensaje}</Alert>}
+    </Stack>
+  )
+}
+
 export default function Sistema() {
   const navegar = useNavigate()
   const [d, setD] = useState<Datos | null>(null)
@@ -90,6 +131,7 @@ export default function Sistema() {
             </Box>
           </>
         )}
+        {d?.docflow && <Docflow inicial={d.docflow} />}
         {hayEscritorio() && <Escritorio />}
       </Stack>
     </Marco>
