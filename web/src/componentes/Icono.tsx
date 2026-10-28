@@ -58,7 +58,8 @@ import TuneOutlined from '@mui/icons-material/TuneOutlined'
 import UnarchiveOutlined from '@mui/icons-material/UnarchiveOutlined'
 import VerifiedOutlined from '@mui/icons-material/VerifiedOutlined'
 import VideoSettingsOutlined from '@mui/icons-material/VideoSettingsOutlined'
-import { colorDe, tinte } from '../lib/identidad'
+import { modo } from '@qillqa/tiqsi'
+import { tinte, tonoDe } from '../lib/identidad'
 
 const ICONOS: Record<string, SvgIconComponent> = {
   unir: MergeTypeOutlined, dividir: CallSplitOutlined, extraer: OutputOutlined, rotar: RotateRightOutlined,
@@ -85,11 +86,12 @@ export const iconoDe = (id: string): SvgIconComponent => ICONOS[id] ?? BuildOutl
 /** El cuadro con el ícono. `tamano` es el lado en px (el ícono ocupa algo más de la mitad). */
 export default function IconoOperacion({ id, categoria, tamano = 40 }: { id: string; categoria: string; tamano?: number }) {
   const Icono = iconoDe(id)
-  const color = colorDe(categoria)
+  const oscuro = modo() === 'oscuro'
+  const color = tonoDe(categoria, oscuro)
   return (
     <Box className="raphi-icono" aria-hidden
       sx={{ width: tamano, height: tamano, flexShrink: 0, borderRadius: `${Math.round(tamano * 0.3)}px`, display: 'grid',
-            placeItems: 'center', color, bgcolor: tinte(color, 0.12), transition: 'transform .18s ease' }}>
+            placeItems: 'center', color, bgcolor: tinte(color, oscuro ? 0.16 : 0.12), transition: 'transform .18s ease' }}>
       <Icono sx={{ fontSize: Math.round(tamano * 0.56) }} />
     </Box>
   )

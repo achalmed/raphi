@@ -46,6 +46,7 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
   más PDF», «JPG, PNG y 5 más») y **soltarle un archivo encima la abre con él**; categorías con su resumen, filtros con
   su color (en el celular, una fila que se desliza), la zona para soltar en franja y las recetas con su título. El
   mismo ícono en la cabecera de cada herramienta y en Trabajos (`web/src/lib/identidad.ts`, `componentes/Icono.tsx`).
+  En el tema oscuro, cada tono sube de luz para que su ícono se lea (`tonoDe`).
 - Sistema muestra docflow: su versión, dónde está su configuración y su caché, que un administrador compacta o vacía
   (`POST /api/raphi/sistema/docflow/cache`); antes solo con `docflow cache` en la terminal.
 
@@ -72,6 +73,8 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 - Soltar con teclas: **Shift** abre la Mesa de trabajo con los archivos y **Alt**, Herramientas con su menú «a qué se
   puede convertir»; sin tecla los toma la pantalla abierta y, si no tiene zona para soltar (Trabajos, Recetas,
   Sistema), se abren Herramientas en vez de perderlos. Herramientas acepta `?archivos=`.
+- Soltar sobre una herramienta también en la ventana: la tarjeta bajo el puntero se resalta mientras se arrastra y, al
+  soltar, abre esa herramienta con los archivos que acepta (o avisa que no los acepta).
 
 
 - La aplicación se llama **Raphi** (ventana, lanzador `raphi`, entrada de escritorio `raphi.desktop`); el

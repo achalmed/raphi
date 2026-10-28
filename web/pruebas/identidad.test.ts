@@ -1,7 +1,7 @@
 // La identidad de las herramientas: colores, tintes y qué acepta cada una (node --test --experimental-strip-types).
 import { test } from 'node:test'
 import assert from 'node:assert/strict'
-import { COLOR_CATEGORIA, RESUMEN_CATEGORIA, acepta, colorDe, tinte } from '../src/lib/identidad.ts'
+import { COLOR_CATEGORIA, RESUMEN_CATEGORIA, aclarar, acepta, colorDe, tinte, tonoDe } from '../src/lib/identidad.ts'
 
 test('cada categoría tiene su color y su resumen; una desconocida, el neutro', () => {
   assert.deepEqual(Object.keys(COLOR_CATEGORIA).sort(), Object.keys(RESUMEN_CATEGORIA).sort())
@@ -23,4 +23,11 @@ test('qué acepta, dicho para quien la usa', () => {
     'DOC, DOCX, ODT y 3 más')
   assert.equal(acepta({ entrada: 'archivos', extensiones: [], minimo_entradas: 1 }), 'Cualquier archivo')
   assert.equal(acepta({ entrada: 'ninguna', extensiones: [], minimo_entradas: 0 }), 'Sin archivo: trabaja con una fuente')
+})
+
+test('en oscuro, el mismo tono subido de luz', () => {
+  assert.equal(aclarar('#000000', 0.5), '#808080')
+  assert.equal(aclarar('#2F6FDB', 0), '#2F6FDB')
+  assert.equal(tonoDe('Organizar', false), '#2F6FDB')
+  assert.notEqual(tonoDe('Organizar', true), '#2F6FDB')
 })

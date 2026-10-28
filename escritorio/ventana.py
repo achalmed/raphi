@@ -48,8 +48,19 @@ def destino_de(teclas) -> str | None:
     return None
 
 
+# Lo que la web declara de cada tarjeta de herramienta (Herramientas.tsx): qué pantalla abre y qué extensiones acepta.
+# MARCAR resalta la que queda bajo el puntero mientras se arrastra; TARJETA dice cuál quedó bajo el punto al soltar.
+MARCAR = ("(() => { const p = %s; document.querySelectorAll('[data-raphi-encima]').forEach((e) => e.removeAttribute('data-raphi-encima'));"
+          " if (!p) return; const t = document.elementFromPoint(p[0], p[1])?.closest('[data-raphi-ruta]');"
+          " if (t && !t.disabled) t.setAttribute('data-raphi-encima', '') })()")
+TARJETA = ("(() => { const p = %s; const t = document.elementFromPoint(p[0], p[1])?.closest('[data-raphi-ruta]');"
+           " return JSON.stringify(t && !t.disabled ? {ruta: t.dataset.raphiRuta, ext: t.dataset.raphiExt || '',"
+           " titulo: t.dataset.raphiTitulo || ''} : null) })()")
+
+
 class FiltroSoltar(QObject):
-    """Recibe lo soltado sobre la vista web: si son archivos del disco, entrega sus rutas a la web."""
+    """Recibe lo soltado sobre la vista web: si son archivos del disco, entrega sus rutas a la web (y el punto donde cayeron,
+    para la tarjeta de herramienta que haya debajo)."""
 
     def __init__(self, ventana: "Ventana") -> None:
         super().__init__(ventana)
@@ -58,10 +69,15 @@ class FiltroSoltar(QObject):
     def eventFilter(self, _objeto, evento) -> bool:
         if evento.type() in (QEvent.Type.DragEnter, QEvent.Type.DragMove) and _rutas(evento):
             evento.acceptProposedAction()
+            self.ventana.marcar(self.ventana.punto(evento.position()))
             return True
+        if evento.type() == QEvent.Type.DragLeave:
+            self.ventana.marcar(None)
+            return False
         if evento.type() == QEvent.Type.Drop and (rutas := _rutas(evento)):
             evento.acceptProposedAction()
-            self.ventana.entregar(rutas, destino_de(evento.modifiers()))
+            self.ventana.marcar(None)
+            self.ventana.entregar(rutas, destino_de(evento.modifiers()), self.ventana.punto(evento.position()))
             return True
         return False
 
@@ -168,10 +184,19 @@ class Ventana(QMainWindow):
             for rutas, destino in pendientes:
                 self.entregar(rutas, destino)
 
-    def entregar(self, rutas: list[str], destino: str | None = None) -> None:
-        """Las rutas van a la web: a `destino` (una pantalla de Raphi) o a la pantalla abierta, cuya zona para soltar
-        marca el evento como atendido; si nadie lo atiende (Trabajos, Recetas, Sistema), se abren Herramientas. Sin la
-        página cargada, esperan a que cargue."""
+    def punto(self, posicion) -> list[float]:
+        """Un punto de la vista en píxeles de la página (la vista los da con su zoom)."""
+        z = self.vista.zoomFactor() or 1
+        return [posicion.x() / z, posicion.y() / z]
+
+    def marcar(self, punto: list[float] | None) -> None:
+        if self.cargada:
+            self.vista.page().runJavaScript(MARCAR % json.dumps(punto))
+
+    def entregar(self, rutas: list[str], destino: str | None = None, punto: list[float] | None = None) -> None:
+        """Las rutas van a la web: a `destino` (una pantalla de Raphi, por la tecla); si no, a la tarjeta de herramienta
+        que quedó bajo `punto`; si no, a la pantalla abierta, cuya zona para soltar marca el evento como atendido; y si
+        nadie lo atiende (Trabajos, Recetas, Sistema), se abren Herramientas. Sin la página cargada, esperan a que cargue."""
         self.mostrar()
         if not self.cargada:
             self.pendientes.append((rutas, destino))
@@ -179,6 +204,23 @@ class Ventana(QMainWindow):
         if destino:
             self._abrir(destino, rutas)
             return
+        if punto is not None:
+            self.vista.page().runJavaScript(TARJETA % json.dumps(punto), 0,
+                                            lambda t: self._a_tarjeta(json.loads(t), rutas) if t and t != "null" else self._a_pantalla(rutas))
+            return
+        self._a_pantalla(rutas)
+
+    def _a_tarjeta(self, tarjeta: dict, rutas: list[str]) -> None:
+        """Lo soltado sobre una herramienta la abre con los archivos que acepta. (La página la devuelve como texto JSON:
+        un objeto de JavaScript no siempre llega entero a Python.)"""
+        extensiones = [e for e in tarjeta.get("ext", "").split(",") if e]
+        sirven = [r for r in rutas if not extensiones or Path(r).suffix.lower() in extensiones]
+        if not sirven:
+            self.avisar("Raphi", f"«{tarjeta.get('titulo') or 'Esa herramienta'}» no acepta esos archivos.")
+            return
+        self._abrir(tarjeta["ruta"], sirven)
+
+    def _a_pantalla(self, rutas: list[str]) -> None:
         self.vista.page().runJavaScript(
             "window.dispatchEvent(new CustomEvent('raphi:rutas', {detail: %s, cancelable: true}))" % json.dumps(rutas),
             0, lambda libre: self._abrir("/raphi", rutas) if libre else None)

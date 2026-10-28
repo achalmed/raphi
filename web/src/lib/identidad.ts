@@ -35,6 +35,15 @@ export function tinte(hex: string, alfa: number): string {
   return `${hex}${a}`
 }
 
+/** Un tono mezclado con blanco (`cuanto` de 0 a 1): sobre el fondo oscuro, el mismo tono subido de luz para que se lea. */
+export function aclarar(hex: string, cuanto: number): string {
+  const c = [1, 3, 5].map((i) => parseInt(hex.slice(i, i + 2), 16))
+  return `#${c.map((v) => Math.round(v + (255 - v) * cuanto).toString(16).padStart(2, '0')).join('')}`.toUpperCase()
+}
+
+/** El tono de una categoría según el modo del anfitrión: en oscuro, más claro. */
+export const tonoDe = (categoria: string, oscuro: boolean): string => (oscuro ? aclarar(colorDe(categoria), 0.38) : colorDe(categoria))
+
 /** Dos extensiones del mismo formato se dicen con un solo nombre. */
 const MISMO: Record<string, string> = { JPEG: 'JPG', HTM: 'HTML', TIF: 'TIFF', HEIF: 'HEIC' }
 

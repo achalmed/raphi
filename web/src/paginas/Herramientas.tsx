@@ -15,12 +15,12 @@ import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import SearchIcon from '@mui/icons-material/Search'
 import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
-import { Marco, PALETA, api } from '@qillqa/tiqsi'
+import { Marco, PALETA, api, modo } from '@qillqa/tiqsi'
 import ElegirArchivos from '../componentes/Archivos'
 import MenuFormatos from '../componentes/MenuFormatos'
 import PanelTrabajo from '../componentes/PanelTrabajo'
 import IconoOperacion from '../componentes/Icono'
-import { RESUMEN_CATEGORIA, acepta, colorDe, tinte } from '../lib/identidad'
+import { RESUMEN_CATEGORIA, acepta, colorDe, tinte, tonoDe } from '../lib/identidad'
 import { OPCIONES } from '../modulo'
 import { BASE, cargarCatalogo, subir, type Archivo, type Catalogo, type Operacion, type Trabajo } from '../lib/api'
 import { buscar } from '../lib/buscar'
@@ -30,12 +30,16 @@ import { buscar } from '../lib/buscar'
  * archivo encima lo sube y la abre con él ya puesto (en el escritorio, lo soltado sobre la ventana lo atiende el puente).
  */
 export function Tarjeta({ op, alPulsar, alSoltar }: { op: Operacion; alPulsar: () => void; alSoltar?: (f: File[]) => void }) {
+  const ruta = op.id === 'componer' ? '/raphi/mesa' : `/raphi/h/${op.id}`
   const falta = op.faltan.length > 0
-  const color = colorDe(op.categoria)
+  const color = tonoDe(op.categoria, modo() === 'oscuro')
   const [encima, setEncima] = useState(false)
   const recibe = !falta && Boolean(alSoltar)
   return (
+    // data-raphi-*: lo que la ventana del escritorio lee para saber qué herramienta quedó bajo lo soltado (y para resaltarla
+    // mientras se arrastra: data-raphi-encima, que la ventana pone y quita).
     <ButtonBase onClick={alPulsar} disabled={falta} focusRipple
+      {...(recibe ? { 'data-raphi-ruta': ruta, 'data-raphi-ext': op.extensiones.join(','), 'data-raphi-titulo': op.titulo } : {})}
       onDragOver={(e) => { if (recibe && e.dataTransfer.types.includes('Files')) { e.preventDefault(); setEncima(true) } }}
       onDragLeave={() => setEncima(false)}
       onDrop={(e) => { if (!recibe) return; e.preventDefault(); setEncima(false); const f = Array.from(e.dataTransfer.files); if (f.length) alSoltar!(f) }}
@@ -45,6 +49,7 @@ export function Tarjeta({ op, alPulsar, alSoltar }: { op: Operacion; alPulsar: (
         bgcolor: encima ? tinte(color, 0.08) : (PALETA.superficie ?? 'background.paper'), opacity: falta ? 0.5 : 1,
         transition: 'border-color .15s ease, background-color .15s ease',
         '&:hover': { borderColor: tinte(color, 0.5) }, '&:hover .raphi-icono': { transform: 'scale(1.07)' },
+        '&[data-raphi-encima]': { borderColor: color, bgcolor: tinte(color, 0.08) },
         '&.Mui-focusVisible': { outline: `2px solid ${color}`, outlineOffset: 2 },
         '@media (prefers-reduced-motion: reduce)': { '&:hover .raphi-icono': { transform: 'none' } },
       }}>
@@ -90,7 +95,7 @@ export default function Herramientas() {
   const [rapidos, setRapidos] = useState<Trabajo[]>([])
   useEffect(() => { cargarCatalogo().then(setCat).catch((e) => setError(e.message)) }, [])
   const abrir = (o: Operacion, ids: string[] = []) => {
-    const ruta = o.id === 'componer' ? '/raphi/mesa' : `/raphi/h/${o.id}`
+    const ruta = o.id === 'componer' ? '/raphi/mesa' : `/raphi/h/${o.id}`  // la misma que declara la tarjeta
     navegar(ids.length ? `${ruta}?archivos=${ids.join(',')}` : ruta)
   }
   const soltarEn = (o: Operacion) => async (f: File[]) => {
@@ -142,7 +147,7 @@ export default function Herramientas() {
             {cat?.categorias.map((c) => (
               <Chip key={c} label={c} onClick={() => setCategoria(categoria === c ? '' : c)} variant={categoria === c ? 'filled' : 'outlined'}
                 icon={<Box component="span" sx={{ width: 8, height: 8, borderRadius: '2px', bgcolor: colorDe(c), ml: '10px !important' }} />}
-                sx={categoria === c ? { bgcolor: tinte(colorDe(c), 0.14), color: colorDe(c), fontWeight: 600, borderColor: 'transparent' } : undefined} />
+                sx={categoria === c ? { bgcolor: tinte(tonoDe(c, modo() === 'oscuro'), 0.16), color: tonoDe(c, modo() === 'oscuro'), fontWeight: 600, borderColor: 'transparent' } : undefined} />
             ))}
           </Stack>
         </Stack>
