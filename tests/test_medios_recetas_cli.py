@@ -36,6 +36,11 @@ def test_imagenes(corpus, salida):
     inf = motor.ejecutar("recortar_imagen", [corpus["jpg"]], {"proporcion": "libre", "caja": "0,0,900,10"}, destino=salida)
     assert not inf.ok and "se sale" in inf.elementos[0].error
     correr("comprimir_imagen", [corpus["jpg"]], salida, calidad=40)
+    # Un PNG de colores planos pesa más como JPG: no se da por comprimido.
+    plano = salida / "plano.png"
+    Image.new("RGB", (800, 600), (30, 120, 200)).save(plano, optimize=True)
+    inf = correr("comprimir_imagen", [plano], salida / "sin")
+    assert inf.elementos[0].resultado.sin_cambio and not list((salida / "sin").glob("*"))
 
 
 @pytest.mark.skipif(not shutil.which("ffmpeg"), reason="sin ffmpeg")

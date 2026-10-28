@@ -181,7 +181,8 @@ def comprimir_imagen(ctx):
     else:
         _guardar_imagen(img, destino, formato, ctx.p("calidad"))
     final = destino.stat().st_size
-    if final >= original and formato == ext:
+    # Comprimir es bajar el peso: si no baja (un PNG de colores planos pesa más como JPG), se conserva el original.
+    if final >= original:
         destino.unlink()
         return Resultado(sin_cambio=True, mensajes=["No se ganó peso: se conserva el original."])
     return Resultado([destino], {"original": original, "final": final,
