@@ -10,6 +10,18 @@ lo revocado se marca «Superada por …» y no se borra. Los pendientes, con fec
 
 ## Producto
 
+### 2026-10-27 · R6: Raphi en Qillqa; Raphi no firma
+
+Publicada el 2026-10-27 (propuesta §8 y §8.1 en el repo de Qillqa). Dos decisiones de Edison:
+
+- **Raphi no firma** (§9.4): la firma digital oficial la hace el sistema del Estado (Firma Perú, ReFirma). Raphi
+  verifica firmas (pyHanko) y estampa la firma visible como imagen; no guarda ni usa certificados.
+- **Lo que vuelve a la Mesa de Partes es una versión** (§9.6): el PDF recibido es la constancia de lo que llegó y no se
+  toca; lo que Raphi le hace (OCR, sello, foliado) queda junto a él como versión.
+
+Dentro de Qillqa, su base y su carpeta las da el anfitrión (`qillqa_raphi`, `~/.cache/qillqa/raphi`): Raphi no sabe de
+Qillqa y sus valores por omisión siguen siendo los del escritorio.
+
 ### 2026-10-27 · R8: se retiran pdf-suite y page-counter
 
 El motor de Raphi hace todo lo que hacían (las 22 operaciones de pdf-suite, con las mismas opciones de compresión, y
@@ -115,4 +127,4 @@ conserva el original. Lo que tenía de decisión está en la primera entrada de 
 
 | fecha | pendiente | dueño |
 |---|---|---|
-| 2026-10-27 | Raphi R6 (`qillqa/docs/plataforma/propuesta-raphi.md` §8): montar Raphi en Qillqa y poner sus piezas en Punku, Qillqasqa, Yupay, Rimay y Rikchay; toca la carpeta de producción y los módulos instalados en ella, así que espera el visto bueno de Edison y su procedimiento de publicación | Edison |
+| — | Ninguno: R6 se publicó el 2026-10-27 | — |
