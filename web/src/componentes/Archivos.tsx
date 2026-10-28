@@ -40,7 +40,8 @@ export function ZonaSoltar({ alSoltar, alSoltarRutas, children, activa = true }:
   const [encima, setEncima] = useState(false)
   useEffect(() => {
     if (!alSoltarRutas || !activa) return
-    const oir = (e: Event) => alSoltarRutas((e as CustomEvent<string[]>).detail)
+    // preventDefault: le dice al escritorio que esta pantalla los tomó (si nadie lo hace, abre Herramientas).
+    const oir = (e: Event) => { e.preventDefault(); alSoltarRutas((e as CustomEvent<string[]>).detail) }
     window.addEventListener(EVENTO_RUTAS, oir)
     return () => window.removeEventListener(EVENTO_RUTAS, oir)
   }, [alSoltarRutas, activa])

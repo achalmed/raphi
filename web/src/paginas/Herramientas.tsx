@@ -4,7 +4,7 @@
  * lo que le falta, en vez de esconderse.
  */
 import { useEffect, useMemo, useState } from 'react'
-import { useNavigate } from 'react-router'
+import { useNavigate, useSearchParams } from 'react-router'
 import Alert from '@mui/material/Alert'
 import Box from '@mui/material/Box'
 import ButtonBase from '@mui/material/ButtonBase'
@@ -14,12 +14,12 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import SearchIcon from '@mui/icons-material/Search'
-import { Marco, PALETA } from '@qillqa/tiqsi'
+import { Marco, PALETA, api } from '@qillqa/tiqsi'
 import ElegirArchivos from '../componentes/Archivos'
 import MenuFormatos from '../componentes/MenuFormatos'
 import PanelTrabajo from '../componentes/PanelTrabajo'
 import { OPCIONES } from '../modulo'
-import { cargarCatalogo, type Archivo, type Catalogo, type Operacion, type Trabajo } from '../lib/api'
+import { BASE, cargarCatalogo, type Archivo, type Catalogo, type Operacion, type Trabajo } from '../lib/api'
 import { buscar } from '../lib/buscar'
 
 export function Tarjeta({ op, alPulsar }: { op: Operacion; alPulsar: () => void }) {
@@ -43,6 +43,11 @@ export default function Herramientas() {
   const [consulta, setConsulta] = useState('')
   const [categoria, setCategoria] = useState('')
   const [soltados, setSoltados] = useState<Archivo[]>([])
+  const [parametros] = useSearchParams()
+  useEffect(() => {        // lo soltado en el escritorio con Alt (o donde no había zona) y los enlaces llegan con ?archivos=
+    const ids = (parametros.get('archivos') ?? '').split(',').filter(Boolean)
+    if (ids.length) Promise.all(ids.map((a) => api<Archivo>(`${BASE}/archivos/${a}`))).then(setSoltados).catch(() => undefined)
+  }, [parametros])
   const [rapidos, setRapidos] = useState<Trabajo[]>([])
   useEffect(() => { cargarCatalogo().then(setCat).catch((e) => setError(e.message)) }, [])
   const lista = useMemo(() => {

@@ -63,6 +63,9 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 #### Añadido
 
 - `raphi accion <operación>`: la usan los menús de Dolphin; escribe junto al original y avisa al terminar.
+- Soltar con teclas: **Shift** abre la Mesa de trabajo con los archivos y **Alt**, Herramientas con su menú «a qué se
+  puede convertir»; sin tecla los toma la pantalla abierta y, si no tiene zona para soltar (Trabajos, Recetas,
+  Sistema), se abren Herramientas en vez de perderlos. Herramientas acepta `?archivos=`.
 
 
 - La aplicación se llama **Raphi** (ventana, lanzador `raphi`, entrada de escritorio `raphi.desktop`); el

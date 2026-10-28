@@ -3,7 +3,9 @@
 - **La sesión**: antes de que la página cargue, un guion pone la ficha del servidor donde la cáscara mínima de Tiqsi
   guarda la suya (`tiqsi_token`), así que no hay pantalla de inicio de sesión.
 - **Lo soltado**: un archivo arrastrado desde Dolphin a la ventana llega a la web como su RUTA (evento `raphi:rutas`),
-  no como una copia subida; así una operación puede escribir junto al original.
+  no como una copia subida; así una operación puede escribir junto al original. Sin tecla, lo toma la zona para soltar
+  de la pantalla abierta (y, si esa pantalla no tiene, se abren Herramientas); con **Shift**, la Mesa de trabajo; con
+  **Alt**, Herramientas y su menú «a qué se puede convertir» (`destino_de`).
 - **La bandeja del sistema**: el ícono abre la ventana y su menú muestra la **zona para soltar**, una ventanita que
   queda encima de todo: lo que se suelta en ella abre Raphi con esos archivos (el gesto de Tangerine en Plasma).
 - **Una sola instancia**: si Raphi ya está abierto, `raphi escritorio archivo.pdf` (el menú de Dolphin) le manda los
@@ -36,6 +38,16 @@ def _rutas(evento) -> list[str]:
     return [u.toLocalFile() for u in datos.urls() if u.isLocalFile()] if datos and datos.hasUrls() else []
 
 
+def destino_de(teclas) -> str | None:
+    """A qué pantalla van los archivos soltados según la tecla apretada: Shift, la Mesa de trabajo; Alt, Herramientas;
+    sin tecla, None (la pantalla abierta)."""
+    if teclas & Qt.KeyboardModifier.ShiftModifier:
+        return "/raphi/mesa"
+    if teclas & Qt.KeyboardModifier.AltModifier:
+        return "/raphi"
+    return None
+
+
 class FiltroSoltar(QObject):
     """Recibe lo soltado sobre la vista web: si son archivos del disco, entrega sus rutas a la web."""
 
@@ -49,7 +61,7 @@ class FiltroSoltar(QObject):
             return True
         if evento.type() == QEvent.Type.Drop and (rutas := _rutas(evento)):
             evento.acceptProposedAction()
-            self.ventana.entregar(rutas)
+            self.ventana.entregar(rutas, destino_de(evento.modifiers()))
             return True
         return False
 
@@ -77,7 +89,7 @@ class ZonaSoltar(QWidget):
     def dropEvent(self, e):
         if rutas := _rutas(e):
             e.acceptProposedAction()
-            self.ventana.entregar(rutas)
+            self.ventana.entregar(rutas, destino_de(e.modifiers()))
 
     def mousePressEvent(self, e):
         self._arrastre = e.globalPosition().toPoint() - self.frameGeometry().topLeft()
@@ -97,7 +109,7 @@ class Ventana(QMainWindow):
         self.setWindowTitle("Raphi")
         self.setWindowIcon(QIcon.fromTheme(ICONO))
         self.resize(1280, 860)
-        self.pendientes: list[str] = []
+        self.pendientes: list[tuple[list[str], str | None]] = []
         self.cargada = False
 
         # Perfil propio y persistente. Su padre es la aplicación, no la ventana: la página debe destruirse antes que él.
@@ -152,17 +164,34 @@ class Ventana(QMainWindow):
     def _cargada(self, ok: bool) -> None:
         self.cargada = ok
         if ok and self.pendientes:
-            rutas, self.pendientes = self.pendientes, []
-            self.entregar(rutas)
+            pendientes, self.pendientes = self.pendientes, []
+            for rutas, destino in pendientes:
+                self.entregar(rutas, destino)
 
-    def entregar(self, rutas: list[str]) -> None:
-        """Las rutas van a la web: a la pantalla abierta (su zona para soltar) o, si no está cargada, al cargar."""
+    def entregar(self, rutas: list[str], destino: str | None = None) -> None:
+        """Las rutas van a la web: a `destino` (una pantalla de Raphi) o a la pantalla abierta, cuya zona para soltar
+        marca el evento como atendido; si nadie lo atiende (Trabajos, Recetas, Sistema), se abren Herramientas. Sin la
+        página cargada, esperan a que cargue."""
         self.mostrar()
         if not self.cargada:
-            self.pendientes += rutas
+            self.pendientes.append((rutas, destino))
+            return
+        if destino:
+            self._abrir(destino, rutas)
             return
         self.vista.page().runJavaScript(
-            "window.dispatchEvent(new CustomEvent('raphi:rutas', {detail: %s}))" % json.dumps(rutas))
+            "window.dispatchEvent(new CustomEvent('raphi:rutas', {detail: %s, cancelable: true}))" % json.dumps(rutas),
+            0, lambda libre: self._abrir("/raphi", rutas) if libre else None)
+
+    def _abrir(self, pantalla: str, rutas: list[str]) -> None:
+        """Registra las rutas en el servidor (sin copiarlas) y abre esa pantalla con ellas (`?archivos=`)."""
+        try:
+            ids = ",".join(a["id"] for a in self.servidor.pedir("/api/raphi/locales", {"rutas": rutas}))
+        except Exception as e:  # noqa: BLE001 — se avisa y la ventana sigue
+            self.avisar("Raphi", f"No se pudieron abrir los archivos: {e}")
+            return
+        if ids:
+            self.vista.page().runJavaScript("location.assign(%s)" % json.dumps(f"{pantalla}?archivos={ids}"))
 
     def mostrar(self) -> None:
         self.showNormal()
