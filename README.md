@@ -24,18 +24,21 @@ raphi receta para-enviar a.pdf
 python3 -m pytest -q tests
 ```
 
-<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-10-27); no se edita a mano.</sub>
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-10-31); no se edita a mano.</sub>
 <!-- suite:fin -->
 
 <!-- suites:inicio -->
-Suites de esta carpeta (2); índice global en `meta/INDICE_SCRIPTS.md`. Patrón: M main · C config · L lib.
+Suites de esta carpeta (5); índice global en `meta/INDICE_SCRIPTS.md`. Patrón: M main · C config · L lib.
 
 | Suite | Carpeta | Objetivo | Escribe en | Simula | Timer | Estado | Patrón |
 |---|---|---|---|---|---|---|---|
 | `docflow` | [raphi/backends/docflow](backends/docflow/) | documentos | archivos | no |  | activo | `MCL` |
+| `photo_metadata_suite` | [raphi/backends/photo-metadata](backends/photo-metadata/) | multimedia | archivos | sí |  | activo | `MCL` |
+| `video_downloader` | [raphi/backends/video-downloader](backends/video-downloader/) | multimedia | archivos | no |  | activo | `MCL` |
+| `whisper_transcriber` | [raphi/backends/whisper-transcriber](backends/whisper-transcriber/) | multimedia | archivos | no |  | activo | `MCL` |
 | `raphi` | [raphi](./) | documentos | archivos | no |  | activo | `MCL` |
 
-<sub>Bloque generado desde los `suite.yml` por `core/suites.py generar` (2026-10-27); no se edita a mano.</sub>
+<sub>Bloque generado desde los `suite.yml` por `core/suites.py generar` (2026-10-31); no se edita a mano.</sub>
 <!-- suites:fin -->
 
 ## Qué es
