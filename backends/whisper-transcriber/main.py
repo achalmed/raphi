@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""script_whisper_transcriber/main.py — transcripción y traducción de audio/video con Whisper.
+"""backends/whisper-transcriber/main.py — transcripción y traducción de audio/video con Whisper.
 
 Modular CLI rebuild of the Colab notebook "Transcribir y Traducir OpenAI
 Whisper" (Jason Boog; mods. Álex Goia; MIT). Orchestration only — the

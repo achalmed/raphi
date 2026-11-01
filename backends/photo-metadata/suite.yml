@@ -1,4 +1,4 @@
-# scripts_photo_metadata_suite/suite.yml — suite photo_metadata_suite: Renombra e incrusta fechas en fotos de cámaras (Tapo y similares) a partir de la marca de tiempo; audita y sincroniza con digiKam.
+# backends/photo-metadata/suite.yml — suite photo_metadata_suite: Renombra e incrusta fechas en fotos de cámaras (Tapo y similares) a partir de la marca de tiempo; audita y sincroniza con digiKam.
 # Contrato: core/suite.schema.yml; core/suites.py validar lo comprueba y generar escribe los índices y README.
 id: photo_metadata_suite
 objetivo: multimedia
@@ -19,4 +19,4 @@ depende_de:
 - python3 (Pillow, numpy)
 - tesseract
 - ffmpeg
-pruebas: tests/run.sh -k photo_metadata   # desde la raíz del repo; simulación sobre un HOME temporal (tests/test_simulacion.py)
+pruebas: tests/test_backends_medios.py -k photo_metadata   # desde la raíz del repo; simulación sobre un HOME temporal (tests/test_simulacion.py)
