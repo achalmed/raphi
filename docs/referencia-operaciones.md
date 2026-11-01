@@ -434,6 +434,16 @@ Entrada: pdf (cada archivo por su lado) · .pdf · necesita: nada aparte.
 
 ## Información
 
+### `auditar_fechas_fotos` — Auditar fechas de fotos
+
+Compara la fecha del nombre de cada foto o video con la de sus metadatos; solo lee.
+
+Entrada: archivos (cada archivo por su lado) · necesita: exiftool.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--anio` | Año esperado (0: el del nombre de la carpeta) | entero | `0` |
+
 ### `comparar` — Comparar dos PDF
 
 Dice qué cambió entre dos versiones, página por página, con un informe HTML que marca lo quitado y lo añadido.
@@ -574,6 +584,56 @@ Entrada: medios (cada archivo por su lado) · .mp4 .mov .mkv .webm .avi .m4v .gi
 SRT ↔ VTT.
 
 Entrada: medios (cada archivo por su lado) · .srt .vtt · necesita: nada aparte.
+
+### `descargar` — Descargar video o audio
+
+De YouTube, Facebook, TikTok y más (yt-dlp): video, solo audio o un tramo exacto.
+
+Entrada: ninguna (todas juntas) · necesita: yt-dlp, ffmpeg.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--url` | Enlaces (uno por línea) | multilinea |  |
+| `--modo` | Qué bajar | opcion: video · audio | `video` |
+| `--calidad` | Altura máxima | opcion: 2160 · 1440 · 1080 · 720 · 480 · 360 · best | `1080` |
+| `--formato-audio` | Formato del audio | opcion: mp3 · m4a · opus · flac · wav | `mp3` |
+| `--tramo` | Tramo (INI-FIN, p. ej. 1:02:00-1:05:30) (vacío: todo el video) | texto |  |
+| `--subtitulos` | Bajar subtítulos (es, en) | casilla | `False` |
+
+### `transcribir` — Transcribir con Whisper
+
+Audio o video a texto y subtítulos, en esta máquina (Whisper); también traduce al inglés.
+
+Entrada: medios (cada archivo por su lado) · .mp3 .m4a .aac .flac .opus .ogg .wav .mp4 .mov .mkv .webm .avi .m4v .gif · necesita: whisper, ffmpeg.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--idioma` | Idioma del audio (código) | texto | `es` |
+| `--modelo` | Modelo (más grande: más exacto y más lento) | opcion: tiny · base · small · medium · large · turbo | `small` |
+| `--tarea` | Tarea | opcion: transcribe · translate | `transcribe` |
+| `--formato` | Salida | opcion: txt · srt · vtt · all | `srt` |
+| `--cortos` | Subtítulos de líneas cortas | casilla | `True` |
+
+### `ajustar_subtitulos` — Acortar líneas de subtítulos
+
+Reparte el texto de un SRT en líneas de un largo máximo, por palabras y sin perder texto.
+
+Entrada: archivos (cada archivo por su lado) · .srt · necesita: pysrt.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--largo` | Caracteres por línea | entero | `42` |
+
+### `ordenar_fotos_por_fecha` — Ordenar fotos por fecha
+
+Copia la carpeta y en la copia corrige extensiones, lleva los nombres a AAAAMMDD_HHMMSS y escribe la fecha en los metadatos. El original no se toca.
+
+Entrada: archivos (cada archivo por su lado) · necesita: exiftool.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--incrustar` | Escribir la fecha en EXIF/QuickTime | casilla | `True` |
+| `--nombre-manda` | Fotos escaneadas: el nombre manda sobre el EXIF | casilla | `False` |
 
 ## Archivos
 

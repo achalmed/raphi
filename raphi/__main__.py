@@ -49,7 +49,7 @@ def _expandir(entradas: list[str], op, recursivo: bool) -> list[str]:
     extensiones = tuple(e.lower() for e in (getattr(op, "extensiones", ()) or ()))
     for entrada in entradas:
         ruta = Path(entrada)
-        if not ruta.is_dir():
+        if not ruta.is_dir() or not extensiones:   # sin extensiones, la operación recibe la carpeta misma
             resultado.append(entrada)
             continue
         candidatos = ruta.rglob("*") if recursivo else ruta.iterdir()

@@ -14,6 +14,10 @@ openpyxl==3.1.5
 PyYAML==6.0.3
 pyhanko==0.29.0                 # MIT: verificar firmas digitales (PAdES) con su cadena
 
+# Backends de medios (llegaron de scripts-linux el 2026-10-31); Whisper y yt-dlp son programas del sistema
+numpy==2.5.4                    # photo-metadata: OCR de la marca de tiempo impresa
+pysrt==1.1.2                    # whisper-transcriber: acortar subtítulos
+
 # API y módulo de Tiqsi
 fastapi==0.136.3
 starlette==1.9.0

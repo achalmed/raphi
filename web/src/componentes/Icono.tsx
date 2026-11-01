@@ -58,6 +58,11 @@ import TuneOutlined from '@mui/icons-material/TuneOutlined'
 import UnarchiveOutlined from '@mui/icons-material/UnarchiveOutlined'
 import VerifiedOutlined from '@mui/icons-material/VerifiedOutlined'
 import VideoSettingsOutlined from '@mui/icons-material/VideoSettingsOutlined'
+import DownloadOutlined from '@mui/icons-material/DownloadOutlined'
+import RecordVoiceOverOutlined from '@mui/icons-material/RecordVoiceOverOutlined'
+import WrapTextOutlined from '@mui/icons-material/WrapTextOutlined'
+import EventNoteOutlined from '@mui/icons-material/EventNoteOutlined'
+import DriveFileRenameOutlineOutlined from '@mui/icons-material/DriveFileRenameOutlineOutlined'
 import { modo } from '@qillqa/tiqsi'
 import { tinte, tonoDe } from '../lib/identidad'
 
@@ -79,6 +84,8 @@ const ICONOS: Record<string, SvgIconComponent> = {
   comprimir_imagen: CompressOutlined, convertir_audio: AudiotrackOutlined, convertir_video: MovieOutlined,
   recortar_medio: ContentCutOutlined, comprimir_video: VideoSettingsOutlined, convertir_subtitulos: SubtitlesOutlined,
   quitar_metadatos_archivo: LayersClearOutlined, comprimir_archivos: FolderZipOutlined, extraer_archivo: UnarchiveOutlined,
+  descargar: DownloadOutlined, transcribir: RecordVoiceOverOutlined, ajustar_subtitulos: WrapTextOutlined,
+  auditar_fechas_fotos: EventNoteOutlined, ordenar_fotos_por_fecha: DriveFileRenameOutlineOutlined,
 }
 
 export const iconoDe = (id: string): SvgIconComponent => ICONOS[id] ?? BuildOutlined
