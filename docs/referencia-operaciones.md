@@ -525,13 +525,14 @@ Entrada: medios (cada archivo por su lado) · .jpg .jpeg .png .webp .heic .heif 
 
 ### `convertir_audio` — Convertir audio
 
-MP3, M4A, FLAC, Opus, OGG o WAV.
+MP3, M4A, FLAC, Opus, OGG o WAV, con sus etiquetas.
 
 Entrada: medios (cada archivo por su lado) · .mp3 .m4a .aac .flac .opus .ogg .wav .mp4 .mov .mkv .webm .avi .m4v .gif · necesita: ffmpeg, ffprobe.
 
 | opción | qué es | tipo | por omisión |
 |---|---|---|---|
 | `--formato` | A | opcion: mp3 · m4a · flac · opus · ogg · wav | `mp3` |
+| `--tasa` | Tasa de bits («auto»: calidad variable alta; un valor fijo (p. ej. 192k), tasa constante) | opcion: auto · 96k · 128k · 160k · 192k · 256k · 320k | `auto` |
 
 ### `convertir_video` — Convertir video
 

@@ -43,6 +43,21 @@ def _imprimir_informe(informe, como_json: bool) -> int:
     return 0 if informe.ok else 1
 
 
+def _expandir(entradas: list[str], op, recursivo: bool) -> list[str]:
+    """Una carpeta se vuelve sus archivos que la operación acepta (por extensión), en orden; un archivo pasa tal cual."""
+    resultado: list[str] = []
+    extensiones = tuple(e.lower() for e in (getattr(op, "extensiones", ()) or ()))
+    for entrada in entradas:
+        ruta = Path(entrada)
+        if not ruta.is_dir():
+            resultado.append(entrada)
+            continue
+        candidatos = ruta.rglob("*") if recursivo else ruta.iterdir()
+        resultado += sorted(str(c) for c in candidatos
+                            if c.is_file() and (not extensiones or c.suffix.lower() in extensiones))
+    return resultado
+
+
 def _opciones_de(op, ap: argparse.ArgumentParser) -> None:
     for p in op.parametros:
         nombre = "--" + p.clave.replace("_", "-")
@@ -194,7 +209,9 @@ def main(argv: list[str] | None = None) -> int:
             orden, resto = resto[0], resto[1:]
         op = obtener(orden)
         ap = argparse.ArgumentParser(prog=f"raphi {op.id}", description=f"{op.titulo}: {op.descripcion}")
-        ap.add_argument("entradas", nargs="*" if op.minimo_entradas == 0 else "+", help="archivos")
+        ap.add_argument("entradas", nargs="*" if op.minimo_entradas == 0 else "+",
+                        help="archivos o carpetas (de una carpeta, los archivos que la operación acepta)")
+        ap.add_argument("-r", "--recursivo", action="store_true", help="con una carpeta, también sus subcarpetas")
         ap.add_argument("-o", "--destino", help="carpeta de salida (por omisión, junto a cada archivo)")
         ap.add_argument("-n", "--simular", action="store_true", help="dice qué haría, sin escribir nada")
         ap.add_argument("-s", "--sufijo", default="", help=f"sufijo de la salida (por omisión «_{op.sufijo or op.id}»)")
@@ -207,8 +224,8 @@ def main(argv: list[str] | None = None) -> int:
             if sys.stderr.isatty() and not a.json:
                 print(f"\r  {fraccion * 100:5.1f} % {mensaje[:50]:<50}", end="", file=sys.stderr, flush=True)
 
-        informe = motor.ejecutar(op.id, a.entradas, params, destino=a.destino, simular=a.simular, sufijo=a.sufijo,
-                                 progreso=progreso)
+        informe = motor.ejecutar(op.id, _expandir(a.entradas, op, a.recursivo), params, destino=a.destino,
+                                 simular=a.simular, sufijo=a.sufijo, progreso=progreso)
         if sys.stderr.isatty() and not a.json:
             print("\r" + " " * 62 + "\r", end="", file=sys.stderr)
         if accion:

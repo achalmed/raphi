@@ -233,15 +233,28 @@ CODECS_VIDEO = {"mp4": ["-c:v", "libx264", "-preset", "medium", "-crf", "23", "-
                 "webm": ["-c:v", "libvpx-vp9", "-crf", "33", "-b:v", "0", "-c:a", "libopus"]}
 
 
-@operacion("convertir_audio", "Medios", "Convertir audio", "MP3, M4A, FLAC, Opus, OGG o WAV.",
+TASAS = ("auto", "96k", "128k", "160k", "192k", "256k", "320k")
+
+
+@operacion("convertir_audio", "Medios", "Convertir audio", "MP3, M4A, FLAC, Opus, OGG o WAV, con sus etiquetas.",
            entrada="medios", extensiones=AUD + VID, sufijo="audio", requiere=("ffmpeg", "ffprobe"),
-           parametros=(Parametro("formato", "A", "opcion", "mp3", opciones=AUD_DESTINO),),
-           palabras=("mp3", "audio", "música", "podcast", "extraer audio"))
+           parametros=(Parametro("formato", "A", "opcion", "mp3", opciones=AUD_DESTINO),
+                       Parametro("tasa", "Tasa de bits", "opcion", "auto", opciones=TASAS,
+                                 ayuda="«auto»: calidad variable alta; un valor fijo (p. ej. 192k), tasa constante")),
+           palabras=("mp3", "audio", "música", "podcast", "extraer audio", "nota de voz", "whatsapp", "opus"))
 def convertir_audio(ctx):
-    destino = ctx.salida(nombre=ctx.entrada.stem, extension=f".{ctx.p('formato')}")
+    # absorbe script_audio_converter (scripts-linux, retirado el 2026-10-31): tasa fija y etiquetas del original
+    formato, tasa = ctx.p("formato"), ctx.p("tasa") or "auto"
+    destino = ctx.salida(nombre=ctx.entrada.stem, extension=f".{formato}")
     if ctx.simular:
-        return Resultado(plan=[f"{ctx.entrada.name} → {destino.name}"])
-    return Resultado([_ffmpeg(ctx, ["-i", str(ctx.entrada), "-vn", *CODECS_AUDIO[ctx.p("formato")]], destino)])
+        return Resultado(plan=[f"{ctx.entrada.name} → {destino.name}" + ("" if tasa == "auto" else f" ({tasa})")])
+    codec = list(CODECS_AUDIO[formato])
+    if tasa != "auto" and formato not in ("flac", "wav"):
+        codec = codec[:2] + ["-b:a", tasa]            # sin pérdida (flac, wav) no lleva tasa
+    # Ogg y Opus guardan las etiquetas en la pista de audio, no en el contenedor: se copian de ahí
+    origen = "0:s:a:0" if ctx.entrada.suffix.lower() in (".ogg", ".opus") else "0"
+    etiquetas = ["-map_metadata", origen] + (["-id3v2_version", "3"] if formato == "mp3" else [])
+    return Resultado([_ffmpeg(ctx, ["-i", str(ctx.entrada), "-vn", *codec, *etiquetas], destino)])
 
 
 @operacion("convertir_video", "Medios", "Convertir video", "MP4, MOV, MKV, WebM o GIF (o solo su audio en MP3/M4A).",
