@@ -1,0 +1,14 @@
+# script_audio_converter/suite.yml — suite audio_converter: Convierte por lotes audios de WhatsApp (Opus) y otros formatos a MP3 con ffmpeg.
+# Contrato: core/suite.schema.yml; core/suites.py validar lo comprueba y generar escribe los índices y README.
+id: audio_converter
+objetivo: multimedia
+resumen: Convierte por lotes audios de WhatsApp (Opus) y otros formatos a MP3 con ffmpeg.
+escribe_en:
+- archivos
+simula_por_defecto: false
+comandos:
+- main.py <carpeta> [--dry-run]
+estado: activo
+depende_de:
+- ffmpeg
+pruebas: tests/run.sh -k audio_converter   # desde la raíz del repo; simulación sobre un HOME temporal (tests/test_simulacion.py)

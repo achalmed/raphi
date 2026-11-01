@@ -1,0 +1,17 @@
+# script_whisper_transcriber/suite.yml — suite whisper_transcriber: Transcribe y traduce audio o video localmente con Whisper.
+# Contrato: core/suite.schema.yml; core/suites.py validar lo comprueba y generar escribe los índices y README.
+id: whisper_transcriber
+objetivo: multimedia
+resumen: Transcribe y traduce audio o video localmente con Whisper.
+escribe_en:
+- archivos
+simula_por_defecto: false
+comandos:
+- main.py <archivo> [--language es] [--dry-run]
+estado: activo
+depende_de:
+- whisper
+- ffmpeg
+- yt-dlp (solo para URL)
+- pysrt (opcional)
+pruebas: tests/run.sh -k whisper_transcriber   # desde la raíz del repo; simulación sobre un HOME temporal (tests/test_simulacion.py)

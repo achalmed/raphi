@@ -1,0 +1,18 @@
+# script_video_downloader/suite.yml — suite video_downloader: Descarga video o audio con yt-dlp y ffmpeg, por URL o por lotes, con recorte opcional.
+# Contrato: core/suite.schema.yml; core/suites.py validar lo comprueba y generar escribe los índices y README.
+id: video_downloader
+objetivo: multimedia
+resumen: Descarga video o audio con yt-dlp y ffmpeg, por URL o por lotes, con recorte opcional.
+escribe_en:
+- archivos
+simula_por_defecto: false
+comandos:
+- main.sh <url>
+- main.sh -m audio --audio-format mp3 <url>
+- main.sh --batch lista.txt
+- main.sh --simulate <url>
+estado: activo
+depende_de:
+- yt-dlp
+- ffmpeg
+pruebas: tests/run.sh -k video_downloader   # desde la raíz del repo; solo --help: --simulate consulta la red (tests/test_simulacion.py)
