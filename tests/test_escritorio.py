@@ -52,7 +52,8 @@ def test_accion_junto_al_original(corpus, tmp_path, monkeypatch, capsys):
 
 
 def test_el_escritorio_no_tiene_pantallas_propias():
-    """Solo la ventana (que muestra la web) y la zona para soltar: ninguna pantalla con controles propios."""
+    """La ventana web solo tiene la ventana y la zona para soltar; Raphi Studio (escritorio/studio/, tests/test_studio.py)
+    arma sus páginas de las fichas del motor."""
     clases = set()
     for archivo in (RAIZ / "escritorio").glob("*.py"):
         for nodo in ast.walk(ast.parse(archivo.read_text())):

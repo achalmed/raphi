@@ -10,6 +10,27 @@ lo revocado se marca «Superada por …» y no se borra. Los pendientes, con fec
 
 ## Producto
 
+### 2026-10-31 · R9: Raphi Studio, el escritorio nativo de la familia de los studios; revisa R4
+
+Propuesta aprobada por Edison: `meta/programa/08-mantenimiento/familia-studios-2026-10-31.md` del espacio de trabajo.
+`raphi` abre **Raphi Studio** (`escritorio/studio/`), de la misma familia visual que Filesystem, Git, Quarto y LaTeX
+Studio (el marco común `gui_comun`: barra lateral, paleta Ctrl+K, avisos, consola, tema con acento violeta). R4 había
+retirado la GUI nativa por duplicar la web; Raphi Studio no la duplica: **sus páginas se arman de las fichas del
+motor**, como los formularios de la web (lo vigila `tests/test_studio.py`: el código del Studio no nombra
+operaciones salvo en el mapa de familias). Ordena por el tipo de archivo (Documentos · PDF · Imágenes · Audio y video
+· Archivos) en vez de por categoría, y corre el motor en su propio proceso (sin servidor local). La ventana web sigue:
+`raphi --web`, y es la que abre `raphi` cuando `gui_comun` no está (Raphi instalado fuera del espacio de trabajo).
+La Mesa de trabajo sigue solo en la web.
+
+### 2026-10-31 · R10: llegan las herramientas de medios de scripts-linux; un solo conversor de audio
+
+`video-downloader`, `whisper-transcriber` y `photo-metadata` llegan con su historia a `backends/` y el motor las
+expone: `descargar`, `transcribir`, `ajustar_subtitulos`, `auditar_fechas_fotos` (solo lee) y
+`ordenar_fotos_por_fecha` (trabaja sobre una copia: el backend renombra en su sitio y aquí el original no se toca).
+`audio-converter` llegó y se retiró en el mismo cambio: `convertir_audio` gana `tasa` y conserva las etiquetas del
+original, y la CLI acepta carpetas (`-r`). Las tres CLI siguen completas en `backends/`; buscan `core/` subiendo
+carpetas para su logger, así que fuera del espacio de trabajo no arrancan (pendiente abajo).
+
 ### 2026-10-27 · R6: Raphi en Qillqa; Raphi no firma
 
 Publicada el 2026-10-27 (propuesta §8 y §8.1 en el repo de Qillqa). Dos decisiones de Edison:
@@ -31,7 +52,7 @@ tenían. Se retiran con la etiqueta `antes-retirar-backends-2026-10-27`; su refe
 queda entero: es el motor de «a Markdown» y tiene sus tests y su CI; su `docflow pdf` sigue en su CLI, duplicado
 con el motor, y no se usa desde Raphi. Los pendientes de los dos backends retirados quedan resueltos por el retiro.
 
-### 2026-10-27 · R4: la ventana nueva y el retiro de la GUI nativa
+### 2026-10-27 · R4: la ventana nueva y el retiro de la GUI nativa (revisada por R9, 2026-10-31)
 
 La GUI PySide6 nativa (`studio/`) se retira: sus seis páginas las cubre la web (Conversión y PDF por las
 herramientas, Metadatos por «editar» y «quitar metadatos», Reportes por «Inventario de páginas» y Trabajos,
@@ -124,6 +145,8 @@ edita, manda la de no dejar rastro de conversaciones con asistentes en un repo p
 conserva el original. Lo que tenía de decisión está en la primera entrada de este registro.
 
 ## Pendientes
+
+- 2026-10-31 · dueño: Edison · `gui_comun` y el logger de `core` fuera del espacio de trabajo: publicar `gui_comun` como paquete propio (decisión 4 de la propuesta de la familia) y dar a los backends de medios un logger que no dependa de `core/`.
 
 | fecha | pendiente | dueño |
 |---|---|---|

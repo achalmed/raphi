@@ -2,7 +2,7 @@
 tipo: readme
 estado: activo
 ---
-# scripts_photo_metadata_suite/ — fechas y nombres de fotos y videos: renombrado por la marca de tiempo impresa, auditoría, EXIF y digiKam
+# photo-metadata/ — fechas y nombres de fotos y videos: renombrado por la marca de tiempo impresa, auditoría, EXIF y digiKam
 <!-- suite:inicio -->
 **Suite `photo_metadata_suite`** · objetivo *multimedia* · estado *activo* · python · interfaz cli
 

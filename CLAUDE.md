@@ -10,9 +10,11 @@ del backend que se toque. El plan por fases vive en el repo de Qillqa: `qillqa/d
 
 ## Reglas que no se negocian
 
-- **Escritorio y web son una sola aplicación** (decisión del 2026-10-27, `docs/decisiones.md`): la única interfaz es
-  `web/`; `escritorio/` es una ventana que la muestra más un puente nativo. Ninguna pantalla se escribe solo para el
-  escritorio (lo vigila `tests/test_escritorio.py`); lo propio del escritorio se ofrece en la web con `hayEscritorio()`.
+- **Ninguna pantalla se escribe a mano por herramienta** (R4 del 2026-10-27, revisada por R9 del 2026-10-31): la web
+  (`web/`) y Raphi Studio (`escritorio/studio/`, el escritorio nativo de la familia de los studios con `gui_comun`)
+  arman sus formularios de la ficha de cada operación. Raphi Studio solo nombra operaciones en `familias.py` (lo
+  vigila `tests/test_studio.py`). La ventana que muestra la web (`escritorio/ventana.py`, `raphi --web`) sigue, y es
+  la que abre `raphi` sin `gui_comun`; lo propio de ella se ofrece en la web con `hayEscritorio()`.
 - **Una operación existe en un solo lugar**: su función con `@operacion(...)` en `raphi/motor/`. De su ficha salen la
   CLI, la API, el formulario de la web y el menú de formatos. Nada de formularios escritos a mano.
 - **Los tres principios viven en el núcleo** (`raphi/motor/base.py`): error por archivo, nunca por lote; la salida
@@ -38,7 +40,8 @@ Raíz admitida: `README.md`, `CLAUDE.md`, `AGENTS.md`, `suite.yml`, `LICENSE`, `
 | lo que apareció | va a | nunca a |
 |---|---|---|
 | una operación | `raphi/motor/<familia>.py` con su prueba en `tests/` | la web o el escritorio |
-| una pantalla | `web/src/paginas/` y su ruta en `web/src/modulo.ts` | `escritorio/` |
+| una pantalla de la web | `web/src/paginas/` y su ruta en `web/src/modulo.ts` | `escritorio/` |
+| una página de Raphi Studio que no sale de las fichas | `escritorio/studio/paginas.py` (genérica, nunca por operación) | una ventana nueva |
 | algo que solo el escritorio puede hacer | un `@Slot` en `escritorio/puente.py` y su firma en `web/src/lib/escritorio.ts` | una ventana nueva |
 | cómo se usa | `README.md` §Uso; una opción de un backend, `docs/referencia-*.md` | un `GUIA.md` |
 | cómo funciona por dentro | `docs/arquitectura.md` | un segundo documento de arquitectura |
@@ -55,7 +58,7 @@ npm run web:pruebas && npx tsc -p web && npm run web:construir  # la web: su ló
 python3 scripts/escanear.py --trabajo                         # la guarda del repo público
 bats backends/docflow/tests/ && shellcheck -x -S warning backends/docflow/bin/docflow   # lo del CI de docflow
 raphi doctor · raphi lista · raphi <operación> archivo -n     # el motor desde la terminal
-raphi                                                         # la ventana; la web sola: raphi.sola (README §Uso)
+raphi                                                         # Raphi Studio; raphi --web, la ventana web; raphi.sola (README §Uso)
 python3 core/archivos.py validar raphi && python3 core/suites.py validar   # desde ~/Documents
 meta/doctor/main.sh --breve                                   # desde ~/Documents
 ```

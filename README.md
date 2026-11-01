@@ -69,10 +69,12 @@ vive en el repo de Qillqa: `qillqa/docs/plataforma/propuesta-raphi.md`.
 ```bash
 ./install.sh                                          # una vez: .venv (Python del sistema), Tiqsi, lanzador raphi y entrada de escritorio
 npm install && npm run web:construir                  # la web (web/dist), que usan la ventana y raphi.sola
-raphi                                                 # la ventana (o python3 main.py); raphi escritorio a.pdf abre con archivos
+raphi                                                 # Raphi Studio (raphi --web: la ventana web); raphi escritorio a.pdf abre con archivos
 raphi lista · raphi doctor                            # las operaciones y lo que falta en esta máquina
 raphi comprimir *.pdf --hasta 10 -n                   # cualquier operación: -n simula, -o carpeta de salida, --json
 raphi receta escaneo-mesa-de-partes recibido.pdf      # una cadena guardada (raphi recetas); raphi formatos foto.heic
+raphi transcribir entrevista.mp3 --idioma es          # Whisper local; raphi descargar --url URL --modo audio
+raphi convertir_audio notas/ -r --tasa 192k           # una carpeta entera (-r con subcarpetas); las etiquetas se conservan
 JWT_SECRET=… .venv/bin/uvicorn raphi.sola:app --port 8040   # la web sola (cuentas: python -m tiqsi.minimo cuenta …)
 .venv/bin/python -m pytest -q tests · npm run web:pruebas   # las pruebas (corpus generado en cada corrida)
 backends/docflow/bin/docflow to-md ruta/ --jobs 4 -n  # docflow sigue como CLI (y bats backends/docflow/tests/)
@@ -88,8 +90,10 @@ carpeta de trabajos de Raphi o a la que se elija.
 | `raphi/motor/` | las operaciones (Python puro): `base.py` (registro, principios), `pdf_*.py`, `documentos.py`, `medios.py` |
 | `raphi/` | la CLI (`__main__.py`), las recetas (`recetas.py`, `recetas/`), las fuentes, la API (`api/`), la cola (`trabajos.py`), la base (`db.py`), el módulo de Tiqsi (`manifiesto.py`, `contrato.py`) y sus modos (`sola.py`, `escritorio.py`) |
 | `web/` | la única interfaz: el módulo web de Tiqsi `@qillqa/raphi` (pantallas, componentes, lógica pura con sus pruebas) |
-| `escritorio/` | la ventana PySide6: servidor local, puente QWebChannel, carpetas vigiladas, menús de Dolphin |
+| `escritorio/studio/` | Raphi Studio: el escritorio nativo de la familia de los studios (`gui_comun`), con sus páginas armadas de las fichas |
+| `escritorio/` | la ventana que muestra la web (`raphi --web`): servidor local, puente QWebChannel; y lo que comparten las dos: carpetas vigiladas, menús de Dolphin |
 | `backends/docflow/` | docflow, la CLI de conversión documental, con su `suite.yml`, su README, sus tests y su CI |
+| `backends/video-downloader/` · `whisper-transcriber/` · `photo-metadata/` | las CLI de medios llegadas de scripts-linux el 2026-10-31 (yt-dlp, Whisper, fechas de fotos), cada una con su README y su `suite.yml` |
 | `tests/` | pruebas del motor, la CLI, la API y el escritorio, con su corpus generado |
 | `scripts/escanear.py` · `demo/demo.conf` | la guarda del repositorio público (escáner de Tiqsi en cada envío) |
 | `docs/` | arquitectura, referencia de las operaciones (generada) y de docflow, decisiones (índice por `core/docs.py indice`) |

@@ -167,7 +167,17 @@ cuenta solo ve lo suyo.
 - **Lo que ofrece a los demás** (`raphi/contrato.py`): «pdf.v1» (ejecutar una operación o receta, miniatura, texto,
   info, firmas) y «conversion.v1» (formatos de un archivo, convertir). Los demás la aprovechan, nunca la necesitan.
 
-## La web (`web/`): la única interfaz
+## Raphi Studio (`escritorio/studio/`)
+
+El escritorio nativo, de la familia de los studios del espacio de trabajo (marco de `gui_comun`: barra lateral,
+paleta Ctrl+K, avisos, consola y tema con acento violeta). Sus páginas salen del motor: una rejilla por familia
+(`familias.py` lee la familia de cada ficha por su entrada y sus extensiones), la página de una herramienta con el
+formulario de su ficha (`formulario.py`, un control por tipo de parámetro), recetas y sistema. Corre `motor.ejecutar`
+en un `FunctionWorker` de `gui_comun`, en su proceso; las carpetas vigiladas (`escritorio/vigilancia.py`) le piden al
+«servidor» `MotorLocal`, que resuelve sin HTTP. Lo soltado sobre la ventana abre las herramientas que sirven para esos
+archivos. Sin `gui_comun`, `raphi` abre la ventana web.
+
+## La web (`web/`)
 
 `web/` es el módulo web de Tiqsi (`@qillqa/raphi`, `web/src/modulo.ts`): Qillqa lo monta en su menú, `raphi.sola` y
 `raphi.escritorio` lo sirven construido (`web/dist`) con la cáscara mínima de Tiqsi. Sus pantallas: Herramientas

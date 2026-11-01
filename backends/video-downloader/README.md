@@ -2,7 +2,7 @@
 tipo: readme
 estado: activo
 ---
-# script_video_downloader/ — descarga de video o audio con yt-dlp y ffmpeg, por URL o por lotes, con recorte exacto
+# video-downloader/ — descarga de video o audio con yt-dlp y ffmpeg, por URL o por lotes, con recorte exacto
 <!-- suite:inicio -->
 **Suite `video_downloader`** · objetivo *multimedia* · estado *activo* · bash · interfaz cli
 
@@ -29,8 +29,8 @@ Envoltorio de `yt-dlp` con opciones en español y valores por defecto en `config
 solo audio, subtítulos, listas de reproducción, lotes desde un archivo, historial para no repetir descargas,
 SponsorBlock y recorte exacto de un tramo (`--clip`). Lo que no envuelve llega a yt-dlp con `--extra` o con el
 arreglo `EXTRA_YTDLP_OPTS` de `config.sh`. Es la pieza de red de la cadena de audio: lo que baja en mp3 lo
-transcribe [`script_whisper_transcriber`](../script_whisper_transcriber/); los audios que ya están en disco los
-convierte [`script_audio_converter`](../script_audio_converter/).
+transcribe [`whisper-transcriber`](../whisper-transcriber/) (en Raphi, `raphi transcribir`); los audios que ya están
+en disco los convierte `raphi convertir_audio`. En Raphi esta CLI es la operación `raphi descargar`.
 
 Modos (`-m`): `video` (mejor video y audio hasta `-q`, fusionados en `-c`), `audio` (extrae a `--audio-format`),
 `best` (la mejor calidad, sin tope), `info` (metadatos en JSON, resumidos con `jq` si está), `formats` (tabla de

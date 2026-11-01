@@ -2,7 +2,7 @@
 tipo: readme
 estado: activo
 ---
-# script_whisper_transcriber/ — transcripción y traducción local de audio o video con Whisper, con subtítulos
+# whisper-transcriber/ — transcripción y traducción local de audio o video con Whisper, con subtítulos
 <!-- suite:inicio -->
 **Suite `whisper_transcriber`** · objetivo *multimedia* · estado *activo* · python · interfaz cli
 
@@ -32,8 +32,9 @@ Ejecuta en la máquina el CLI `whisper` (OpenAI Whisper) sobre audio o video y d
 - **Archivo `.srt`** → no se transcribe: se reparte el texto en líneas de como mucho `--max-line-length` caracteres,
   por palabras y sin perder texto.
 
-Es el último eslabón de la cadena de audio: [`script_video_downloader`](../script_video_downloader/) baja de la red
-y [`script_audio_converter`](../script_audio_converter/) convierte a mp3 lo que ya está en disco.
+Es el último eslabón de la cadena de audio: [`video-downloader`](../video-downloader/) baja de la red y
+`raphi convertir_audio` convierte a mp3 lo que ya está en disco. En Raphi esta CLI es `raphi transcribir` y
+`raphi ajustar_subtitulos`.
 
 - **Qué escribe:** en `--output-dir` (por defecto, la carpeta actual) `<nombre>.<formato>` por cada formato pedido;
   Whisper sobrescribe lo que ya exista. Con `--task translate` las salidas se llaman `<nombre>.en.<formato>`, así que
@@ -101,7 +102,7 @@ concreta necesita.
   `DEFAULT_MODEL`. El aviso de Whisper «FP16 is not supported on CPU» es informativo.
 - **`--task translate` solo produce inglés** (límite de Whisper).
 - **La transcripción se revisa a mano**: cifras, nombres propios y siglas son donde más se equivoca.
-- **No baja el video completo**, solo el audio que necesita; para el video, `script_video_downloader`.
+- **No baja el video completo**, solo el audio que necesita; para el video, `video-downloader` (`raphi descargar`).
 - **`--shorten-srt` no hace nada si no se genera `.srt`** (con `-f txt`, por ejemplo): avisa y sigue.
 - **Las descargas de YouTube fallan cuando el sitio cambia**: se actualiza `yt-dlp`.
 - Probada en Linux; en macOS debería funcionar con los mismos binarios, sin probar.

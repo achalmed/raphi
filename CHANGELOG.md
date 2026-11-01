@@ -19,6 +19,10 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 #### Añadido
 
+- 2026-10-31: `descargar` (yt-dlp), `transcribir` (Whisper local), `ajustar_subtitulos`, `auditar_fechas_fotos` y
+  `ordenar_fotos_por_fecha`, sobre los backends de medios llegados de scripts-linux con su historia.
+- 2026-10-31: `convertir_audio` con `tasa` fija y las etiquetas del original; la CLI acepta carpetas (`-r`).
+
 - El motor `raphi/motor/`: 48 operaciones en un solo registro (organizar, optimizar, convertir, editar, seguridad,
   información, medios y archivos), con simular, verificar la salida y el error por archivo en el núcleo.
 - Lo nuevo frente a pdf-suite y docflow: comprimir hasta un tamaño, componer páginas de varios PDF, foliar
@@ -53,6 +57,12 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 ## Raphi escritorio (GUI; antes DocFlow Studio)
 
 ### Sin publicar
+
+#### Añadido
+
+- 2026-10-31: **Raphi Studio** (`escritorio/studio/`), el escritorio nativo de la familia de los studios: barra lateral
+  por familias, páginas armadas de las fichas del motor, paleta Ctrl+K, avisos, soltar archivos, carpetas vigiladas y
+  menús de Dolphin. `raphi` lo abre; la ventana web, con `raphi --web` (decisiones R9).
 
 #### Cambiado
 

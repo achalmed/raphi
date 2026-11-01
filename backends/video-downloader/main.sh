@@ -1,4 +1,5 @@
 #!/usr/bin/env bash
+set -euo pipefail
 # =============================================================================
 #  main.sh — Video Downloader v1.0.0
 # =============================================================================
@@ -19,8 +20,6 @@
 #
 #  MOTOR     : yt-dlp (+ ffmpeg). Compatible: Kubuntu / Ubuntu / Arch / Archcraft
 # =============================================================================
-
-set -euo pipefail
 
 # --- Directorio del script (funciona desde cualquier CWD) ------------------
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
