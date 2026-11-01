@@ -7,9 +7,26 @@ import pathlib
 _p = pathlib.Path(__file__).resolve()
 while _p != _p.parent and not (_p / "core" / "py-common" / "logger.py").exists():
     _p = _p.parent
-_s = importlib.util.spec_from_file_location("core_logger", _p / "core" / "py-common" / "logger.py")
-_core = importlib.util.module_from_spec(_s)
-_s.loader.exec_module(_core)
+if (_p / "core" / "py-common" / "logger.py").exists():
+    _s = importlib.util.spec_from_file_location("core_logger", _p / "core" / "py-common" / "logger.py")
+    _core = importlib.util.module_from_spec(_s)
+    _s.loader.exec_module(_core)
+else:   # fuera del espacio de trabajo (Raphi instalado solo): logging de la biblioteca estándar, mismos nombres
+    import logging as _logging
+    import types as _types
+
+    def _configurar(nombre, verbose=False, log_file=None, **_):
+        log = _logging.getLogger(nombre)
+        if not log.handlers:
+            h = _logging.StreamHandler()
+            h.setFormatter(_logging.Formatter("[%(levelname)s] %(message)s"))
+            log.addHandler(h)
+            if log_file:
+                log.addHandler(_logging.FileHandler(log_file, encoding="utf-8"))
+        log.setLevel(_logging.DEBUG if verbose else _logging.INFO)
+        return log
+
+    _core = _types.SimpleNamespace(configurar=_configurar, RESET="")
 
 import config
 

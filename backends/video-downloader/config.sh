@@ -17,10 +17,15 @@
 # ~/Documents del usuario que invoca, y su carpeta madre es su directorio personal.
 _d="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 while [ "$_d" != / ] && [ ! -f "$_d/core/env.sh" ]; do _d="$(dirname "$_d")"; done
-[ -f "$_d/core/env.sh" ] || { echo "[ERROR] no encuentro core/env.sh subiendo desde ${BASH_SOURCE[0]}" >&2; exit 1; }
-source "$_d/core/env.sh"; unset _d
+if [ -f "$_d/core/env.sh" ]; then
+    source "$_d/core/env.sh"
+    HOME_DIR="$(dirname "$DOCS_ROOT")"
+else    # fuera del espacio de trabajo (Raphi instalado solo): la carpeta personal de quien invoca
+    HOME_DIR="$(getent passwd "${SUDO_USER:-${USER:-$(id -un)}}" | cut -d: -f6)"
+    HOME_DIR="${HOME_DIR:-$HOME}"
+fi
+unset _d
 USUARIO="${SUDO_USER:-${USER:-$(id -un)}}"
-HOME_DIR="$(dirname "$DOCS_ROOT")"
 
 # --- Carpeta de destino de las descargas -----------------------------------
 # Se crea automáticamente si no existe. Sobreescribible con --output-dir/-o.

@@ -4,6 +4,7 @@
 
 # Escritorio
 PySide6>=6.6
+# gui-comun (el marco de Raphi Studio): install.sh lo pone desde ../gui-comun si está, o desde su repo público
 
 # Motor
 pikepdf==10.17.0

@@ -1,8 +1,12 @@
 #!/usr/bin/env bash
 # backends/video-downloader/lib/logger.sh — envoltorio (FS2, 2026-09-07): el logger vive en core/shell-lib/logger.sh; aquí solo lo propio de esta suite.
 _core_d="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"; while [ "$_core_d" != / ] && [ ! -f "$_core_d/core/shell-lib/logger.sh" ]; do _core_d="$(dirname "$_core_d")"; done
-[ -f "$_core_d/core/shell-lib/logger.sh" ] || { echo "[ERROR] no encuentro core/shell-lib/logger.sh subiendo desde ${BASH_SOURCE[0]}" >&2; exit 1; }
-source "$_core_d/core/shell-lib/logger.sh"; unset _core_d
+if [ -f "$_core_d/core/shell-lib/logger.sh" ]; then
+    source "$_core_d/core/shell-lib/logger.sh"
+else    # fuera del espacio de trabajo (Raphi instalado solo): el logger mínimo con los mismos nombres
+    source "$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)/logger_sin_core.sh"
+fi
+unset _core_d
 
 # propio de la suite: logger_init(verbose, log_activo, archivo, max_bytes) con cabecera de sesión (LOGGER_* se conservan para lib/)
 LOGGER_VERBOSE=false; LOGGER_LOG_ENABLED=false; LOGGER_LOG_FILE=""

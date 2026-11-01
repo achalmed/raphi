@@ -1,7 +1,7 @@
 """Raphi Studio (escritorio/studio, 2026-10-31): la ventana nativa de la familia de los studios, armada de las fichas.
 
-Necesita `gui_comun` (core/py-common del espacio de trabajo): sin él, estas pruebas se saltan y `raphi` abre la
-ventana web.
+Necesita `gui_comun` (el paquete gui-comun, instalado o el repo del espacio de trabajo): sin él, estas pruebas se
+saltan y `raphi` abre la ventana web.
 """
 from __future__ import annotations
 

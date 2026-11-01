@@ -37,14 +37,22 @@ echo "==> Creando entorno virtual (.venv) con ${PYTHON_BASE}…"
 if [[ -f "${DIR}/../tiqsi/pyproject.toml" ]]; then
     "${DIR}/.venv/bin/python" -m pip install -q -e "${DIR}/../tiqsi"
 fi
+# gui-comun (el marco común de los studios, para Raphi Studio): el repo de al lado si está; si no, el público.
+if [[ -f "${DIR}/../gui-comun/pyproject.toml" ]]; then
+    "${DIR}/.venv/bin/python" -m pip install -q -e "${DIR}/../gui-comun"
+else
+    "${DIR}/.venv/bin/python" -m pip install -q "gui-comun @ git+https://github.com/achalmed/gui-comun.git@v1.0.0" \
+        || echo "   (sin gui-comun: raphi abrirá la ventana web)"
+fi
 
 echo "==> Enlazando lanzador en ${BIN_DIR}/raphi…"
 mkdir -p "$BIN_DIR"
 chmod +x "${DIR}/run.sh"
 ln -sf "${DIR}/run.sh" "${BIN_DIR}/raphi"
 
-echo "==> Instalando entrada de escritorio…"
+echo "==> Instalando el acceso directo en el menú de aplicaciones…"
 mkdir -p "$APPS_DIR"
+if ! PYTHONPATH="$DIR" "${DIR}/.venv/bin/python" -m escritorio.studio --instalar-lanzador; then
 cat > "${APPS_DIR}/raphi.desktop" <<DESKTOP
 [Desktop Entry]
 Type=Application
@@ -54,6 +62,7 @@ Exec=${DIR}/run.sh
 Terminal=false
 Categories=Office;Utility;
 DESKTOP
+fi
 
 # El nombre anterior: solo se retira si es un enlace o la entrada que creaba este instalador.
 if [[ -L "${BIN_DIR}/docflow-studio" ]]; then

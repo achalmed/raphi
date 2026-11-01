@@ -29,7 +29,9 @@ expone: `descargar`, `transcribir`, `ajustar_subtitulos`, `auditar_fechas_fotos`
 `ordenar_fotos_por_fecha` (trabaja sobre una copia: el backend renombra en su sitio y aquí el original no se toca).
 `audio-converter` llegó y se retiró en el mismo cambio: `convertir_audio` gana `tasa` y conserva las etiquetas del
 original, y la CLI acepta carpetas (`-r`). Las tres CLI siguen completas en `backends/`; buscan `core/` subiendo
-carpetas para su logger, así que fuera del espacio de trabajo no arrancan (pendiente abajo).
+carpetas para su logger; fuera del espacio de trabajo usan uno mínimo con los mismos nombres (resuelto el mismo día).
+Raphi Studio usa el paquete público `gui-comun` (`install.sh`: el repo de al lado o el de GitHub), así que también
+corre con Raphi instalado solo; su acceso directo en el menú lo escribe `gui_comun.lanzador`.
 
 ### 2026-10-27 · R6: Raphi en Qillqa; Raphi no firma
 
@@ -146,7 +148,6 @@ conserva el original. Lo que tenía de decisión está en la primera entrada de 
 
 ## Pendientes
 
-- 2026-10-31 · dueño: Edison · `gui_comun` y el logger de `core` fuera del espacio de trabajo: publicar `gui_comun` como paquete propio (decisión 4 de la propuesta de la familia) y dar a los backends de medios un logger que no dependa de `core/`.
 
 | fecha | pendiente | dueño |
 |---|---|---|
