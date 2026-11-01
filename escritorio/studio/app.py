@@ -19,7 +19,7 @@ def datos_lanzador() -> dict:
     from escritorio.studio.ventana import ACENTO, LOGO
     raiz = Path(__file__).resolve().parents[2]
     return dict(app_id="raphi", nombre="Raphi Studio", comentario="Documentos, PDF, imágenes, audio y video",
-                orden=[str(raiz / "run.sh")], logo_svg=LOGO, acento=ACENTO, categorias="Office;Graphics;AudioVideo;Utility;",
+                orden=[str(raiz / "run.sh")], logo_svg=LOGO, acento=ACENTO, categorias="Office;",
                 palabras="pdf;convertir;comprimir;ocr;audio;video;transcribir;whisper;imagen;fotos;", archivos=True)
 
 
