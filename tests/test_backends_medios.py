@@ -1,9 +1,9 @@
-"""tests/test_backends_medios.py — los backends de medios (llegados de scripts-linux el 2026-10-31), en simulación.
+"""tests/test_backends_medios.py — los backends de medios (llegados del repo de utilidades de Linux el 2026-10-31), en simulación.
 
 Cada uno corre sobre un HOME y una carpeta de trabajo temporales; se compara un listado con tamaño y mtime de lo
 temporal y del repo antes y después: una simulación no crea, modifica ni borra nada. Lo que necesita red (yt-dlp con
 una URL) o datos del usuario (la base de digiKam) se prueba solo con --help o se salta con su motivo. Vino de
-scripts-linux/tests/test_simulacion.py (ola 4, L1b).
+la prueba de simulación de ese repo (ola 4, L1b).
 """
 from __future__ import annotations
 

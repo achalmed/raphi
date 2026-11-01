@@ -1,6 +1,6 @@
 """Audio y video que no son conversión: descargar de la red, transcribir con Whisper y acortar subtítulos.
 
-Las tres operaciones envuelven los backends que llegaron de scripts-linux el 2026-10-31 (`backends/video-downloader`,
+Las tres operaciones envuelven los backends que llegaron del repo de utilidades de Linux el 2026-10-31 (`backends/video-downloader`,
 `backends/whisper-transcriber`), que siguen siendo CLI completas. Cada backend escribe en una carpeta temporal y
 de ahí cada archivo pasa a su destino con `ctx.salida`, así que nada se pisa (principio 2 de `base.py`).
 """

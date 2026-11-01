@@ -243,7 +243,7 @@ TASAS = ("auto", "96k", "128k", "160k", "192k", "256k", "320k")
                                  ayuda="«auto»: calidad variable alta; un valor fijo (p. ej. 192k), tasa constante")),
            palabras=("mp3", "audio", "música", "podcast", "extraer audio", "nota de voz", "whatsapp", "opus"))
 def convertir_audio(ctx):
-    # absorbe script_audio_converter (scripts-linux, retirado el 2026-10-31): tasa fija y etiquetas del original
+    # absorbe el conversor de notas de voz que se retiró el 2026-10-31: tasa fija y etiquetas del original
     formato, tasa = ctx.p("formato"), ctx.p("tasa") or "auto"
     destino = ctx.salida(nombre=ctx.entrada.stem, extension=f".{formato}")
     if ctx.simular:

@@ -1,6 +1,6 @@
 """Fechas y nombres de fotos y videos de cámara: auditar y ordenar una carpeta.
 
-Envuelve `backends/photo-metadata` (llegó de scripts-linux el 2026-10-31), que sigue siendo una CLI completa con OCR de
+Envuelve `backends/photo-metadata` (llegó del repo de utilidades de Linux el 2026-10-31), que sigue siendo una CLI completa con OCR de
 la marca impresa, plan de renombrado editable, deshacer y digiKam. Ese backend trabaja sobre la carpeta misma; aquí
 se respeta el principio 2 de `base.py`: «ordenar» trabaja sobre una copia en una carpeta nueva y «auditar» solo lee.
 """
