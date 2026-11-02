@@ -1,22 +1,29 @@
-"""escritorio/studio/controladores/herramientas.py — la tabla de herramientas (las operaciones del motor y las recetas,
-de las fichas del corredor en caché; releídas en segundo plano) filtrada por familia o por los archivos que aceptan;
+"""escritorio/studio/controladores/herramientas.py — el catálogo de herramientas (las operaciones del motor y las
+recetas, de las fichas del corredor en caché; releídas en segundo plano) como cuadrícula filtrada por área, por la
+búsqueda (título, descripción, palabras y formatos, sin distinguir tildes) o por los archivos que aceptan;
 la herramienta actual con su Resumen (Markdown), los campos de sus Opciones (`PaginaFormulario`, desde la ficha) y
 sus valores (recordados por herramienta en QSettings), el destino de la salida (junto a cada original · en una
 carpeta); el último trabajo de cada herramienta."""
 from __future__ import annotations
 
 import json
+import unicodedata
 from pathlib import Path
 
-from gui_comun.modelos import ModeloFiltrado, ModeloTabla
+from gui_comun.modelos import ModeloFiltrado, ModeloLista
 from gui_comun.qt import QObject, QSettings, QStandardPaths, Property, Signal, Slot
 
 from escritorio.studio import familias
 from escritorio.studio.servicios import fichas as svc
 from escritorio.studio.servicios import rutas
 
-COLUMNAS = [("Herramienta", "titulo"), ("Familia", "familia_texto"), ("Categoría", "categoria"), ("Acepta", "acepta"), ("Entradas", "entradas"),
-            ("Opciones", "opciones"), ("Estado", "estado")]
+ROLES = ("ref", "titulo", "descripcion", "icono", "area", "areaTexto", "areas", "formatos", "acepta", "entradas", "opciones",
+         "disponible", "estado", "nivel", "receta", "larga", "buscable")
+
+
+def _plano(texto: str) -> str:
+    """En minúsculas y sin tildes (la búsqueda del catálogo no distingue «video» de «vídeo»)."""
+    return "".join(c for c in unicodedata.normalize("NFD", (texto or "").lower()) if unicodedata.category(c) != "Mn")
 
 
 def cache_del_studio() -> Path:
@@ -35,7 +42,7 @@ class Herramientas(QObject):
         self.espacio, self.archivos, self.consola, self.tareas = espacio, archivos, consola, tareas
         self._s = QSettings()
         self._cache = cache or cache_del_studio()
-        self._tabla = ModeloTabla(COLUMNAS, parent=self)
+        self._tabla = ModeloLista(ROLES, parent=self)
         self._modelo = ModeloFiltrado(self._tabla, parent=self)
         self._datos: dict = {}
         self._fichas: dict[str, dict] = {}
@@ -46,7 +53,7 @@ class Herramientas(QObject):
         self._en_carpeta = False
         self._motivo = ""
         self._modelo.aceptar_con(self._acepta)
-        espacio.filtroCambiado.connect(lambda: self._modelo.aceptar_con(self._acepta))
+        espacio.filtroCambiado.connect(lambda: (self._modelo.aceptar_con(self._acepta), self.cambiado.emit()))
         archivos.cambiado.connect(self._archivos_cambiaron)
         self.cargar_cache()
 
@@ -76,13 +83,16 @@ class Herramientas(QObject):
             self.actualCambiado.emit()
 
     def _fila(self, f: dict) -> dict:
-        faltan = f.get("faltan") or []
-        return {"titulo": f["titulo"], "familia_texto": familias.nombre_de(f["familia"]), "categoria": f.get("categoria", ""), "acepta": svc.acepta_texto(f),
-                "entradas": svc.entrada_texto(f).split(" (")[0], "opciones": str(len(f.get("parametros", []))) if not f.get("es_receta") else f"{len(f.get('pasos', []))} pasos",
-                "estado": "lista" if not faltan else "falta " + ", ".join(x.removeprefix("py:") for x in faltan), "nivel": "positivo" if not faltan else "negativo",
-                "icono": {"titulo": f.get("icono", "")}, "habilitado": True, "ref": f["ref"], "familia": f["familia"], "clave": "lista" if not faltan else "falta",
-                "palabras": " ".join(f.get("palabras", [])) + " " + f.get("descripcion", ""),
-                "crudo": {"opciones": len(f.get("parametros", [])), "estado": 0 if not faltan else 1}}
+        faltan = [x.removeprefix("py:") for x in f.get("faltan") or []]
+        areas = f.get("areas") or [f.get("area", "")]
+        return {"ref": f["ref"], "titulo": f["titulo"], "descripcion": f.get("descripcion", ""), "icono": f.get("icono", ""),
+                "area": areas[0], "areaTexto": " · ".join(familias.nombre_area(a) for a in areas), "areas": areas,
+                "formatos": f.get("formatos") or svc.acepta_texto(f), "acepta": svc.acepta_texto(f), "entradas": svc.entrada_texto(f),
+                "opciones": len(f.get("parametros", [])) if not f.get("es_receta") else len(f.get("pasos", [])),
+                "disponible": not faltan, "estado": "lista" if not faltan else "falta " + ", ".join(faltan),
+                "nivel": "positivo" if not faltan else "negativo", "receta": bool(f.get("es_receta")), "larga": bool(f.get("larga")),
+                "buscable": _plano(" ".join([f["titulo"], f.get("descripcion", ""), " ".join(f.get("palabras", [])), f.get("formatos", ""),
+                                             " ".join(familias.nombre_area(a) for a in areas)]))}
 
     @Slot()
     def releer(self) -> None:
@@ -127,7 +137,9 @@ class Herramientas(QObject):
     # ------------------------------------------------------------------ la tabla
     def _acepta(self, fila_origen: int) -> bool:
         f = self._tabla.fila(fila_origen)
-        if self.espacio.familia and f.get("familia") != self.espacio.familia:
+        if self.espacio.area and self.espacio.area not in (f.get("areas") or []):
+            return False
+        if self.espacio.busqueda and not all(p in f.get("buscable", "") for p in _plano(self.espacio.busqueda).split()):
             return False
         if self.espacio.soloAceptan:
             ficha = self._fichas.get(f.get("ref", ""))
@@ -160,13 +172,18 @@ class Herramientas(QObject):
     def resumen(self) -> str:
         return f"{self.total} herramientas · {self.listas} listas en esta máquina"
 
-    @Property("QVariantList", notify=cambiado)
-    def filasNavegacion(self) -> list:
-        filas = [{"nombre": "familia", "texto": "Todas", "icono": "application-x-executable", "contador": len(self._fichas)}]
-        for id_, nombre, _p, icono in familias.FAMILIAS:
-            n = sum(1 for f in self._fichas.values() if f["familia"] == id_)
-            filas.append({"nombre": f"familia.{id_}", "texto": nombre, "icono": icono, "contador": n})
-        return filas
+    @Property("QVariantMap", notify=cambiado)
+    def porArea(self) -> dict:
+        """Cuántas herramientas hay en cada área (y en «» todas): el contador de cada filtro."""
+        c = {"": len(self._fichas)}
+        for f in self._fichas.values():
+            for a in f.get("areas") or []:
+                c[a] = c.get(a, 0) + 1
+        return c
+
+    @Property(int, notify=cambiado)
+    def visibles(self) -> int:
+        return self._modelo.rowCount()
 
     @Property("QVariantList", notify=cambiado)
     def refs(self) -> list:
@@ -199,10 +216,7 @@ class Herramientas(QObject):
     def irA(self, ref: str) -> bool:
         if ref not in self._fichas:
             return False
-        self.espacio.fijarVista("herramientas")
-        if self.filaDe(ref) < 0:
-            self.espacio.fijarSoloAceptan(False)
-            self.espacio.fijarFamilia("")
+        self.espacio.fijarVista("herramienta")
         self._fijar_actual(ref)
         self.seleccionar.emit(self.filaDe(ref))
         return True
@@ -251,6 +265,14 @@ class Herramientas(QObject):
     @Property(str, notify=actualCambiado)
     def textoFamilia(self) -> str:
         return familias.nombre_de(self.familia) if self._actual else ""
+
+    @Property(str, notify=actualCambiado)
+    def textoAreas(self) -> str:
+        return " · ".join(familias.nombre_area(a) for a in self._ficha_actual().get("areas", [])) if self._actual else ""
+
+    @Property(str, notify=actualCambiado)
+    def formatos(self) -> str:
+        return self._ficha_actual().get("formatos", "") if self._actual else ""
 
     @Property(bool, notify=actualCambiado)
     def esReceta(self) -> bool:
@@ -366,5 +388,5 @@ class Herramientas(QObject):
         return ", ".join(f"{k} = {v}" for k, v in self._valores.items())
 
     def entradas_paleta(self, _texto: str) -> list[dict]:
-        return [{"nombre": f"herramienta.{f['ref']}", "texto": f["titulo"], "grupo": familias.nombre_de(f["familia"]), "icono": f.get("icono", ""),
+        return [{"nombre": f"herramienta.{f['ref']}", "texto": f["titulo"], "grupo": familias.nombre_area(f.get("area", "")), "icono": f.get("icono", ""),
                  "ejecutar": lambda r=f["ref"]: self.irA(r)} for f in self._fichas.values()]

@@ -1,5 +1,6 @@
 """tests/studio/test_controladores.py — los controladores de la ventana en proceso (sin QML) sobre los archivos de muestra:
-espacio (vistas y filtros), archivos (la lista), herramientas (la tabla desde las fichas, los filtros por familia y por
+espacio (vistas y filtros), archivos (la lista), herramientas (el catálogo desde las fichas, los filtros por área, por la
+búsqueda y por
 los archivos que aceptan, la actual con sus campos y sus opciones recordadas, la salida), trabajos y operaciones (F5
 simula como trabajo, Ctrl+Intro aplica, la cola, el resultado con su vista previa, la CLI de solo lectura). Con el
 .venv del repo corre el motor de verdad (convertir subtítulos y rotar un PDF); nada descarga ni transcribe."""
@@ -57,13 +58,16 @@ def piezas(app, muestra, ajustes_temporales):
 @requiere_binding
 def test_espacio_y_archivos(piezas):
     e, a, m = piezas["espacio"], piezas["archivos"], piezas["muestra"]
-    assert e.vista == "herramientas" and e.familia == "" and e.nombreNavegacion == "familia"
-    e.fijarFamilia("pdf")
-    assert e.textoFamilia == "PDF" and e.nombreNavegacion == "familia.pdf"
+    assert e.vista == "catalogo" and e.area == "" and e.textoArea == "Todas las herramientas"
+    e.fijarArea("audio")
+    assert e.area == "audio" and e.textoArea == "Audio" and e.vista == "catalogo"
+    e.fijarVista("cola")
     e.fijarGrupo("hechos")
-    assert e.vista == "trabajos" and e.nombreNavegacion == "trabajos.hechos" and e.textoFiltro == "hechos"
-    e.fijarFamilia("")
-    assert e.vista == "herramientas"
+    assert e.vista == "cola" and e.grupo == "hechos" and e.textoGrupo == "Hechos"
+    e.fijarBusqueda("vídeo")
+    assert e.vista == "catalogo" and e.busqueda == "vídeo" and "«vídeo»" in e.textoFiltro
+    e.fijarArea("no-existe")
+    assert e.area == ""
     assert a.total == 0 and a.resumen == "sin archivos"
     assert a.agregar([str(m.archivos["pdf"]), str(m.archivos["pdf"]), "/no/existe.pdf", m.archivos["otro"].as_uri()]) == 2
     assert a.total == 2 and a.rutas == [str(m.archivos["pdf"]), str(m.archivos["otro"])] and a.resumen.startswith("2 archivos: oficio.pdf, anexo.pdf")
@@ -74,21 +78,33 @@ def test_espacio_y_archivos(piezas):
     assert a.total == 0
 
 
+def _refs_visibles(h) -> list:
+    return [h.modelo.sourceModel().fila(h.modelo.filaOrigen(i))["ref"] for i in range(h.modelo.filas)]
+
+
 @requiere_binding
-def test_herramientas_tabla_filtros_y_actual(piezas):
+def test_herramientas_catalogo_filtros_y_actual(piezas):
     h, e, a, m = piezas["herramientas"], piezas["espacio"], piezas["archivos"], piezas["muestra"]
-    assert h.total >= 4 and h.listas >= 2 and h.filasNavegacion[0]["contador"] == h.total
+    assert h.total >= 4 and h.listas >= 2 and h.porArea[""] == h.total and h.visibles == h.total
     assert "pdf" in {f["familia"] for f in (h.ficha(r) for r in h.refs)} and any(h.ficha(r)["es_receta"] for r in h.refs)
-    e.fijarFamilia("recetas")
-    assert h.modelo.filas >= 1 and all(h.ficha(h.modelo.sourceModel().fila(h.modelo.filaOrigen(i))["ref"])["familia"] == "recetas" for i in range(h.modelo.filas))
-    e.fijarFamilia("")
+    fila = h.modelo.sourceModel().fila(0)
+    assert {"titulo", "descripcion", "icono", "areaTexto", "formatos", "disponible", "estado"} <= set(fila)
+    e.fijarArea("recetas")
+    assert h.modelo.filas >= 1 and all(h.ficha(r)["es_receta"] for r in _refs_visibles(h))
+    e.fijarArea("transcripcion")
+    assert "convertir_subtitulos" in _refs_visibles(h)
+    e.fijarArea("")
+    e.fijarBusqueda("subtitulos")                      # sin tilde encuentra «subtítulos»
+    assert "convertir_subtitulos" in _refs_visibles(h) and "unir" not in _refs_visibles(h)
+    e.fijarBusqueda("")
     a.agregar([str(m.archivos["srt"])])
     e.fijarSoloAceptan(True)
     aceptan = h.queAceptan()
     assert "convertir_subtitulos" in aceptan and "unir" not in aceptan and h.modelo.filas == len(aceptan)
     assert h.irA("convertir_subtitulos") and h.hayActual and h.titulo == "Convertir subtítulos" and h.familia == "audio_video" and h.aceptaLosArchivos
+    assert e.vista == "herramienta" and h.textoAreas.startswith("Transcripción") and h.formatos == "SRT VTT"
     assert h.campos == [] and h.resumenMarkdown.startswith("# Convertir subtítulos")
-    assert h.irA("unir") and not e.soloAceptan and e.familia == ""            # oculta por el filtro: lo quita
+    assert h.irA("unir") and e.vista == "herramienta"
     assert [c["clave"] for c in h.campos][:1] == ["nombre"] and h.valores == {} and h.minimoEntradas == 2 and not h.aceptaLosArchivos
     h.fijarValor("nombre", "paquete")
     assert h.valores == {"nombre": "paquete"} and h.textoOpciones == "nombre = paquete"
@@ -109,7 +125,7 @@ def test_herramientas_tabla_filtros_y_actual(piezas):
 @requiere_binding
 def test_operaciones_sin_poder(piezas):
     o, h, a, m = piezas["operaciones"], piezas["herramientas"], piezas["archivos"], piezas["muestra"]
-    assert o.actual == "herramienta" and not o.puedeSimular and o.motivoNoSimular == "Elige primero una herramienta en la tabla."
+    assert o.actual == "herramienta" and not o.puedeSimular and o.motivoNoSimular == "Elige primero una herramienta en el catálogo."
     h.irA("unir")
     assert "necesita al menos 2" in o.motivoNoSimular
     a.agregar([str(m.archivos["pdf"]), str(m.archivos["srt"])])
@@ -158,8 +174,15 @@ def test_trabajos_simular_aplicar_y_la_cli(piezas, app):
     assert t.contadores["en_curso"] + t.contadores["en_cola"] == 2
     _esperar(app, tr, t)
     assert t.contadores == {"todos": 4, "en_cola": 0, "en_curso": 0, "hechos": 4, "con_error": 0}
+    assert [f["seccion"] for f in t.modelo.sourceModel().todas()] == ["Hechos"] * 4             # la cola por secciones
     assert sorted(p.name for p in (m.raiz / "salida").iterdir()) == ["oficio_rotado-2.pdf", "oficio_rotado.pdf"]
     assert m.archivos["pdf"].stat().st_size > 0
+    # repetir: el mismo trabajo (entradas, opciones, salida) otra vez a la cola, sin pisar lo anterior
+    rotado = t.id
+    nuevo = t.repetir(rotado)
+    assert nuevo and nuevo != rotado
+    _esperar(app, tr, t)
+    assert t.contadores["hechos"] == 5 and "oficio_rotado-3.pdf" in {p.name for p in (m.raiz / "salida").iterdir()}
     # un trabajo que falla por archivo (un PDF que no es PDF): con error, con su mensaje
     malo = m.raiz / "malo.pdf"
     malo.write_text("esto no es un PDF", encoding="utf-8")
@@ -168,6 +191,10 @@ def test_trabajos_simular_aplicar_y_la_cli(piezas, app):
     assert o.aplicar()
     _esperar(app, tr, t)
     assert t.estado == "fallido" and t.contadores["con_error"] == 1 and "malo.pdf" in t.resultado
+    malo.unlink()
+    avisos = []
+    t.aviso.connect(lambda texto, tipo: avisos.append(texto))
+    assert t.repetir(t.id) == "" and "ya no existe malo.pdf" in avisos[-1]      # sin su entrada, no se repite
     # la CLI de solo lectura
     o.fijar("doctor")
     assert o.simular()
@@ -185,3 +212,27 @@ def test_lista_de_trabajos_persistida(piezas, muestra):
     from escritorio.studio.servicios import trabajos as svc
     lista = svc.Lista(c / "trabajos.json")
     assert lista.por_id(ident) is not None
+
+
+@requiere_binding
+def test_vista_previa_de_cada_tipo(piezas, app):
+    from escritorio.studio.controladores.vista import Vista
+    m = piezas["muestra"]
+    v = Vista(piezas["cache"])
+    try:
+        v.mostrar(str(m.archivos["png"]))
+        assert v.tipo == "imagen" and v.url.startswith("file://") and v.descripcion.startswith("Imagen PNG")
+        v.mostrar(str(m.archivos["wav"]))
+        assert v.tipo == "audio" and v.url.endswith("entrevista.wav")
+        v.mostrar(str(m.archivos["srt"]))
+        assert v.tipo == "texto" and "Hola, buenas tardes" in v.texto
+        v.mostrar(str(m.archivos["carpeta"]))
+        assert v.tipo == "carpeta" and v.url == ""
+        v.mostrar(str(m.archivos["pdf"]))
+        if v.paginas.filas:                                   # con poppler
+            assert v.tipo == "pdf" and v.paginas.filas == 2 and "2 páginas" in v.descripcion
+            assert v.renderizar_ya(1).endswith(".png") and v.paginas.fila(0)["imagen"].startswith("file://")
+        v.mostrar("")
+        assert v.tipo == "" and v.ruta == ""
+    finally:
+        v.apagar()

@@ -44,14 +44,18 @@ def herramientas(datos: dict) -> list[dict]:
     """Las fichas de la ventana: cada operación con su familia e icono, y cada receta como herramienta de Recetas."""
     salida = []
     for f in datos.get("operaciones", []):
+        areas = familias.areas_de(f)
         salida.append(dict(f, es_receta=False, familia=familias.familia_de(f), icono=familias.icono_de(f), ref=f["id"],
-                           larga=any(r in LARGOS for r in f.get("requiere", []))))
+                           larga=any(r in LARGOS for r in f.get("requiere", [])), areas=areas, area=areas[0],
+                           formatos=familias.formatos_texto(f)))
     for r in datos.get("recetas", []):
         salida.append({"id": r["id"], "ref": f"receta:{r['id']}", "titulo": r["nombre"], "descripcion": r.get("descripcion") or "Receta: " + " → ".join(p["titulo"] for p in r["pasos"]),
                        "categoria": "Recetas", "entrada": r["entrada"], "lote": True, "parametros": [], "requiere": [], "faltan": r.get("faltan", []),
                        "extensiones": r.get("extensiones", []), "minimo_entradas": r.get("minimo_entradas", 1), "palabras": [p["titulo"] for p in r["pasos"]],
                        "es_receta": True, "familia": "recetas", "icono": "view-list-tree", "pasos": r["pasos"], "origen": r.get("origen", ""),
-                       "larga": False})
+                       "larga": False, "areas": ["recetas"], "area": "recetas",
+                       "formatos": familias.formatos_texto({"entrada": r["entrada"], "extensiones": r.get("extensiones", []),
+                                                            "minimo_entradas": r.get("minimo_entradas", 1), "id": r["id"]})})
     return salida
 
 

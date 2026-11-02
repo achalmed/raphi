@@ -2,11 +2,12 @@
 """escritorio/studio/capturar.py — una captura de Raphi Studio para la documentación sobre los ARCHIVOS DE MUESTRA
 (`muestra.py`: un PDF, un PNG, unos subtítulos, un Markdown y una carpeta de juguete, nunca los del usuario) creados en
 una carpeta temporal fuera de la carpeta de inicio, con HOME, configuración, caché y datos temporales (ninguna ruta de
-la máquina en pantalla), el esquema de color que se pida, la familia, la herramienta, la pestaña de detalles, la vista y,
-si se pide, la paleta de órdenes.
+la máquina en pantalla), el esquema de color que se pida, la vista (catálogo, herramienta o cola), el área, la búsqueda,
+la herramienta, las entradas y, si se pide, la paleta de órdenes.
 
-    /usr/bin/python3 escritorio/studio/capturar.py docs/figuras/raphi-studio-oscuro.png --esquema ~/Documents/lliphi/generado/esquema/LliphiOscuro.colors --familia pdf --herramienta rotar --pestana 2
-    /usr/bin/python3 escritorio/studio/capturar.py docs/figuras/raphi-studio-claro.png --esquema ~/Documents/lliphi/generado/esquema/LliphiClaro.colors --vista trabajos --pestana 3
+    /usr/bin/python3 escritorio/studio/capturar.py docs/figuras/raphi-studio-catalogo.png --esquema …/LliphiOscuro.colors --vista catalogo
+    /usr/bin/python3 escritorio/studio/capturar.py docs/figuras/raphi-studio-herramienta.png --esquema …/LliphiOscuro.colors --vista herramienta --herramienta rotar --aplicar
+    /usr/bin/python3 escritorio/studio/capturar.py docs/figuras/raphi-studio-cola.png --esquema …/LliphiClaro.colors --vista cola --aplicar
     /usr/bin/python3 escritorio/studio/capturar.py salida.png --paleta "pdf"
 
 Antes de capturar corre de verdad, sobre la muestra, la herramienta elegida con el corredor del motor (el `.venv` del
@@ -32,16 +33,17 @@ def main() -> int:
     parser = argparse.ArgumentParser(description="Captura de Raphi Studio sobre los archivos de muestra")
     parser.add_argument("salida")
     parser.add_argument("--esquema", help="archivo .colors de KDE (relanza con XDG_CONFIG_HOME temporal)")
-    parser.add_argument("--vista", default="herramientas", help="herramientas · trabajos")
-    parser.add_argument("--familia", default="pdf", help="la familia de la navegación (vacío: todas)")
+    parser.add_argument("--vista", default="catalogo", help="catalogo · herramienta · cola")
+    parser.add_argument("--area", default="", help="el área del catálogo (vacío: todas)")
+    parser.add_argument("--busqueda", default="", help="el texto de la búsqueda del catálogo")
+    parser.add_argument("--sin-entradas-en-catalogo", action="store_true", help="en el catálogo, sin el aviso de las entradas")
     parser.add_argument("--herramienta", default="", help="la herramienta elegida (id de la operación; vacío: la primera que acepte los archivos)")
-    parser.add_argument("--archivos", default="pdf,otro", help="qué archivos de la muestra van a la lista (pdf, otro, png, srt, md, txt, carpeta)")
-    parser.add_argument("--pestana", type=int, default=-1, help="pestaña de detalles (0 Resumen · 1 Archivos · 2 Opciones · 3 Resultado · 4 Registro)")
+    parser.add_argument("--archivos", default="pdf,otro", help="qué archivos de la muestra son entradas (pdf, otro, png, srt, md, txt, wav, carpeta)")
     parser.add_argument("--aplicar", action="store_true", help="aplica de verdad la herramienta (además de simularla) antes de capturar")
     parser.add_argument("--sin-correr", action="store_true", help="no corre nada antes de capturar")
     parser.add_argument("--paleta", default=None, help="abre la paleta de órdenes con este texto")
-    parser.add_argument("--ancho", type=int, default=1280)
-    parser.add_argument("--alto", type=int, default=800)
+    parser.add_argument("--ancho", type=int, default=1440)
+    parser.add_argument("--alto", type=int, default=900)
     args = parser.parse_args()
 
     if "RAPHI_STUDIO_CAPTURA" not in os.environ:      # primera pasada: la muestra, el entorno temporal (y esquema), y relanzar
@@ -105,8 +107,7 @@ def main() -> int:
 
     def empezar():
         archivos.agregar([str(m.archivos[k]) for k in args.archivos.split(",") if k in m.archivos])
-        espacio.fijarFamilia(args.familia)
-        ref = args.herramienta or next(iter(herramientas.queAceptan()), "")
+        ref = args.herramienta or (next(iter(herramientas.queAceptan()), "") if args.vista != "catalogo" else "")
         if ref:
             herramientas.irA(ref)
             operaciones.fijar("herramienta")
@@ -117,22 +118,22 @@ def main() -> int:
         correr_siguiente()
 
     def listo():
+        if args.vista == "catalogo" and args.sin_entradas_en_catalogo:
+            archivos.vaciar()
+        espacio.fijarArea(args.area)
+        espacio.fijarBusqueda(args.busqueda)
         espacio.fijarVista(args.vista)
-        if args.vista == "trabajos":
-            trabajos.irA(trabajos.id or "")
-        raiz.setProperty("mostrarDetalles", True)
-        raiz.setProperty("mostrarInferior", True)
-        inferior = raiz.property("inferior")
-        if inferior is not None:
-            inferior.setProperty("pestanaActual", 0)
-        if args.pestana >= 0:
-            QTimer.singleShot(500, lambda: interfaz.pedir.emit("pestana", {"indice": args.pestana}))
+        if args.vista == "cola" and trabajos.id:
+            trabajos.irA(trabajos.id)
+            if trabajos.salidas:
+                piezas["vista"].mostrar(trabajos.salidas[0])
         if args.paleta is not None:
             QTimer.singleShot(900, lambda: interfaz.pedir.emit("paleta", {"texto": args.paleta}))
-        app.capturar(args.salida, espera_ms=2400)
+        app.capturar(args.salida, espera_ms=3000)
 
     QTimer.singleShot(600, empezar)
     codigo = app.app.exec()
+    piezas["vista"].apagar()
     app.cerrar()
     print("CAPTURA", args.salida)
     return codigo

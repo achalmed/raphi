@@ -1,6 +1,7 @@
-"""tests/studio/test_studio.py — Raphi Studio (QML + Kirigami sobre gui-comun 2.7) abre su ventana sin pantalla con el
-Python del sistema sobre los archivos de muestra: la ventana entera (acciones, menús, barra, resumen, los archivos
-recibidos y la herramienta que los acepta, un trabajo simulado con el motor), cada componente QML, `--smoke`, y las
+"""tests/studio/test_ventana.py — Raphi Studio (reingeniería: QML + Kirigami sobre gui-comun 3.0, VentanaBase) abre su
+ventana sin pantalla con el Python del sistema sobre los archivos de muestra: la ventana entera (acciones, menús, las
+tres vistas, los archivos recibidos y la herramienta que los acepta, un trabajo simulado con el motor, la vista previa
+de un PDF y de un audio), cada componente QML, `--smoke`, y las
 reglas de la familia (sin colores propios, sin marca dentro, sin QtWidgets, ninguna operación nombrada fuera de
 familias.py; ninguna prueba descarga ni transcribe ni toca los archivos del usuario)."""
 from __future__ import annotations
@@ -29,7 +30,7 @@ app.motor.warnings.connect(lambda avisos: errores.extend(a.toString() for a in a
 ok = app.cargar(aplicacion.QML_DIR / "Main.qml")
 raiz = app.motor.rootObjects()[0] if ok else None
 a, h, ar, t, o, e = piezas["acciones"], piezas["herramientas"], piezas["archivos"], piezas["trabajos"], piezas["operaciones"], piezas["espacio"]
-sin = (a.accion("op.simular").habilitada, a.accion("op.aplicar").visible, a.accion("archivo.quitar").habilitada)
+sin = (a.accion("op.simular").habilitada, a.accion("op.aplicar").habilitada, a.accion("archivo.quitar").habilitada, e.vista)
 n = ar.recibir([str(m.archivos["srt"])])
 tras_recibir = (e.soloAceptan, h.modelo.filas, h.ref, e.vista)
 h.irA("convertir_subtitulos")
@@ -40,10 +41,17 @@ while (piezas["tareas"].activa or t.enCurso) and time.monotonic() - inicio < 120
     app.app.processEvents(); time.sleep(0.05)
 app.app.processEvents()
 titulo = raiz.property("title") if raiz else ""
+v = piezas["vista"]
+v.mostrar(str(m.archivos["wav"])); audio = (v.tipo, v.url.endswith(".wav"))
+v.mostrar(str(m.archivos["pdf"])); pdf = (v.tipo, v.paginas.filas)
+e.fijarVista("cola"); en_cola = (e.vista, raiz.property("title"))
+e.fijarVista("catalogo"); e.fijarArea("transcripcion"); catalogo = (e.vista, h.visibles)
+confirma = (a.accion("op.aplicar").operacion, a.accion("op.aplicar").requiereConfirmacion)
 QTimer.singleShot(800, app.app.quit); app.app.exec(); app.cerrar()
 print(json.dumps({"ok": ok, "titulo": titulo, "errores": errores, "acciones": a.nombres(), "menus": [x["titulo"] for x in a.menus], "barra": a.barra, "sin": sin, "n": n,
                   "tras_recibir": tras_recibir, "con": con, "corrio": corrio, "estado": t.estado, "simulado": t.simulado, "resultado": t.resultado[:200],
-                  "resumen": e.resumen, "contexto": e.contexto, "total": h.total}))
+                  "resumen": e.resumen, "contexto": e.contexto, "total": h.total, "audio": audio, "pdf": pdf, "en_cola": en_cola, "catalogo": catalogo,
+                  "confirma": confirma, "clase": type(app.app).__name__}))
 """
 
 COMPONENTE = """
@@ -78,16 +86,19 @@ def test_abre_y_cierra_su_ventana(tmp_path, muestra):
     assert datos["ok"], r.stderr[-3000:]
     assert not _graves(datos["errores"]), "\n".join(_graves(datos["errores"]))
     for n in ("archivo.anadir", "archivo.anadir_carpeta", "archivo.quitar", "archivo.vaciar", "archivo.abrir", "archivo.mostrar", "archivo.terminal", "archivo.copiar",
-              "editar.filtrar", "editar.todo", "ver.vista.herramientas", "ver.vista.trabajos", "ver.familia", "ver.familia.pdf", "ver.aceptan", "ver.releer",
-              "op.herramienta", "op.doctor", "op.lista", "op.formatos", "op.simular", "op.aplicar", "op.cancelar", "herramienta.restablecer", "herramienta.opciones",
-              "trabajos.quitar", "trabajos.limpiar", "trabajos.herramienta", "herr.dolphin", "herr.vigilar", "herr.faltan", "herr.web", "herr.lanzador", "herr.venv",
-              "ayuda.manual", "ayuda.referencia", "ventana.navegacion", "ventana.detalles", "ventana.inferior", "ventana.paleta", "app.ajustes", "app.acerca", "app.salir"):
+              "editar.buscar", "ver.catalogo", "ver.herramienta", "ver.cola", "ver.atras", "ver.area", "ver.area.transcripcion", "ver.aceptan", "ver.releer",
+              "op.doctor", "op.lista", "op.formatos", "op.simular", "op.aplicar", "op.cancelar", "herramienta.restablecer",
+              "trabajos.repetir", "trabajos.quitar", "trabajos.limpiar", "trabajos.herramienta", "herr.dolphin", "herr.vigilar", "herr.faltan", "herr.salida",
+              "herr.web", "herr.lanzador", "herr.venv", "ayuda.manual", "ayuda.referencia", "ventana.paleta", "app.ajustes", "app.acerca", "app.salir"):
         assert n in datos["acciones"], n
-    assert datos["menus"] == ["&Archivo", "&Editar", "&Ver", "&Herramienta", "&Trabajos", "H&erramientas", "A&justes", "Ay&uda"]
-    assert datos["barra"] == ["op.simular", "op.aplicar", "|", "archivo.anadir", "archivo.anadir_carpeta"]
-    assert datos["sin"] == [False, True, False] and datos["n"] == 1
-    assert datos["tras_recibir"][0] is True and datos["tras_recibir"][1] >= 1 and datos["tras_recibir"][3] == "herramientas"
+    assert datos["menus"] == ["&Archivo", "&Editar", "&Ver", "&Herramienta", "&Cola", "H&erramientas", "A&justes", "Ay&uda"]
+    assert datos["clase"] == "QApplication"                                  # gui-comun 3.0: los diálogos de KDE
+    assert datos["sin"] == [False, False, False, "catalogo"] and datos["n"] == 1
+    assert datos["tras_recibir"][0] is True and datos["tras_recibir"][1] >= 1
     assert datos["con"] == [True, True, "Simular", "herramienta"]
+    assert datos["confirma"] == ["escritura", True]                          # Procesar lo confirma la base
+    assert datos["audio"] == ["audio", True] and datos["pdf"][0] == "pdf"
+    assert datos["en_cola"][0] == "cola" and datos["en_cola"][1].startswith("Cola") and datos["catalogo"][0] == "catalogo" and datos["catalogo"][1] >= 1
     if MOTOR:
         assert datos["total"] >= 60 and datos["corrio"] and datos["estado"] == "hecho" and datos["simulado"] and "entrevista.vtt" in datos["resultado"]
         assert datos["resumen"].startswith(f"{datos['total']} herramientas · ") and "1 trabajos: 0 en cola · 0 en curso · 1 hechos" in datos["resumen"]

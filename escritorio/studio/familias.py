@@ -1,9 +1,14 @@
-"""Las familias de Raphi Studio: cada operación del motor cae en una, leída de su ficha (sin Qt, se prueba sola).
+"""Las familias y las áreas de Raphi Studio: cada operación del motor cae en una familia y en una o más áreas del
+catálogo, leídas de su ficha (sin Qt, se prueba sola).
 
 La web agrupa por categoría (Organizar, Convertir…); el escritorio, por el tipo de archivo con que trabaja la persona:
 Documentos · PDF · Imágenes · Audio y video · Archivos, y Recetas. Una operación nueva cae sola en su familia por sus
 extensiones y su tipo de entrada; solo las que no se pueden leer así van en `POR_ID`. Es el único archivo del studio
 que nombra operaciones (lo vigila `tests/test_studio.py`).
+
+Las áreas (reingeniería X1, `docs/reingenieria.md`) son las del catálogo: Documentos y PDF · Imágenes · Audio · Vídeo ·
+Transcripción · Conversión · Procesamiento por lotes · Automatización y recetas. Una herramienta puede estar en varias
+(convertir un vídeo es Vídeo y Conversión); la primera es la suya.
 """
 from __future__ import annotations
 
@@ -83,3 +88,82 @@ def acepta(ficha: dict, rutas: list[str]) -> bool:
         carpetas = all(Path(r).is_dir() for r in rutas)
         return carpetas if trabaja_con_carpetas(ficha) else not carpetas
     return all(Path(r).suffix.lower() in ext for r in rutas)
+
+
+# ======================================================================================================================
+# Las áreas del catálogo (reingeniería X1)
+
+AREAS = (
+    ("documentos_pdf", "Documentos y PDF", "Ofimática, PDF: unir, dividir, comprimir, OCR, sellos, firmas y seguridad", "application-pdf"),
+    ("imagenes", "Imágenes", "Convertir, redimensionar, recortar, comprimir y ordenar fotos por fecha", "image-x-generic"),
+    ("audio", "Audio", "Convertir y recortar audio, descargar y transcribir", "audio-x-generic"),
+    ("video", "Vídeo", "Convertir, comprimir, recortar y descargar vídeo", "video-x-generic"),
+    ("transcripcion", "Transcripción", "Del audio al texto con Whisper, y los subtítulos", "audio-input-microphone"),
+    ("conversion", "Conversión", "De un formato a otro: documentos, PDF, imágenes, audio, vídeo y subtítulos", "document-export"),
+    ("lotes", "Procesamiento por lotes", "Las que trabajan con carpetas o reúnen muchos archivos en uno (todas aceptan varios archivos)", "folder-documents"),
+    ("recetas", "Automatización y recetas", "Varias herramientas, una tras otra, con sus opciones guardadas", "view-list-tree"),
+)
+NOMBRES_AREA = {id_: nombre for id_, nombre, _p, _i in AREAS}
+ICONOS_AREA = {id_: icono for id_, _n, _p, icono in AREAS}
+AUDIO = {".mp3", ".m4a", ".aac", ".flac", ".opus", ".ogg", ".wav"}
+VIDEO = {".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v"}
+SUBTITULOS = {".srt", ".vtt"}
+# las que su ficha no deja leer del todo
+TRANSCRIPCION_POR_ID = {"transcribir"}
+AUDIO_Y_VIDEO_POR_ID = {"descargar"}
+LOTES_POR_ID = {"inventario_paginas"} | CON_CARPETAS
+
+
+def nombre_area(area: str) -> str:
+    return NOMBRES_AREA.get(area, area)
+
+
+def areas_de(ficha: dict) -> list[str]:
+    """Las áreas de una herramienta, la suya primero."""
+    if ficha.get("es_receta"):
+        return ["recetas"]
+    familia = familia_de(ficha)
+    ext = {e.lower() for e in ficha.get("extensiones", ())}
+    salida: list[str] = []
+
+    def poner(a: str) -> None:
+        if a not in salida:
+            salida.append(a)
+
+    if ficha["id"] in TRANSCRIPCION_POR_ID:
+        poner("transcripcion")
+    if familia in ("pdf", "documentos"):
+        poner("documentos_pdf")
+    elif familia == "imagenes":
+        poner("imagenes")
+    elif familia == "audio_video":
+        if ext and ext <= SUBTITULOS:
+            poner("transcripcion")
+        if ficha["id"] in AUDIO_Y_VIDEO_POR_ID:
+            poner("video")
+            poner("audio")
+        if ext & AUDIO:                                # acepta audio (y quizá vídeo, del que saca el audio)
+            poner("audio")
+        if ext & VIDEO:
+            poner("video")
+    if ficha.get("categoria") == "Convertir" or (ext and ext <= SUBTITULOS and familia == "audio_video" and "convertir" in ficha["id"]) \
+            or ficha["id"].startswith("convertir_"):
+        poner("conversion")
+    if familia == "archivos" or ficha["id"] in LOTES_POR_ID or (not ficha.get("lote", True) and ficha.get("entrada") in ("pdfs", "imagenes")):
+        poner("lotes")
+    return salida or ["lotes"]
+
+
+def formatos_texto(ficha: dict, tope: int = 6) -> str:
+    """Los formatos que acepta, cortos: «PDF», «JPG PNG WEBP …», «carpetas», «sin archivos»."""
+    if ficha.get("entrada") == "ninguna" or ficha.get("minimo_entradas", 1) == 0:
+        return "sin archivos (una dirección o nada)"
+    ext = ficha.get("extensiones") or []
+    if not ext:
+        return "carpetas" if trabaja_con_carpetas(ficha) else "cualquier archivo"
+    vistos: list[str] = []
+    for e in ext:
+        e = e.lstrip(".").upper().replace("JPEG", "JPG")
+        if e not in vistos:
+            vistos.append(e)
+    return " ".join(vistos[:tope]) + (" …" if len(vistos) > tope else "")

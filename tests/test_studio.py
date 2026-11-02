@@ -26,6 +26,19 @@ def test_cada_operacion_en_una_familia():
         assert familias.icono_de(ficha)
 
 
+def test_cada_operacion_en_un_area_del_catalogo():
+    """Reingeniería X1: cada operación del motor cae en una o más áreas del catálogo, y cada área tiene alguna."""
+    from raphi import motor
+    ids = {a[0] for a in familias.AREAS}
+    usadas = set()
+    for ficha in motor.operaciones():
+        areas = familias.areas_de(ficha)
+        assert areas and set(areas) <= ids, ficha["id"]
+        usadas.update(areas)
+        assert familias.formatos_texto(ficha)
+    assert usadas | {"recetas"} == ids
+
+
 def test_el_corredor_da_las_fichas_y_corre_un_trabajo(tmp_path, corpus):
     r = subprocess.run([sys.executable, str(STUDIO / "corredor.py"), "fichas"], capture_output=True, text=True, timeout=120, cwd=str(RAIZ))
     assert r.returncode == 0, r.stderr[-1500:]

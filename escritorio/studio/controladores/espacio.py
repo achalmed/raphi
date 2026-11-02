@@ -1,7 +1,8 @@
-"""escritorio/studio/controladores/espacio.py — lo transversal: la vista (herramientas · trabajos), la familia y el
-grupo de trabajos que filtran la tabla (la navegación), el resumen y el contexto de la barra de estado, y las acciones
-sobre una ruta (abrir con el sistema, mostrar en Dolphin, terminal, portapapeles). La vista y los filtros se
-recuerdan en QSettings."""
+"""escritorio/studio/controladores/espacio.py — lo transversal (reingeniería, `docs/reingenieria.md`): la vista
+(Catálogo · Herramienta · Cola), el área y la búsqueda que filtran el catálogo, el grupo que filtra la cola, el
+resumen y el contexto de la barra de estado, y lo que se hace con una ruta: abrir con su aplicación y mostrar en
+Dolphin (las funciones de `escritorio` de gui-comun 3.0), la terminal y el portapapeles. La vista, el área y el grupo
+se recuerdan en QSettings."""
 from __future__ import annotations
 
 import os
@@ -13,7 +14,7 @@ from gui_comun.qt import QGuiApplication, QObject, QSettings, Property, Signal, 
 from escritorio.studio import familias
 from escritorio.studio.servicios import trabajos as svc_trabajos
 
-VISTAS = (("herramientas", "Herramientas", "application-x-executable"), ("trabajos", "Trabajos", "view-task"))
+VISTAS = (("catalogo", "Catálogo", "view-grid"), ("herramienta", "Herramienta", "tool-animator"), ("cola", "Cola", "view-task"))
 NOMBRES_VISTAS = tuple(v[0] for v in VISTAS)
 
 
@@ -24,22 +25,24 @@ class Espacio(QObject):
     contextoCambiado = Signal()
     aviso = Signal(str, str)
 
-    def __init__(self, consola, ajustes=None, parent=None):
+    def __init__(self, consola, ajustes=None, escritorio=None, parent=None):
         super().__init__(parent)
-        self.consola, self.ajustes = consola, ajustes
+        self.consola, self.ajustes, self.escritorio = consola, ajustes, escritorio
         self._s = QSettings()
-        self._vista = str(self._s.value("ventana/vista", "herramientas") or "herramientas")
-        if self._vista not in NOMBRES_VISTAS:
-            self._vista = "herramientas"
-        self._familia = str(self._s.value("ventana/familia", "") or "")
-        if self._familia and self._familia not in familias.NOMBRES:
-            self._familia = ""
+        self._vista = str(self._s.value("ventana/vista3", "catalogo") or "catalogo")
+        if self._vista not in NOMBRES_VISTAS or self._vista == "herramienta":
+            self._vista = "catalogo"                     # la herramienta se abre eligiéndola, no al arrancar
+        self._area = str(self._s.value("ventana/area", "") or "")
+        if self._area and self._area not in familias.NOMBRES_AREA:
+            self._area = ""
         self._grupo = str(self._s.value("ventana/grupo", "todos") or "todos")
         if self._grupo not in dict(svc_trabajos.GRUPOS):
             self._grupo = "todos"
+        self._busqueda = ""
         self._solo_aceptan = False
         self._resumen = self._contexto = ""
 
+    # ------------------------------------------------------------- la vista
     @Property("QVariantList", constant=True)
     def vistas(self) -> list:
         return [{"nombre": n, "texto": t, "icono": i} for n, t, i in VISTAS]
@@ -52,33 +55,47 @@ class Espacio(QObject):
     def indiceVista(self) -> int:
         return NOMBRES_VISTAS.index(self._vista)
 
-    @Property(str, notify=vistaCambiada)
-    def textoVista(self) -> str:
-        return next(t for n, t, _i in VISTAS if n == self._vista)
-
     @Slot(str)
     def fijarVista(self, nombre: str) -> None:
         if nombre in NOMBRES_VISTAS and nombre != self._vista:
             self._vista = nombre
-            self._s.setValue("ventana/vista", nombre)
+            self._s.setValue("ventana/vista3", nombre)
             self.vistaCambiada.emit()
 
-    # ------------------------------------------------------------- los filtros
-    @Property(str, notify=filtroCambiado)
-    def familia(self) -> str:
-        return self._familia
+    # ------------------------------------------------------------- los filtros del catálogo
+    @Property("QVariantList", constant=True)
+    def areas(self) -> list:
+        return [{"nombre": "", "texto": "Todas", "icono": "view-grid"}] + [{"nombre": a, "texto": n, "icono": i, "descripcion": d}
+                                                                           for a, n, d, i in familias.AREAS]
 
     @Property(str, notify=filtroCambiado)
-    def textoFamilia(self) -> str:
-        return familias.nombre_de(self._familia) if self._familia else "Todas las herramientas"
+    def area(self) -> str:
+        return self._area
+
+    @Property(str, notify=filtroCambiado)
+    def textoArea(self) -> str:
+        return familias.nombre_area(self._area) if self._area else "Todas las herramientas"
 
     @Slot(str)
-    def fijarFamilia(self, nombre: str) -> None:
-        nombre = nombre if nombre in familias.NOMBRES else ""
-        self.fijarVista("herramientas")
-        if nombre != self._familia:
-            self._familia = nombre
-            self._s.setValue("ventana/familia", nombre)
+    def fijarArea(self, area: str) -> None:
+        area = area if area in familias.NOMBRES_AREA else ""
+        self.fijarVista("catalogo")
+        if area != self._area:
+            self._area = area
+            self._s.setValue("ventana/area", area)
+            self.filtroCambiado.emit()
+
+    @Property(str, notify=filtroCambiado)
+    def busqueda(self) -> str:
+        return self._busqueda
+
+    @Slot(str)
+    def fijarBusqueda(self, texto: str) -> None:
+        texto = (texto or "").strip()
+        if texto != self._busqueda:
+            self._busqueda = texto
+            if texto:
+                self.fijarVista("catalogo")
             self.filtroCambiado.emit()
 
     @Property(bool, notify=filtroCambiado)
@@ -92,6 +109,7 @@ class Espacio(QObject):
             self._solo_aceptan = bool(v)
             self.filtroCambiado.emit()
 
+    # ------------------------------------------------------------- el filtro de la cola
     @Property(str, notify=filtroCambiado)
     def grupo(self) -> str:
         return self._grupo
@@ -103,23 +121,16 @@ class Espacio(QObject):
     @Slot(str)
     def fijarGrupo(self, grupo: str) -> None:
         grupo = grupo if grupo in dict(svc_trabajos.GRUPOS) else "todos"
-        self.fijarVista("trabajos")
         if grupo != self._grupo:
             self._grupo = grupo
             self._s.setValue("ventana/grupo", grupo)
             self.filtroCambiado.emit()
 
     @Property(str, notify=filtroCambiado)
-    def nombreNavegacion(self) -> str:
-        if self._vista == "trabajos":
-            return "trabajos" if self._grupo == "todos" else f"trabajos.{self._grupo}"
-        return f"familia.{self._familia}" if self._familia else "familia"
-
-    @Property(str, notify=filtroCambiado)
     def textoFiltro(self) -> str:
-        if self._vista == "trabajos":
-            return self.textoGrupo.lower()
-        partes = [self.textoFamilia.lower()]
+        partes = [self.textoArea.lower()]
+        if self._busqueda:
+            partes.append(f"«{self._busqueda}»")
         if self._solo_aceptan:
             partes.append("las que aceptan los archivos")
         return " · ".join(partes)
@@ -148,30 +159,23 @@ class Espacio(QObject):
     # ------------------------------------------------------------- sobre una ruta
     @Slot(str)
     def abrir(self, ruta: str) -> None:
-        if ruta and os.path.exists(ruta):
-            subprocess.Popen(["xdg-open", ruta])
-            self.consola.registrar("info", f"Abierto con el sistema: {ruta}")
-        else:
+        """Con la aplicación que KDE asocia a su tipo (gui-comun 3.0, `escritorio.abrirConAplicacion`)."""
+        if not ruta or not os.path.exists(ruta):
             self.aviso.emit(f"No existe: {ruta or '(nada seleccionado)'}", "aviso")
+        elif self.escritorio is not None:
+            self.escritorio.abrirConAplicacion(ruta)
+        else:
+            subprocess.Popen(["xdg-open", ruta], start_new_session=True)
 
     @Slot(str)
     def mostrarEnCarpeta(self, ruta: str) -> None:
-        """Dolphin con el archivo seleccionado (`--select`); sin Dolphin, la carpeta con el sistema."""
+        """Dolphin con el archivo señalado (gui-comun 3.0, `escritorio.mostrarEnDolphin`)."""
         if not ruta or not os.path.exists(ruta):
             self.aviso.emit(f"No existe: {ruta or '(nada seleccionado)'}", "aviso")
-            return
-        if shutil.which("dolphin"):
-            subprocess.Popen(["dolphin", "--select", ruta])
+        elif self.escritorio is not None:
+            self.escritorio.mostrarEnDolphin(ruta)
         else:
-            subprocess.Popen(["xdg-open", ruta if os.path.isdir(ruta) else os.path.dirname(ruta)])
-
-    @Slot(str)
-    def abrirDolphin(self, ruta: str) -> None:
-        carpeta = ruta if os.path.isdir(ruta) else os.path.dirname(ruta)
-        if os.path.isdir(carpeta):
-            subprocess.Popen(["xdg-open", carpeta])
-        else:
-            self.aviso.emit(f"No existe la carpeta: {carpeta}", "aviso")
+            subprocess.Popen(["xdg-open", ruta if os.path.isdir(ruta) else os.path.dirname(ruta)], start_new_session=True)
 
     def _terminal(self) -> str:
         preferido = (self.ajustes.terminal if self.ajustes is not None else "konsole") or "konsole"
@@ -187,9 +191,9 @@ class Espacio(QObject):
             return
         terminal = self._terminal()
         if terminal == "konsole":
-            subprocess.Popen(["konsole", "--workdir", carpeta])
+            subprocess.Popen(["konsole", "--workdir", carpeta], start_new_session=True)
         elif terminal:
-            subprocess.Popen([terminal], cwd=carpeta)
+            subprocess.Popen([terminal], cwd=carpeta, start_new_session=True)
         else:
             self.aviso.emit("No se encontró un emulador de terminal (konsole).", "aviso")
 
@@ -200,10 +204,10 @@ class Espacio(QObject):
             self.consola.registrar("info", f"Copiado: {texto}")
 
     def entradas_paleta(self, _texto: str) -> list[dict]:
-        salida = [{"nombre": "ir.herramientas", "texto": "Ver todas las herramientas", "grupo": "Vistas", "icono": "application-x-executable",
-                   "ejecutar": lambda: self.fijarFamilia("")}]
-        salida += [{"nombre": f"ir.familia.{f}", "texto": f"Ver {n}", "grupo": "Vistas", "icono": i, "ejecutar": lambda f=f: self.fijarFamilia(f)}
-                   for f, n, _p, i in familias.FAMILIAS]
-        salida += [{"nombre": f"ir.trabajos.{g}", "texto": f"Ver los trabajos: {t.lower()}", "grupo": "Vistas", "icono": "view-task",
-                    "ejecutar": lambda g=g: self.fijarGrupo(g)} for g, t in svc_trabajos.GRUPOS]
+        salida = [{"nombre": "ir.catalogo", "texto": "Ver todas las herramientas", "grupo": "Vistas", "icono": "view-grid",
+                   "ejecutar": lambda: self.fijarArea("")}]
+        salida += [{"nombre": f"ir.area.{a}", "texto": f"Ver {n}", "grupo": "Áreas", "icono": i, "ejecutar": lambda a=a: self.fijarArea(a)}
+                   for a, n, _d, i in familias.AREAS]
+        salida += [{"nombre": f"ir.cola.{g}", "texto": f"Cola: {t.lower()}", "grupo": "Vistas", "icono": "view-task",
+                    "ejecutar": lambda g=g: (self.fijarGrupo(g), self.fijarVista("cola"))} for g, t in svc_trabajos.GRUPOS]
         return salida

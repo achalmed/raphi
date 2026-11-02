@@ -138,7 +138,7 @@ class Operaciones(QObject):
         if not o.trabajo:
             return ""
         if not h.hayActual:
-            return "Elige primero una herramienta en la tabla."
+            return "Elige primero una herramienta en el catálogo."
         if h.faltan:
             return "Falta en esta máquina: " + ", ".join(h.faltan) + "."
         if not h.sinArchivos and self.archivos.total < h.minimoEntradas:

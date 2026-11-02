@@ -3,16 +3,19 @@
 
 Nunca los archivos del usuario. En una carpeta temporal escribe, con el Python del sistema y sin PyMuPDF ni Pillow
 (`docs/rediseno.md` S10): un PDF de dos páginas con texto, escrito a mano; un PNG diminuto (zlib y struct); unos
-subtítulos SRT; un Markdown; un texto; y una carpeta con dos fotos de juguete. Devuelve las rutas y las variables de
+subtítulos SRT; un Markdown; un texto; un WAV de dos segundos (con `wave`, sin ffmpeg); y una carpeta con dos fotos de
+juguete. Devuelve las rutas y las variables de
 entorno con las que el studio ve la muestra (HOME, configuración, caché y datos temporales: ninguna ruta de la
 máquina en pantalla).
 
     from muestra import crear
-    m = crear(Path(carpeta))      # m.archivos: {pdf, png, srt, md, txt, carpeta}; m.entorno
+    m = crear(Path(carpeta))      # m.archivos: {pdf, otro, png, srt, md, txt, wav, carpeta}; m.entorno
 """
 from __future__ import annotations
 
+import math
 import struct
+import wave
 import zlib
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -73,6 +76,16 @@ def png(ruta: Path, ancho: int = 64, alto: int = 48, color=(46, 84, 150)) -> Pat
     return ruta
 
 
+def wav(ruta: Path, segundos: float = 2.0, hz: int = 440, tasa: int = 8000) -> Path:
+    """Un WAV mono de un tono (la vista previa de audio y las herramientas de audio, sin ffmpeg para crearlo)."""
+    with wave.open(str(ruta), "wb") as w:
+        w.setnchannels(1)
+        w.setsampwidth(2)
+        w.setframerate(tasa)
+        w.writeframes(b"".join(struct.pack("<h", int(6000 * math.sin(2 * math.pi * hz * i / tasa))) for i in range(int(segundos * tasa))))
+    return ruta
+
+
 def crear(raiz: Path) -> Muestra:
     raiz = Path(raiz)
     raiz.mkdir(parents=True, exist_ok=True)
@@ -86,6 +99,9 @@ def crear(raiz: Path) -> Muestra:
         "md": docs / "notas.md",
         "txt": docs / "nota.txt",
     }
+    medios = raiz / "medios"
+    medios.mkdir(exist_ok=True)
+    archivos["wav"] = wav(medios / "entrevista.wav")
     archivos["srt"].write_text("1\n00:00:01,000 --> 00:00:02,500\nHola, buenas tardes.\n\n2\n00:00:03,000 --> 00:00:04,000\nGracias por venir.\n", encoding="utf-8")
     archivos["md"].write_text("# Notas de la reunión\n\n- Acción: enviar el oficio.\n- Número: 42.\n", encoding="utf-8")
     archivos["txt"].write_text("Una nota de oficina con tildes: acción, número, señal.\n", encoding="utf-8")

@@ -2,8 +2,10 @@
 de acciones (menú, barra, menú contextual, paleta, atajos), la instancia única (los archivos que llegan de Dolphin o
 de otra instancia van a la ventana abierta) y carga `qml/Main.qml`.
 
-Toda operación existe una sola vez, aquí, en `Acciones`: F5 simula (la herramienta sobre los archivos como trabajo
-simulado del corredor, o la CLI de solo lectura del motor) y Ctrl+Intro aplica tras confirmar en QML. Lo que necesita
+Reingeniería del 2026-11-02 (`docs/reingenieria.md`): un estudio multimedia, no un explorador — el catálogo de
+herramientas en cuadrícula por áreas, el espacio de trabajo de cada herramienta (entradas, vista previa, opciones) y la
+cola. Toda operación existe una sola vez, aquí, en `Acciones`: F5 simula (la herramienta sobre las entradas como
+trabajo simulado del corredor) y Ctrl+Intro procesa tras la confirmación de gui-comun 3.0. Lo que necesita
 un diálogo lo pide a QML por `Interfaz.pedir`. Python no construye interfaz; el motor corre como proceso con el
 `.venv` del repo (`corredor.py`); la ventana no nombra ninguna operación (lo vigila `tests/test_studio.py`).
 """
@@ -29,10 +31,12 @@ from gui_comun.tareas import Tareas  # noqa: E402
 from escritorio.studio import familias  # noqa: E402
 from escritorio.studio.controladores.ajustes import Ajustes  # noqa: E402
 from escritorio.studio.controladores.archivos import Archivos  # noqa: E402
+from escritorio.studio.controladores import espacio as espacio_mod  # noqa: E402
 from escritorio.studio.controladores.espacio import Espacio  # noqa: E402
 from escritorio.studio.controladores.herramientas import Herramientas  # noqa: E402
 from escritorio.studio.controladores.operaciones import Operaciones  # noqa: E402
 from escritorio.studio.controladores.trabajos import Trabajos  # noqa: E402
+from escritorio.studio.controladores.vista import Vista  # noqa: E402
 from escritorio.studio.servicios import operaciones as ops  # noqa: E402
 from escritorio.studio.servicios import rutas  # noqa: E402
 
@@ -43,9 +47,9 @@ REPO = rutas.REPO
 APP_ID = "raphi"
 NOMBRE = APP_NAME
 NOMBRE_SOCKET = "raphi-escritorio"          # el mismo que la ventana web: Dolphin y la CLI no saben cuál está abierta
-DESCRIPCION = ("Documentos, PDF, imágenes, audio y video en tu máquina, en una ventana de trabajo: las herramientas del motor de Raphi por familia "
-               "con lo que les falta, los archivos que sueltas o eliges, las opciones de cada herramienta generadas de su ficha, y los trabajos con su "
-               "cola, su progreso, su resultado y su registro. F5 simula (el plan: qué se producirá y dónde) y Ctrl+Intro aplica tras confirmar; el "
+DESCRIPCION = ("Un estudio de documentos, PDF, imágenes, audio y vídeo en tu máquina: el catálogo de herramientas del motor de Raphi por áreas "
+               "con lo que les falta, el espacio de trabajo de cada una (entradas, vista previa, opciones generadas de su ficha) y la cola de trabajos "
+               "con su progreso, su resultado, su registro y repetir. F5 simula (el plan: qué se producirá y dónde) y Ctrl+Intro procesa tras confirmar; el "
                "original nunca se toca. El motor corre como proceso con el entorno del repo; la misma herramienta está en la CLI (raphi), en la web y en Qillqa.")
 ACENTO = "violeta"
 
@@ -70,100 +74,109 @@ def construir(app: Aplicacion, cache: Path | None = None, releer: bool = True) -
     tareas = Tareas(consola)
     interfaz = Interfaz()
     ajustes = Ajustes()
-    espacio = Espacio(consola, ajustes)
+    espacio = Espacio(consola, ajustes, escritorio=getattr(app, "escritorio", None))
     archivos = Archivos(consola)
     herramientas = Herramientas(espacio, archivos, consola, tareas, cache=cache)
     trabajos = Trabajos(espacio, herramientas, consola, tareas, cache=cache)
     operaciones = Operaciones(espacio, herramientas, archivos, trabajos, consola, tareas, cache=cache)
+    vista = Vista(herramientas._cache)
     acciones = Acciones()
     acciones.estandar(NOMBRE)
     pedir = lambda que, **datos: (lambda *_: interfaz.pedir.emit(que, datos))
 
     def objetivo() -> str:
-        if espacio.vista == "trabajos":
+        """Sobre qué actúan abrir, mostrar en Dolphin, terminal y copiar: lo que muestra la vista previa, la salida del
+        trabajo elegido en la cola o el archivo elegido de la lista."""
+        if espacio.vista == "cola":
             return trabajos.salidaActual or (trabajos.archivos[0] if trabajos.archivos else "")
-        return archivos.rutaActual or (archivos.rutas[0] if archivos.rutas else "")
+        return vista.ruta or archivos.rutaActual or (archivos.rutas[0] if archivos.rutas else "")
 
     # --- Archivo
     acciones.registrar("archivo.anadir", "&Añadir archivos…", "document-open", StandardKey.Open, "Archivo", al_disparar=pedir("elegir_archivos"),
-                       descripcion="Archivos para la lista (también se sueltan sobre la ventana)")
+                       descripcion="Archivos de entrada, con el diálogo de KDE (también se sueltan desde Dolphin sobre la ventana)")
     acciones.registrar("archivo.anadir_carpeta", "Añadir una &carpeta…", "folder-open", "Ctrl+Shift+O", "Archivo", al_disparar=pedir("elegir_carpeta"),
                        descripcion="Una carpeta entera como entrada (las herramientas que trabajan con carpetas)")
-    acciones.registrar("archivo.quitar", "&Quitar de la lista", "list-remove", "Delete", "Archivo", habilitada=False, al_disparar=pedir("quitar_archivos"))
-    acciones.registrar("archivo.vaciar", "&Vaciar la lista", "edit-clear-list", None, "Archivo", habilitada=False, al_disparar=lambda *_: archivos.vaciar())
-    acciones.registrar("archivo.abrir", "A&brir", "document-open", None, "Archivo", habilitada=False, al_disparar=lambda *_: espacio.abrir(objetivo()),
-                       descripcion="El archivo seleccionado (o la salida) con la aplicación del sistema")
-    acciones.registrar("archivo.mostrar", "&Mostrar en la carpeta", "system-file-manager", "Ctrl+Shift+M", "Archivo", habilitada=False,
-                       al_disparar=lambda *_: espacio.mostrarEnCarpeta(objetivo()), descripcion="Dolphin con el archivo seleccionado")
+    acciones.registrar("archivo.quitar", "&Quitar de las entradas", "list-remove", "Delete", "Archivo", habilitada=False, al_disparar=pedir("quitar_archivos"))
+    acciones.registrar("archivo.vaciar", "&Vaciar las entradas", "edit-clear-list", None, "Archivo", habilitada=False, al_disparar=lambda *_: archivos.vaciar())
+    acciones.registrar("archivo.abrir", "A&brir con su aplicación", "document-open", None, "Archivo", habilitada=False,
+                       al_disparar=lambda *_: espacio.abrir(objetivo()), descripcion="El archivo de la vista previa (o la salida elegida) con la aplicación de KDE")
+    acciones.registrar("archivo.mostrar", "&Mostrar en Dolphin", "system-file-manager", "Ctrl+Shift+M", "Archivo", habilitada=False,
+                       al_disparar=lambda *_: espacio.mostrarEnCarpeta(objetivo()), descripcion="Dolphin en su carpeta, con el archivo señalado")
     acciones.registrar("archivo.terminal", "Abrir &terminal aquí", "utilities-terminal", "Shift+F4", "Archivo", habilitada=False,
                        al_disparar=lambda *_: espacio.abrirTerminal(objetivo()))
     acciones.registrar("archivo.copiar", "Copiar la &ruta", "edit-copy", "Ctrl+Shift+C", "Archivo", habilitada=False, al_disparar=lambda *_: espacio.copiar(objetivo()))
     # --- Editar
-    acciones.registrar("editar.filtrar", "&Filtrar", "edit-find", StandardKey.Find, "Editar", al_disparar=pedir("filtrar"))
-    acciones.registrar("editar.todo", "Seleccionar &todo", "edit-select-all", StandardKey.SelectAll, "Editar", al_disparar=pedir("seleccionar_todo"))
+    acciones.registrar("editar.buscar", "&Buscar una herramienta", "edit-find", StandardKey.Find, "Editar", al_disparar=pedir("buscar"),
+                       descripcion="Por su nombre, lo que hace o sus formatos")
     # --- Ver
-    acciones.registrar("ver.vista.herramientas", "&1 Herramientas", "application-x-executable", "Ctrl+1", "Ver › Vista", marcable=True,
-                       al_disparar=lambda *_: espacio.fijarVista("herramientas"))
-    acciones.registrar("ver.vista.trabajos", "&2 Trabajos", "view-task", "Ctrl+2", "Ver › Vista", marcable=True, al_disparar=lambda *_: espacio.fijarVista("trabajos"))
-    acciones.registrar("ver.familia", "&Todas las familias", "application-x-executable", "Ctrl+0", "Ver › Familia", marcable=True, al_disparar=lambda *_: espacio.fijarFamilia(""))
-    for i, (id_, nombre, _p, icono) in enumerate(familias.FAMILIAS, start=1):
-        acciones.registrar(f"ver.familia.{id_}", f"&{nombre}", icono, None, "Ver › Familia", marcable=True, al_disparar=lambda *_, n=id_: espacio.fijarFamilia(n))
-    acciones.registrar("ver.aceptan", "Solo las que &aceptan los archivos", "view-filter", "Ctrl+Shift+A", "Ver", marcable=True,
+    for i, (nombre, texto, icono) in enumerate(espacio_mod.VISTAS, start=1):
+        acciones.registrar(f"ver.{nombre}", f"&{i} {texto}", icono, f"Ctrl+{i}", "Ver", marcable=True, al_disparar=lambda *_, n=nombre: espacio.fijarVista(n))
+    acciones.registrar("ver.atras", "&Volver al catálogo", "go-previous", "Alt+Left", "Ver", al_disparar=lambda *_: espacio.fijarVista("catalogo"))
+    acciones.registrar("ver.area", "&Todas las áreas", "view-grid", "Ctrl+0", "Ver › Área", marcable=True, al_disparar=lambda *_: espacio.fijarArea(""))
+    for id_, nombre, _p, icono in familias.AREAS:
+        acciones.registrar(f"ver.area.{id_}", f"&{nombre}", icono, None, "Ver › Área", marcable=True, al_disparar=lambda *_, n=id_: espacio.fijarArea(n))
+    acciones.registrar("ver.aceptan", "Solo las que &aceptan las entradas", "view-filter", "Ctrl+Shift+A", "Ver", marcable=True,
                        al_disparar=lambda *_: espacio.fijarSoloAceptan(acciones.accion("ver.aceptan").marcada),
-                       descripcion="La tabla de herramientas se queda con las que sirven para los archivos de la lista")
-    acciones.registrar("ver.releer", "&Releer las fichas", "view-refresh", "F6", "Ver", al_disparar=lambda *_: herramientas.releer(),
+                       descripcion="El catálogo se queda con las herramientas que sirven para los archivos de entrada")
+    acciones.registrar("ver.releer", "&Releer las fichas", "view-refresh", "F6", "Ver", al_disparar=lambda *_: herramientas.releer(), operacion="lectura",
                        descripcion="Vuelve a pedir al motor sus operaciones, recetas y lo que falta en esta máquina")
-    # --- Herramienta (la operación actual) y Trabajos
-    for o in ops.OPERACIONES:
-        acciones.registrar(f"op.{o.id}", o.titulo, o.icono, None, "Herramienta", al_disparar=lambda *_, i=o.id: operaciones.fijar(i), descripcion=o.descripcion)
-    acciones.registrar("op.simular", "&Simular", "system-run", StandardKey.Refresh, "Herramienta", al_disparar=operaciones.simular,
-                       descripcion="La herramienta sobre los archivos en simulación (el plan: qué se producirá y dónde), o la orden de solo lectura elegida")
-    acciones.registrar("op.aplicar", "&Aplicar…", "dialog-ok-apply", "Ctrl+Return", "Herramienta", habilitada=False, al_disparar=pedir("aplicar"),
-                       descripcion="Muestra la herramienta, los archivos, las opciones y la salida; si confirmas, corre de verdad")
-    acciones.registrar("op.cancelar", "&Cancelar el trabajo", "process-stop", "Escape", "Herramienta", habilitada=False, al_disparar=operaciones.cancelar,
+    # --- Herramienta
+    acciones.registrar("op.simular", "&Simular", "system-run", StandardKey.Refresh, "Herramienta", al_disparar=operaciones.simular, operacion="simulacion",
+                       descripcion="La herramienta sobre las entradas sin escribir nada: el plan (qué se producirá y dónde) en la cola")
+    acciones.registrar("op.aplicar", "&Procesar…", "media-playback-start", "Ctrl+Return", "Herramienta", habilitada=False, al_disparar=operaciones.aplicar,
+                       operacion="escritura", confirmar=True, consecuencias=lambda: operaciones.textoConfirmacion or "Procesa las entradas con la herramienta.",
+                       descripcion="Muestra la herramienta, las entradas, las opciones y la salida; si confirmas, el trabajo va a la cola de verdad")
+    acciones.registrar("op.cancelar", "&Detener el trabajo", "process-stop", "Escape", "Herramienta", habilitada=False, al_disparar=operaciones.cancelar,
                        descripcion="Detiene el trabajo en curso (también el programa que esté corriendo)")
     acciones.registrar("herramienta.restablecer", "&Restablecer las opciones", "edit-undo", "Ctrl+Shift+R", "Herramienta", habilitada=False,
                        al_disparar=lambda *_: herramientas.restablecerOpciones(), descripcion="Vuelve a las opciones por omisión de la herramienta")
-    for i, (nombre, texto) in enumerate((("resumen", "Ver el &resumen"), ("archivos", "Ver los &archivos"), ("opciones", "Ver las &opciones"),
-                                         ("resultado", "Ver el r&esultado"))):
-        acciones.registrar(f"herramienta.{nombre}", texto, "", None, "Herramienta", al_disparar=pedir("pestana", indice=i))
-    acciones.registrar("trabajos.quitar", "&Quitar de la cola", "list-remove", None, "Trabajos", habilitada=False, al_disparar=lambda *_: trabajos.quitarDeLaCola(trabajos.id))
-    acciones.registrar("trabajos.limpiar", "&Limpiar los terminados", "edit-clear-history", None, "Trabajos", al_disparar=lambda *_: trabajos.limpiarHechos(),
+    # --- Cola
+    acciones.registrar("trabajos.repetir", "&Repetir el trabajo", "view-refresh", None, "Cola", habilitada=False,
+                       al_disparar=lambda *_: trabajos.repetir(trabajos.id), descripcion="El mismo trabajo (entradas, opciones y salida) otra vez a la cola")
+    acciones.registrar("trabajos.quitar", "&Quitar de la cola", "list-remove", None, "Cola", habilitada=False, al_disparar=lambda *_: trabajos.quitarDeLaCola(trabajos.id))
+    acciones.registrar("trabajos.limpiar", "&Limpiar los terminados", "edit-clear-history", None, "Cola", al_disparar=lambda *_: trabajos.limpiarHechos(),
                        descripcion="Quita de la lista los trabajos hechos, fallidos y cancelados; las salidas no se tocan")
-    acciones.registrar("trabajos.herramienta", "Ir a su &herramienta", "go-jump", None, "Trabajos", habilitada=False, al_disparar=lambda *_: herramientas.irA(trabajos.ref))
-    # --- Herramientas
+    acciones.registrar("trabajos.herramienta", "Ir a su &herramienta", "go-jump", None, "Cola", habilitada=False, al_disparar=lambda *_: herramientas.irA(trabajos.ref))
+    # --- Herramientas (del motor y del escritorio)
+    for o in ops.OPERACIONES:
+        if o.id == "herramienta":
+            continue
+        acciones.registrar(f"op.{o.id}", o.titulo, o.icono, None, "Herramientas", operacion="lectura", descripcion=o.descripcion,
+                           al_disparar=lambda *_, i=o.id: (operaciones.fijar(i), operaciones.simular(), operaciones.fijar("herramienta"),
+                                                          interfaz.pedir.emit("salida", {})))
     acciones.registrar("herr.dolphin", "Menús de &Dolphin…", "system-file-manager", None, "Herramientas", al_disparar=pedir("dolphin"),
                        descripcion="Instalar o quitar «Raphi ▸ …» del clic derecho de Dolphin")
     acciones.registrar("herr.vigilar", "Carpetas &vigiladas…", "folder-sync", None, "Herramientas", al_disparar=pedir("vigilar"),
                        descripcion="Una carpeta cuyo contenido nuevo pasa por una receta")
     acciones.registrar("herr.faltan", "Lo que &falta en esta máquina…", "dialog-warning", None, "Herramientas", al_disparar=pedir("faltan"))
+    acciones.registrar("herr.salida", "&Salida del motor", "utilities-terminal", "F4", "Herramientas", al_disparar=pedir("salida"),
+                       descripcion="La salida íntegra del motor y el registro de la ventana")
     acciones.registrar("herr.web", "Abrir la versión &web", "internet-web-browser", None, "Herramientas", al_disparar=lambda *_: abrir_web(),
                        descripcion="La ventana que muestra la web de Raphi (raphi --web)")
-    acciones.registrar("herr.lanzador", "Instalar el acceso &directo", "application-x-executable", None, "Herramientas", al_disparar=lambda *_: instalar_lanzador())
+    acciones.registrar("herr.lanzador", "Instalar el acceso &directo", "application-x-executable", None, "Herramientas", al_disparar=lambda *_: instalar_lanzador(),
+                       operacion="instalacion", consecuencias="Escribe el acceso directo de Raphi Studio en el menú de aplicaciones de tu usuario (~/.local/share/applications) y su icono.")
     acciones.registrar("herr.venv", "El &entorno del motor…", "python", None, "Herramientas", al_disparar=pedir("venv"),
                        descripcion="Con qué intérprete corre el motor y cómo crear el .venv (install.sh)")
     # --- Ayuda
     acciones.registrar("ayuda.manual", "&Manual de Raphi Studio", "help-contents", StandardKey.HelpContents, "Ayuda",
-                       al_disparar=lambda *_: subprocess.Popen(["xdg-open", str(APP_DIR / "README.md")]))
+                       al_disparar=lambda *_: espacio.abrir(str(APP_DIR / "README.md")))
     acciones.registrar("ayuda.referencia", "&Referencia de las operaciones", "help-hint", None, "Ayuda",
-                       al_disparar=lambda *_: subprocess.Popen(["xdg-open", str(REPO / "docs" / "referencia-operaciones.md")]))
+                       al_disparar=lambda *_: espacio.abrir(str(REPO / "docs" / "referencia-operaciones.md")))
 
     acciones.definir_menus([
         ("&Archivo", ["archivo.anadir", "archivo.anadir_carpeta", "archivo.quitar", "archivo.vaciar", "|", "archivo.abrir", "archivo.mostrar", "archivo.terminal",
                       "archivo.copiar", "|", "app.salir"]),
-        ("&Editar", ["editar.filtrar", "editar.todo"]),
-        ("&Ver", ["ventana.navegacion", "ventana.detalles", "ventana.inferior", "|", ("&Vista", ["ver.vista.herramientas", "ver.vista.trabajos"]),
-                  ("&Familia", ["ver.familia"] + [f"ver.familia.{f[0]}" for f in familias.FAMILIAS]), "ver.aceptan", "|", "ver.releer", "|", "ventana.pantalla_completa"]),
-        ("&Herramienta", ["op.simular", "op.aplicar", "op.cancelar", "|", "herramienta.restablecer", "|"] + [f"op.{o.id}" for o in ops.OPERACIONES]
-                         + ["|", "herramienta.resumen", "herramienta.archivos", "herramienta.opciones", "herramienta.resultado"]),
-        ("&Trabajos", ["ver.vista.trabajos", "|", "trabajos.herramienta", "trabajos.quitar", "trabajos.limpiar"]),
-        ("H&erramientas", ["herr.dolphin", "herr.vigilar", "herr.faltan", "|", "herr.web", "herr.lanzador", "herr.venv", "|", "ventana.paleta"]),
+        ("&Editar", ["editar.buscar"]),
+        ("&Ver", ["ver.catalogo", "ver.herramienta", "ver.cola", "ver.atras", "|", ("&Área", ["ver.area"] + [f"ver.area.{a[0]}" for a in familias.AREAS]),
+                  "ver.aceptan", "|", "ver.releer", "|", "ventana.pantalla_completa"]),
+        ("&Herramienta", ["op.simular", "op.aplicar", "op.cancelar", "|", "herramienta.restablecer"]),
+        ("&Cola", ["ver.cola", "|", "trabajos.repetir", "trabajos.herramienta", "trabajos.quitar", "trabajos.limpiar"]),
+        ("H&erramientas", [f"op.{o.id}" for o in ops.OPERACIONES if o.id != "herramienta"] + ["herr.salida", "|", "herr.faltan", "herr.dolphin", "herr.vigilar",
+                           "|", "herr.web", "herr.lanzador", "herr.venv", "|", "ventana.paleta"]),
         ("A&justes", ["app.ajustes"]),
         ("Ay&uda", ["ayuda.manual", "ayuda.referencia", "app.acerca"]),
     ])
-    acciones.definir_barra(["op.simular", "op.aplicar", "|", "archivo.anadir", "archivo.anadir_carpeta"])
     acciones.anadir_fuente(espacio.entradas_paleta)
-    acciones.anadir_fuente(operaciones.entradas_paleta)
     acciones.anadir_fuente(herramientas.entradas_paleta)
     acciones.anadir_fuente(trabajos.entradas_paleta)
     acciones.anadir_fuente(archivos.entradas_paleta)
@@ -181,45 +194,48 @@ def construir(app: Aplicacion, cache: Path | None = None, releer: bool = True) -
         archivos.recibir(rutas_)
 
     def al_recibir(n: int) -> None:
-        """Archivos que llegaron (soltados, Dolphin, otra instancia): si se quiere, la tabla con lo que los acepta."""
-        if n and ajustes.filtrarAlRecibir:
-            espacio.fijarVista("herramientas")
+        """Archivos que llegaron (soltados, Dolphin, otra instancia): con una herramienta abierta que los acepta, se
+        quedan ahí; si no, el catálogo con lo que los acepta (y, si es una sola, esa herramienta)."""
+        if not n:
+            return
+        if espacio.vista == "herramienta" and herramientas.hayActual and herramientas.aceptaLosArchivos:
+            return
+        if ajustes.filtrarAlRecibir:
             espacio.fijarSoloAceptan(True)
             que = herramientas.queAceptan()
             if len(que) == 1:
                 herramientas.irA(que[0])
-            elif not que:
-                interfaz.pedir.emit("aviso", {"texto": "Ninguna herramienta acepta esos archivos juntos.", "tipo": "aviso"})
-        interfaz.pedir.emit("pestana", {"indice": 1})
+            else:
+                espacio.fijarVista("catalogo")
+                if not que:
+                    interfaz.pedir.emit("aviso", {"texto": "Ninguna herramienta acepta esas entradas juntas.", "tipo": "aviso"})
 
     def vista_cambiada():
-        acciones.marcar("ver.vista.herramientas", espacio.vista == "herramientas")
-        acciones.marcar("ver.vista.trabajos", espacio.vista == "trabajos")
+        for n, *_r in espacio_mod.VISTAS:
+            acciones.marcar(f"ver.{n}", espacio.vista == n)
         disponibilidad()
 
     def filtro_cambiado():
-        acciones.marcar("ver.familia", espacio.familia == "")
-        for id_, *_r in familias.FAMILIAS:
-            acciones.marcar(f"ver.familia.{id_}", espacio.familia == id_)
+        acciones.marcar("ver.area", espacio.area == "")
+        for id_, *_r in familias.AREAS:
+            acciones.marcar(f"ver.area.{id_}", espacio.area == id_)
         acciones.marcar("ver.aceptan", espacio.soloAceptan)
         disponibilidad()
 
     def disponibilidad():
         activa = tareas.activa
-        en_trabajos = espacio.vista == "trabajos"
         hay_objetivo = bool(objetivo())
         for nombre in ("archivo.abrir", "archivo.mostrar", "archivo.terminal", "archivo.copiar"):
             acciones.habilitar(nombre, hay_objetivo)
-        acciones.habilitar("archivo.quitar", not en_trabajos and archivos.total > 0)
+        acciones.habilitar("archivo.quitar", archivos.total > 0)
         acciones.habilitar("archivo.vaciar", archivos.total > 0)
+        acciones.habilitar("ver.herramienta", herramientas.hayActual)
         acciones.habilitar("herramienta.restablecer", herramientas.hayActual and bool(herramientas.valores))
-        a = acciones.accion("op.simular")
-        a.texto = f"&{operaciones.verbo}"
-        acciones.habilitar("op.simular", operaciones.puedeSimular)
-        b = acciones.accion("op.aplicar")
-        b.visible = operaciones.escribe
+        acciones.habilitar("op.simular", operaciones.puedeSimular and operaciones.actual == "herramienta")
+        acciones.accion("op.aplicar").visible = operaciones.escribe or operaciones.actual == "herramienta"
         acciones.habilitar("op.aplicar", operaciones.puedeAplicar)
         acciones.habilitar("op.cancelar", operaciones.enCurso)
+        acciones.habilitar("trabajos.repetir", trabajos.hayActual and trabajos.estado not in ("en_cola", "en_curso"))
         acciones.habilitar("trabajos.quitar", trabajos.hayActual and trabajos.estado == "en_cola")
         acciones.habilitar("trabajos.herramienta", trabajos.hayActual and trabajos.ref in herramientas.refs)
         acciones.habilitar("ver.releer", not activa)
@@ -235,7 +251,7 @@ def construir(app: Aplicacion, cache: Path | None = None, releer: bool = True) -
         espacio.fijarContexto(" · ".join(partes))
 
     archivos.recibidos.connect(al_recibir)
-    herramientas.actualCambiado.connect(lambda: espacio.vista == "herramientas" and trabajos.irAlUltimoDe(herramientas.ref))
+    herramientas.actualCambiado.connect(lambda: herramientas.hayActual and trabajos.irAlUltimoDe(herramientas.ref))
     herramientas.actualCambiado.connect(lambda: herramientas.hayActual and operaciones.fijar("herramienta"))   # elegir una herramienta es querer correrla
     espacio.vistaCambiada.connect(vista_cambiada)
     espacio.filtroCambiado.connect(filtro_cambiado)
@@ -246,13 +262,14 @@ def construir(app: Aplicacion, cache: Path | None = None, releer: bool = True) -
     trabajos.cambiado.connect(lambda: (disponibilidad(), barra_estado()))
     trabajos.actualCambiado.connect(disponibilidad)
     operaciones.cambiado.connect(lambda: (disponibilidad(), barra_estado()))
+    vista.cambiado.connect(disponibilidad)
     tareas.cambiada.connect(disponibilidad)
     vista_cambiada()
     filtro_cambiado()
     barra_estado()
 
     piezas = dict(consola=consola, tareas=tareas, interfaz=interfaz, ajustes=ajustes, espacio=espacio, archivos=archivos, herramientas=herramientas,
-                  trabajos=trabajos, operaciones=operaciones, acciones=acciones, recibir=recibir)
+                  trabajos=trabajos, operaciones=operaciones, vista=vista, acciones=acciones, recibir=recibir)
     for nombre, objeto in piezas.items():
         if nombre != "recibir":
             app.exponer(nombre, objeto)
@@ -334,7 +351,10 @@ def main(argv: list[str]) -> int:
         app._escucha = escucha
     if rutas_:
         piezas["recibir"](rutas_)
-    return app.ejecutar(QML_DIR / "Main.qml", humo=humo)
+    try:
+        return app.ejecutar(QML_DIR / "Main.qml", humo=humo)
+    finally:
+        piezas["vista"].apagar()
 
 
 def _version() -> str:

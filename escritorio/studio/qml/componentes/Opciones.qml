@@ -18,7 +18,7 @@ QQC2.ScrollView {
         x: Kirigami.Units.largeSpacing
         y: Kirigami.Units.largeSpacing
         spacing: Kirigami.Units.largeSpacing
-        Kirigami.PlaceholderMessage { Layout.fillWidth: true; visible: !pagina.h.hayActual; text: "Ninguna herramienta"; explanation: "Elige una herramienta en la tabla: sus opciones salen de su ficha."; icon.name: "application-x-executable" }
+        Kirigami.PlaceholderMessage { Layout.fillWidth: true; visible: !pagina.h.hayActual; text: "Ninguna herramienta"; explanation: "Elige una herramienta en el catálogo: sus opciones salen de su ficha."; icon.name: "application-x-executable" }
         Kirigami.InlineMessage {
             Layout.fillWidth: true
             visible: pagina.h.hayActual && pagina.h.faltan.length > 0

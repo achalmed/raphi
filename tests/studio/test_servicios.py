@@ -6,6 +6,8 @@ Resultado en Markdown, la lista persistida) y el catálogo de operaciones; un tr
 (convertir subtítulos: sin programas) si el .venv está."""
 from __future__ import annotations
 
+import shutil
+
 import json
 import subprocess
 from pathlib import Path
@@ -47,6 +49,32 @@ def test_familias_y_acepta(muestra_sesion):
     pdf, srt = str(muestra_sesion.archivos["pdf"]), str(muestra_sesion.archivos["srt"])
     assert familias.acepta(f[1], [srt]) and not familias.acepta(f[1], [pdf]) and not familias.acepta(f[0], [pdf]) and familias.acepta(f[0], [pdf, str(muestra_sesion.archivos["otro"])])
     assert not familias.acepta(f[0], [])
+
+
+def test_areas_del_catalogo():
+    """Las áreas del encargo (X1): una herramienta puede estar en varias; la suya, primero; nada queda sin área."""
+    f = FICHAS_MINIMAS["operaciones"]
+    assert familias.areas_de(f[0])[0] == "documentos_pdf" and "lotes" in familias.areas_de(f[0])          # unir: muchos en uno
+    assert familias.areas_de(f[1]) == ["transcripcion", "conversion"]                                     # convertir subtítulos
+    assert familias.areas_de(f[2])[:2] == ["transcripcion", "audio"]                                      # transcribir
+    assert familias.areas_de({"es_receta": True, "id": "x"}) == ["recetas"]
+    assert familias.areas_de({"id": "descargar", "entrada": "ninguna", "extensiones": [], "categoria": "Medios"})[:2] == ["video", "audio"]
+    assert familias.formatos_texto(f[0]) == "PDF" and familias.formatos_texto(f[1]) == "SRT VTT"
+    assert familias.formatos_texto({"id": "descargar", "entrada": "ninguna", "minimo_entradas": 0}).startswith("sin archivos")
+    assert [a[1] for a in familias.AREAS] == ["Documentos y PDF", "Imágenes", "Audio", "Vídeo", "Transcripción", "Conversión",
+                                              "Procesamiento por lotes", "Automatización y recetas"]
+
+
+def test_vista_previa_servicio(muestra_sesion, tmp_path):
+    from escritorio.studio.servicios import vista_previa as vp
+    m = muestra_sesion
+    assert [vp.tipo(m.archivos[k]) for k in ("png", "pdf", "wav", "srt", "md", "carpeta")] == ["imagen", "pdf", "audio", "texto", "texto", "carpeta"]
+    assert vp.tipo(tmp_path / "x.mkv") == "video" and vp.tipo(tmp_path / "x.docx") == ""
+    if shutil.which("pdftoppm") and shutil.which("pdfinfo"):
+        assert len(vp.paginas_pdf(m.archivos["pdf"])) == 2
+        png = vp.renderizar(m.archivos["pdf"], 1, 40, tmp_path)
+        assert png and png.read_bytes()[:4] == b"\x89PNG" and vp.renderizar(m.archivos["pdf"], 1, 40, tmp_path) == png
+        assert vp.podar(tmp_path, limite=0) > 0
 
 
 def test_fichas_herramientas_resumen_y_campos():

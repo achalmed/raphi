@@ -1,4 +1,5 @@
-"""escritorio/studio/controladores/trabajos.py — la cola de trabajos del studio (`docs/rediseno.md` S3): encolar un
+"""escritorio/studio/controladores/trabajos.py — la cola de trabajos del studio (`docs/rediseno.md` S3; en la
+reingeniería, su propia vista, X5, y «repetir»): encolar un
 trabajo (la herramienta sobre los archivos con las opciones, simulado o de verdad), correr el siguiente con
 `gui_comun.tareas.proceso` (el corredor en el intérprete del motor; uno a la vez; el progreso de sus líneas
 `## progreso`; Esc cancela), leer su informe al terminar; la tabla de trabajos filtrada por grupo; el trabajo actual con
@@ -9,15 +10,17 @@ import json
 import time
 from pathlib import Path
 
-from gui_comun.modelos import ModeloFiltrado, ModeloTabla
+from gui_comun.modelos import ModeloFiltrado, ModeloLista, ModeloTabla
 from gui_comun.qt import QObject, Property, Signal, Slot
 
 from escritorio.studio.servicios import archivos as svc_archivos
 from escritorio.studio.servicios import rutas
 from escritorio.studio.servicios import trabajos as svc
 
-COLUMNAS = [("Trabajo", "titulo"), ("Archivos", "archivos"), ("Estado", "estado"), ("Progreso", "progreso"), ("Inicio", "inicio"), ("Duración", "duracion"),
-            ("Salidas", "salidas")]
+ROLES = ("id", "titulo", "archivos", "estado", "clave", "progreso", "porcentaje", "inicio", "duracion", "salidas", "nivel", "icono", "grupo",
+         "seccion", "ref", "simulado", "mensaje", "primeraSalida")
+SECCIONES = {"en_curso": "En curso", "en_cola": "En cola", "hechos": "Hechos", "con_error": "Con error"}
+ORDEN_SECCION = {"en_curso": 0, "en_cola": 1, "hechos": 2, "con_error": 2}
 COLUMNAS_SALIDAS = [("Salida", "nombre"), ("Tipo", "tipo"), ("Tamaño", "tamano"), ("Carpeta", "carpeta")]
 
 
@@ -45,7 +48,7 @@ class Trabajos(QObject):
         self.espacio, self.herramientas, self.consola, self.tareas = espacio, herramientas, consola, tareas
         self._cache = cache or herramientas._cache
         self._lista = svc.Lista(self._cache / "trabajos.json")
-        self._tabla = ModeloTabla(COLUMNAS, parent=self)
+        self._tabla = ModeloLista(ROLES, parent=self)
         self._modelo = ModeloFiltrado(self._tabla, parent=self)
         self._salidas = ModeloTabla(COLUMNAS_SALIDAS, parent=self)
         self._actual = ""
@@ -57,8 +60,7 @@ class Trabajos(QObject):
         self._modelo.aceptar_con(self._acepta)
         espacio.filtroCambiado.connect(lambda: self._modelo.aceptar_con(self._acepta))
         tareas.linea.connect(self._linea)
-        self._tabla.poner([self._fila(t) for t in self._lista.trabajos])
-        self.cambiado.emit()
+        self._pintar()
 
     modelo = Property(QObject, lambda self: self._modelo, constant=True)
     salidasModelo = Property(QObject, lambda self: self._salidas, constant=True)
@@ -70,19 +72,36 @@ class Trabajos(QObject):
 
     def _fila(self, t: svc.Trabajo) -> dict:
         n = len(t.archivos)
-        archivos = (Path(t.archivos[0]).name + (f" y {n - 1} más" if n > 1 else "")) if n else "—"
-        return {"titulo": t.titulo + (" (simulación)" if t.simular else ""), "archivos": archivos, "estado": svc.TEXTO_DE_ESTADO[t.estado],
-                "progreso": f"{t.progreso} %" if t.estado == "en_curso" else ("100 %" if t.estado == "hecho" else "—"), "inicio": _hora(t.inicio or t.creado),
-                "duracion": _duracion(t.duracion) if t.estado not in ("en_cola",) else "—", "salidas": str(len(t.salidas)) if t.salidas else ("plan" if t.simular and t.estado == "hecho" else "—"),
-                "nivel": svc.NIVEL_DE_ESTADO[t.estado], "icono": {"titulo": svc.ICONO_DE_ESTADO[t.estado]}, "habilitado": True, "id": t.id, "grupo": t.grupo,
-                "ref": t.ref, "crudo": {"inicio": t.inicio or t.creado, "duracion": t.duracion, "salidas": len(t.salidas), "progreso": t.progreso}}
+        archivos = (Path(t.archivos[0]).name + (f" y {n - 1} más" if n > 1 else "")) if n else "sin archivos"
+        return {"id": t.id, "titulo": t.titulo + (" (simulación)" if t.simular else ""), "archivos": archivos, "estado": svc.TEXTO_DE_ESTADO[t.estado],
+                "clave": t.estado, "progreso": f"{t.progreso} %" if t.estado == "en_curso" else ("100 %" if t.estado == "hecho" else "—"),
+                "porcentaje": t.progreso if t.estado == "en_curso" else (100 if t.estado == "hecho" else 0), "inicio": _hora(t.inicio or t.creado),
+                "duracion": _duracion(t.duracion) if t.estado != "en_cola" else "—", "salidas": len(t.salidas), "nivel": svc.NIVEL_DE_ESTADO[t.estado],
+                "icono": svc.ICONO_DE_ESTADO[t.estado], "grupo": t.grupo, "seccion": SECCIONES.get(t.grupo, "Hechos") if t.grupo != "con_error" else "Con error",
+                "ref": t.ref, "simulado": t.simular, "mensaje": t.mensaje, "primeraSalida": t.salidas[0] if t.salidas else ""}
+
+    def _ordenados(self) -> list:
+        """En curso, en cola (por llegada) y después los terminados, el más reciente primero."""
+        vivos = [t for t in self._lista.trabajos if t.grupo in ("en_curso", "en_cola")]
+        vivos.sort(key=lambda t: (ORDEN_SECCION[t.grupo], t.creado))
+        terminados = sorted((t for t in self._lista.trabajos if t.grupo not in ("en_curso", "en_cola")), key=lambda t: -(t.fin or t.creado))
+        return vivos + terminados
+
+    def _pintar(self) -> None:
+        self._tabla.poner([self._fila(t) for t in self._ordenados()])
+        self.cambiado.emit()
 
     def _refrescar(self, t: svc.Trabajo) -> None:
-        for i, f in enumerate(self._tabla.todas()):
-            if f.get("id") == t.id:
-                self._tabla.actualizar(i, **self._fila(t))
-                break
-        self.cambiado.emit()
+        filas = self._tabla.todas()
+        orden = [x.id for x in self._ordenados()]
+        if [f.get("id") for f in filas] != orden:
+            self._pintar()
+        else:
+            for i, f in enumerate(filas):
+                if f.get("id") == t.id:
+                    self._tabla.actualizar(i, **self._fila(t))
+                    break
+            self.cambiado.emit()
         if t.id == self._actual:
             self.actualCambiado.emit()
 
@@ -120,7 +139,7 @@ class Trabajos(QObject):
     def encolar(self, ref: str, titulo: str, archivos: list[str], params: dict, destino: str, simular: bool) -> str:
         t = svc.nuevo(ref, titulo, archivos, params, destino, simular)
         self._lista.anadir(t)
-        self._tabla.anadir(self._fila(t))
+        self._pintar()
         self.consola.registrar("info", f"Trabajo {'simulado' if simular else 'nuevo'}: {titulo} ({len(archivos)} archivo(s))")
         self.cambiado.emit()
         self._fijar_actual(t.id)
@@ -201,12 +220,24 @@ class Trabajos(QObject):
             self._lista.guardar()
             self._refrescar(t)
 
+    @Slot(str, result=str)
+    def repetir(self, ident: str) -> str:
+        """El mismo trabajo (herramienta, archivos, opciones, salida y modo) otra vez a la cola; devuelve el nuevo id."""
+        t = self._lista.por_id(ident)
+        if t is None:
+            return ""
+        faltan = [a for a in t.archivos if not Path(a).exists()]
+        if faltan:
+            self.aviso.emit(f"No se puede repetir «{t.titulo}»: ya no existe {Path(faltan[0]).name}" + (f" (y {len(faltan) - 1} más)" if len(faltan) > 1 else "") + ".", "aviso")
+            return ""
+        return self.encolar(t.ref, t.titulo, list(t.archivos), dict(t.params), t.destino, t.simular)
+
     @Slot()
     def limpiarHechos(self) -> None:
         """Quita de la lista los trabajos terminados (las salidas no se tocan)."""
         self._lista.trabajos = [t for t in self._lista.trabajos if t.estado in ("en_cola", "en_curso")]
         self._lista.guardar()
-        self._tabla.poner([self._fila(t) for t in self._lista.trabajos])
+        self._pintar()
         if self._actual and not self._lista.por_id(self._actual):
             self._fijar_actual("")
         self.cambiado.emit()
@@ -229,7 +260,7 @@ class Trabajos(QObject):
     def irA(self, ident: str) -> bool:
         if not self._lista.por_id(ident):
             return False
-        self.espacio.fijarVista("trabajos")
+        self.espacio.fijarVista("cola")
         if self.filaDe(ident) < 0:
             self.espacio.fijarGrupo("todos")
         self._fijar_actual(ident)

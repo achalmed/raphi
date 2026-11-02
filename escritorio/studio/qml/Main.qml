@@ -1,17 +1,18 @@
-// Main.qml — Raphi Studio: las herramientas del motor, los archivos y los trabajos en un espacio de trabajo al estilo
-// Dolphin/Kate sobre GuiComun.VentanaStudio. Navegación (Herramientas por familia · Trabajos por estado) · centro (la
-// tabla de herramientas o la de trabajos) · detalles (Resumen, Archivos, Opciones generadas de la ficha, Resultado,
-// Registro) · panel inferior (la salida del motor) · barra de estado. Soltar archivos en cualquier parte los añade.
-// Ninguna llamada al motor ni al disco aquí: todo lo hacen los controladores de Python (studio.*).
+// Main.qml — Raphi Studio (reingeniería del 2026-11-02, docs/reingenieria.md): un estudio multimedia sobre
+// GuiComun.VentanaBase (sin navegación lateral, tabla ni panel de detalles impuestos). Arriba, la barra del estudio:
+// volver, buscar herramientas, las áreas del catálogo, Simular y Procesar, la cola con su contador. En el centro, una de
+// tres vistas: el Catálogo (cuadrícula de herramientas), la Herramienta (entradas · vista previa · opciones) y la Cola
+// (trabajos con su progreso, su resultado, sus salidas y repetir). Abajo, la barra de estado con el trabajo en curso.
+// Soltar archivos desde Dolphin en cualquier parte los añade a las entradas. Ninguna llamada al motor ni al disco
+// aquí: todo lo hacen los controladores de Python (studio.*).
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as QQC2
-import QtQuick.Dialogs
 import org.kde.kirigami as Kirigami
 import GuiComun
 import "componentes"
 
-VentanaStudio {
+VentanaBase {
     id: ventana
 
     readonly property var espacio: studio.espacio
@@ -20,69 +21,65 @@ VentanaStudio {
     readonly property var archivos: studio.archivos
     readonly property var trabajos: studio.trabajos
     readonly property var ops: studio.operaciones
-    readonly property bool enTrabajos: espacio.vista === "trabajos"
+    readonly property string vista: espacio.vista
 
-    title: (ventana.enTrabajos ? (trabajos.hayActual ? trabajos.titulo : "Trabajos") : (herramientas.hayActual ? herramientas.titulo : espacio.textoFamilia)) + " — Raphi Studio"
+    title: (vista === "cola" ? "Cola" : vista === "herramienta" && herramientas.hayActual ? herramientas.titulo : espacio.textoArea) + " — Raphi Studio"
     acciones: registro
     tareas: studio.tareas
     consola: studio.consola
     descripcion: descripcionStudio
     autor: "Edison Achalma (@achalmed)"
-    resumen: espacio.resumen
-    contexto: espacio.contexto
-    claveAjustes: "ventana"
+    claveAjustes: "ventana-3"
+    width: 1360
+    height: 860
 
     function accion(nombre) { return registro.accion(nombre) }
-    function tablaActual() { return ventana.enTrabajos ? tablaTrabajos : tablaHerramientas }
-    function irAPestana(i) { ventana.mostrarDetalles = true; detalles.pestanaActual = i }
-    function religarNavegacion() { navegacion.actual = Qt.binding(() => espacio.nombreNavegacion) }
 
     Connections {
         target: studio.interfaz
         function onPedir(nombre, datos) {
             switch (nombre) {
-            case "filtrar": filtro.forceActiveFocus(); filtro.selectAll(); break
-            case "seleccionar_todo": { const t = tablaActual(); if (t && t.seleccionarTodo) t.seleccionarTodo(); break }
-            case "seleccionar_fila": { const t = tablaActual(); if (t && datos.fila >= 0) t.seleccionarFila(datos.fila, true); break }
-            case "elegir_archivos": selectorArchivos.open(); break
-            case "elegir_carpeta": selectorCarpeta.open(); break
-            case "quitar_archivos": paginaArchivos.quitarSeleccion(); break
-            case "aplicar": dialogoAplicar.abrir(); break
+            case "buscar": barra.enfocarBusqueda(); break
+            case "elegir_archivos": selectorArchivos.abrir(archivos.carpetaComun); break
+            case "elegir_carpeta": selectorCarpeta.abrir(archivos.carpetaComun); break
+            case "quitar_archivos": if (vistaHerramienta.quitarSeleccion) vistaHerramienta.quitarSeleccion(); else archivos.vaciar(); break
             case "venv": dialogoVenv.open(); break
             case "dolphin": dialogoDolphin.open(); break
             case "vigilar": dialogoVigilar.open(); break
             case "faltan": dialogoFaltan.open(); break
-            case "pestana": irAPestana(datos.indice); break
+            case "salida": dialogoSalida.open(); break
             case "paleta": ventana.paleta.abrir(datos.texto || ""); break
             case "aviso": ventana.mensajes.mostrar(datos.texto, datos.tipo || "informacion"); break
             case "activar": ventana.show(); ventana.raise(); ventana.requestActivate(); break
             }
         }
     }
-    Connections { target: espacio; function onAviso(texto, tipo) { ventana.mensajes.mostrar(texto, tipo) } function onFiltroCambiado() { religarNavegacion() } function onVistaCambiada() { filtro.text = ""; religarNavegacion() } }
+    Connections { target: espacio; function onAviso(texto, tipo) { ventana.mensajes.mostrar(texto, tipo) } }
     Connections { target: archivos; function onAviso(texto, tipo) { ventana.mensajes.mostrar(texto, tipo) } }
-    Connections {
-        target: herramientas
-        function onAviso(texto, tipo) { ventana.mensajes.mostrar(texto, tipo) }
-        function onSeleccionar(fila) { if (fila >= 0) tablaHerramientas.seleccionarFila(fila, true); irAPestana(0) }
-    }
-    Connections {
-        target: trabajos
-        function onAviso(texto, tipo) { ventana.mensajes.mostrar(texto, tipo) }
-        function onSeleccionar(fila) { if (fila >= 0) tablaTrabajos.seleccionarFila(fila, true); irAPestana(3) }
-        function onTerminado(id, simulado, estado) { if (!ventana.enTrabajos) trabajos.irAlUltimoDe(herramientas.ref); irAPestana(3) }
-    }
+    Connections { target: herramientas; function onAviso(texto, tipo) { ventana.mensajes.mostrar(texto, tipo) } }
+    Connections { target: trabajos; function onAviso(texto, tipo) { ventana.mensajes.mostrar(texto, tipo) } }
     Connections { target: ops; function onAviso(texto, tipo) { ventana.mensajes.mostrar(texto, tipo) } }
 
-    // ------------------------------------------------------------------ soltar archivos en cualquier parte
+    // ------------------------------------------------------------------ la barra del estudio
+    header: BarraEstudio { id: barra }
+
+    // ------------------------------------------------------------------ las tres vistas
+    StackLayout {
+        anchors.fill: parent
+        currentIndex: espacio.indiceVista
+        PaginaCatalogo { id: vistaCatalogo }
+        EspacioHerramienta { id: vistaHerramienta }
+        PaginaCola { id: vistaCola }
+    }
+
+    // soltar archivos desde Dolphin en cualquier parte
     DropArea {
         anchors.fill: parent
         z: 100
         keys: ["text/uri-list"]
         onDropped: drop => {
             if (!drop.hasUrls) return
-            const rutas = drop.urls.map(u => String(u))
-            studio.archivos.recibir(rutas)
+            studio.archivos.recibir(drop.urls.map(u => String(u)))
             drop.accept(Qt.CopyAction)
         }
         Rectangle {
@@ -95,168 +92,25 @@ VentanaStudio {
         }
     }
 
-    // ------------------------------------------------------------------ barra: la operación y el filtro
-    herramientasExtra: [
-        QQC2.ComboBox {
-            id: selectorOperacion
-            Layout.preferredWidth: Kirigami.Units.gridUnit * 15
-            model: ops.lista
-            textRole: "titulo"
-            currentIndex: ops.indiceActual
-            onActivated: index => ops.fijarPorIndice(index)
-            Accessible.name: "Operación"
-            QQC2.ToolTip.text: ops.descripcion
-            QQC2.ToolTip.visible: hovered && ops.descripcion !== ""
-            Connections { target: ops; function onCambiado() { selectorOperacion.currentIndex = ops.indiceActual } }
-        },
-        Kirigami.SearchField {
-            id: filtro
-            Layout.preferredWidth: Kirigami.Units.gridUnit * 11
-            placeholderText: "Filtrar (Ctrl+F)"
-            onTextChanged: { const t = tablaActual(); if (t && t.modelo && t.modelo.filtrar) t.modelo.filtrar(text) }
-            Keys.onEscapePressed: { text = ""; const t = tablaActual(); if (t) t.forceActiveFocus() }
-            Accessible.name: "Filtrar"
-        }
-    ]
-
-    // ------------------------------------------------------------------ navegación
-    navegacion: PanelNavegacion {
-        id: navegacion
-        secciones: [
-            { titulo: "Herramientas", filas: herramientas.filasNavegacion },
-            { titulo: "Trabajos", filas: trabajos.filasNavegacion }
-        ]
-        onElegida: nombre => {
-            if (nombre.startsWith("trabajos")) espacio.fijarGrupo(nombre.length > 8 ? nombre.substring(9) : "todos")
-            else espacio.fijarFamilia(nombre.length > 7 ? nombre.substring(8) : "")
-            religarNavegacion()
-        }
-        Component.onCompleted: religarNavegacion()
+    footer: BarraEstado {
+        resumen: espacio.resumen
+        contexto: espacio.contexto
+        tareas: studio.tareas
+        onProgresoPulsado: espacio.fijarVista("cola")
     }
 
-    // ------------------------------------------------------------------ centro
-    centro: StackLayout {
-        id: centro
-        currentIndex: espacio.indiceVista
-
-        TablaDatos {                                              // 0 · Herramientas
-            id: tablaHerramientas
-            modelo: herramientas.modelo
-            claveAjustes: "herramientas"
-            umbralEstrecho: Kirigami.Units.gridUnit * 44
-            mensajeVacio: herramientas.total === 0 ? (herramientas.motivoSinFichas ? "El motor no respondió: " + herramientas.motivoSinFichas : "Leyendo las fichas del motor… (F6 las relee)")
-                                                   : "Ninguna herramienta cumple el filtro «" + espacio.textoFiltro + "»"
-            iconoVacio: "application-x-executable"
-            columnas: [
-                { ancho: 0, minimo: 12, conIcono: true },
-                { ancho: 7, secundaria: true, estrecho: true },
-                { ancho: 7, secundaria: true, estrecho: true },
-                { ancho: 10, secundaria: true, estrecho: true },
-                { ancho: 6, secundaria: true, estrecho: true },
-                { ancho: 5, alinear: "derecha", secundaria: true, estrecho: true },
-                { ancho: 9, semantica: true }
-            ]
-            onOrdenar: (columna, descendente) => herramientas.modelo.ordenar(columna, descendente)
-            onFilaActualCambiada: fila => herramientas.fijarFila(fila)
-            onActivada: fila => { herramientas.fijarFila(fila); irAPestana(archivos.total > 0 ? 2 : 1) }
-            menuContextual: MenuAcciones {
-                acciones: ventana.registro
-                conAtajos: false
-                elementos: [
-                    { tipo: "accion", nombre: "op.simular" }, { tipo: "accion", nombre: "op.aplicar" },
-                    { tipo: "separador" },
-                    { tipo: "accion", nombre: "herramienta.archivos" }, { tipo: "accion", nombre: "herramienta.opciones" }, { tipo: "accion", nombre: "herramienta.resultado" },
-                    { tipo: "separador" },
-                    { tipo: "accion", nombre: "herramienta.restablecer" }
-                ]
-            }
-        }
-        TablaDatos {                                              // 1 · Trabajos
-            id: tablaTrabajos
-            modelo: trabajos.modelo
-            claveAjustes: "trabajos"
-            umbralEstrecho: Kirigami.Units.gridUnit * 44
-            mensajeVacio: trabajos.total === 0 ? "Ningún trabajo todavía: elige una herramienta, añade archivos y simula (F5)" : "Ningún trabajo cumple el filtro «" + espacio.textoFiltro + "»"
-            iconoVacio: "view-task"
-            columnas: [
-                { ancho: 0, minimo: 12, conIcono: true },
-                { ancho: 12, secundaria: true, estrecho: true },
-                { ancho: 7, semantica: true },
-                { ancho: 5, alinear: "derecha", secundaria: true },
-                { ancho: 6, mono: true, secundaria: true, estrecho: true },
-                { ancho: 6, alinear: "derecha", secundaria: true, estrecho: true },
-                { ancho: 5, alinear: "derecha", secundaria: true, estrecho: true }
-            ]
-            onOrdenar: (columna, descendente) => trabajos.modelo.ordenar(columna, descendente)
-            onFilaActualCambiada: fila => trabajos.fijarFila(fila)
-            onActivada: fila => { trabajos.fijarFila(fila); irAPestana(3) }
-            menuContextual: MenuAcciones {
-                acciones: ventana.registro
-                conAtajos: false
-                elementos: [
-                    { tipo: "accion", nombre: "trabajos.herramienta" }, { tipo: "accion", nombre: "op.cancelar" }, { tipo: "accion", nombre: "trabajos.quitar" },
-                    { tipo: "separador" },
-                    { tipo: "accion", nombre: "archivo.abrir" }, { tipo: "accion", nombre: "archivo.mostrar" },
-                    { tipo: "separador" },
-                    { tipo: "accion", nombre: "trabajos.limpiar" }
-                ]
-            }
-        }
-    }
-
-    // ------------------------------------------------------------------ detalles
-    detalles: PanelDetalles {
-        id: detalles
-        anchoPreferido: Kirigami.Units.gridUnit * 30
-        anchoMinimo: Kirigami.Units.gridUnit * 20
-        titulo: ventana.enTrabajos ? (trabajos.hayActual ? trabajos.titulo : "") : (herramientas.hayActual ? herramientas.titulo : "")
-        subtitulo: ventana.enTrabajos ? (trabajos.hayActual ? trabajos.textoEstado + " · " + trabajos.textoArchivos : "")
-                                      : (herramientas.hayActual ? herramientas.textoFamilia + " · " + herramientas.descripcion : "")
-        icono: ventana.enTrabajos ? "" : herramientas.icono
-        mensajeVacio: ventana.enTrabajos ? "Elige un trabajo en la tabla: su resultado, sus salidas y su registro"
-                                         : "Elige una herramienta en la tabla: su ficha, los archivos, sus opciones y su resultado"
-        iconoVacio: ventana.enTrabajos ? "view-task" : "application-x-executable"
-        accionesCabecera: ventana.enTrabajos ? [ventana.accion("archivo.abrir"), ventana.accion("archivo.mostrar"), ventana.accion("trabajos.herramienta")]
-                                             : [ventana.accion("op.simular"), ventana.accion("op.aplicar"), ventana.accion("archivo.anadir")]
-        pestanas: [
-            { titulo: "Resumen" },
-            { titulo: "Archivos", contador: ventana.enTrabajos ? trabajos.archivos.length : archivos.total },
-            { titulo: "Opciones", contador: herramientas.campos.length, visible: !ventana.enTrabajos },
-            { titulo: "Resultado", contador: trabajos.nSalidas },
-            { titulo: "Registro" }
-        ]
-        Resumen {}
-        Archivos { id: paginaArchivos }
-        Opciones {}
-        Resultado {}
-        Registro {}
-    }
-
-    inferior: PanelInferior { consola: studio.consola }
-
-    // ------------------------------------------------------------------ diálogos
-    FileDialog {
+    // ------------------------------------------------------------------ diálogos (los de archivos y carpetas: los de KDE)
+    ElegirArchivos {
         id: selectorArchivos
-        title: "Añadir archivos"
-        fileMode: FileDialog.OpenFiles
-        nameFilters: herramientas.hayActual && herramientas.extensionesFiltro !== "" ? ["Lo que acepta " + herramientas.titulo + " (" + herramientas.extensionesFiltro + ")", "Todos los archivos (*)"] : ["Todos los archivos (*)"]
-        onAccepted: { archivos.agregar(selectedFiles.map(u => String(u))); irAPestana(1) }
+        titulo: "Añadir archivos de entrada"
+        multiple: true
+        filtros: herramientas.hayActual && herramientas.extensionesFiltro !== "" ? ["Lo que acepta " + herramientas.titulo + " (" + herramientas.extensionesFiltro + ")"] : []
+        onElegidos: rutas => archivos.recibir(rutas)
     }
-    FolderDialog {
+    ElegirCarpeta {
         id: selectorCarpeta
-        title: "Añadir una carpeta"
-        onAccepted: { archivos.agregar([String(selectedFolder)]); irAPestana(1) }
-    }
-    Kirigami.PromptDialog {
-        id: dialogoAplicar
-        title: "Aplicar: " + herramientas.titulo
-        subtitle: ops.textoConfirmacion
-        standardButtons: Kirigami.Dialog.Cancel
-        customFooterActions: [Kirigami.Action { text: "Aplicar"; icon.name: "dialog-ok-apply"; enabled: ops.puedeAplicar; onTriggered: { ops.aplicar(); dialogoAplicar.close() } }]
-        function abrir() {
-            if (!ops.puedeAplicar) { ventana.mensajes.mostrar(ops.motivoNoAplicar, "aviso"); return }
-            open()
-        }
+        titulo: "Añadir una carpeta de entrada"
+        onElegida: ruta => archivos.recibir([ruta])
     }
     Kirigami.PromptDialog {
         id: dialogoVenv
@@ -282,7 +136,15 @@ VentanaStudio {
         subtitle: herramientas.faltantes.length === 0 ? "Están todos los programas y módulos: cada herramienta puede correr."
                   : herramientas.faltantes.map(f => f.programa + " — lo usan: " + f.usan.join(", ")).join("\n") + "\n\nLos programas del sistema los instala backends/docflow/install.sh; los módulos de Python, install.sh (el .venv)."
         standardButtons: Kirigami.Dialog.Close
-        customFooterActions: [Kirigami.Action { text: "Doctor (F5)"; icon.name: "checkmark"; onTriggered: { ops.fijar("doctor"); ops.simular(); dialogoFaltan.close() } }]
+    }
+    Kirigami.Dialog {
+        id: dialogoSalida
+        title: "Salida del motor"
+        standardButtons: Kirigami.Dialog.Close
+        preferredWidth: Math.min(ventana.width * 0.85, Kirigami.Units.gridUnit * 60)
+        preferredHeight: Math.min(ventana.height * 0.7, Kirigami.Units.gridUnit * 30)
+        padding: 0
+        PanelInferior { consola: studio.consola; implicitHeight: dialogoSalida.preferredHeight - Kirigami.Units.gridUnit * 4 }
     }
     DialogoVigilar { id: dialogoVigilar }
     dialogoAjustes: DialogoAjustesStudio {}
