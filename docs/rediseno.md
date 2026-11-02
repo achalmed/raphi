@@ -71,7 +71,7 @@ pierden al cambiar; el lanzador instalado apunta al `.venv` con PySide6 6.12, qu
    yt-dlp, whisper). Decisión S1.
 8. **Qué queda fuera**: la Mesa de trabajo (solo en la web), la bandeja del sistema con su zona para soltar
    (`QSystemTrayIcon` es de QtWidgets; la ventana web la conserva), la edición de recetas (son YAML en
-   `~/.config/raphi/recetas/`: el editor).
+   la carpeta de recetas del usuario: el editor).
 
 ## 3. Arquitectura de información
 

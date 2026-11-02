@@ -10,6 +10,21 @@ lo revocado se marca «Superada por …» y no se borra. Los pendientes, con fec
 
 ## Producto
 
+### 2026-11-02 · R11: Raphi Studio es un espacio de trabajo QML + Kirigami sobre gui-comun 2.7; revisa R9
+
+Fase 5 de la modernización de la familia de studios (piloto Git Studio, aprobado por Edison el 2026-11-01). El diseño
+y sus once decisiones (S1–S11) están en [`rediseno.md`](rediseno.md) §8: la ventana es un espacio de trabajo al estilo
+Dolphin/Kate (herramientas por familia o trabajos por estado, los archivos en una sola lista, la herramienta con su
+Resumen, Opciones generadas de la ficha con `PaginaFormulario` del marco, Resultado y Registro); **F5 simula y
+Ctrl+Intro aplica tras confirmar**; **la ventana corre con el Python del sistema y el motor como proceso con el `.venv`
+del repo** (`escritorio/studio/corredor.py`): el `.venv` trae un PySide6 6.12 con QtWebEngine para la ventana web que
+no carga Kirigami, y el del sistema sí; no se crea otro entorno. La cola de trabajos es de la ventana (persistida en su
+caché), no la de la API. R9 sigue en lo esencial (ninguna pantalla a mano; `familias.py` es el único que nombra
+operaciones; la ventana web se conserva, D7 de la arquitectura QML) y queda revisada en cómo corre el motor (antes, un
+`FunctionWorker` en el proceso de la ventana) y en la ventana misma (Widgets, retirada: se lee en la historia de git).
+Fuera: la bandeja del sistema con su zona para soltar (sigue en la ventana web; `QSystemTrayIcon` es de QtWidgets) y la
+Mesa de trabajo (solo en la web). `gui_comun` se localiza instalado o por `GUI_COMUN_DIR`, nunca subiendo carpetas.
+
 ### 2026-10-31 · R9: Raphi Studio, el escritorio nativo de la familia de los studios; revisa R4
 
 Propuesta aprobada por Edison: `meta/programa/08-mantenimiento/familia-studios-2026-10-31.md` del espacio de trabajo.
@@ -151,4 +166,7 @@ conserva el original. Lo que tenía de decisión está en la primera entrada de 
 
 | fecha | pendiente | dueño |
 |---|---|---|
-| — | Ninguno: R6 se publicó el 2026-10-27 | — |
+| 2026-11-02 | Validar Raphi Studio 2.0 en la sesión real (Lliphi, Wayland) soltando archivos desde Dolphin, simulando y aplicando una herramienta, un trabajo largo (transcribir) con su progreso y Esc; después fusionar `wip/2026-11-02-qml` en `main` y `rediseno.md` pasa a `hecho` | autor |
+| 2026-11-02 | La bandeja del sistema con su zona para soltar quedó solo en la ventana web (QtWidgets); si se quiere en el studio, `org.kde.notification` o un `QSystemTrayIcon` fuera del proceso QML | director |
+| 2026-11-02 | `install.sh` sigue instalando `gui-comun@v1.0.0` desde GitHub cuando el repo de al lado no está: el studio necesita 2.7 (publicar la etiqueta y subir la referencia) | director |
+| 2026-11-02 | El progreso de un trabajo depende de que la operación llame a `ctx.avisar`; las que no lo hacen muestran solo «en curso» hasta terminar | director |

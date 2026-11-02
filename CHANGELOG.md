@@ -58,6 +58,16 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 ### Sin publicar
 
+#### Cambiado
+
+- 2026-11-02: Raphi Studio pasa a QML + Kirigami sobre `gui-comun` 2.7 (`docs/rediseno.md`): espacio de trabajo con la
+  tabla de herramientas por familia o la de trabajos por estado, los archivos de entrada en una sola lista, las
+  opciones generadas de la ficha con `PaginaFormulario`, el resultado con vista previa y el registro; F5 simula y
+  Ctrl+Intro aplica tras confirmar; la ventana corre con el Python del sistema y el motor como proceso con el `.venv`
+  (`escritorio/studio/corredor.py`); `escritorio/__main__.py` relanza al Python del sistema; pruebas `tests/run.sh`.
+  Se retira la ventana de Widgets (`app.py`, `ventana.py`, `paginas.py`, `herramienta.py`, `formulario.py`,
+  `motor_local.py`). Fuera: la bandeja del sistema (sigue en la ventana web).
+
 #### Añadido
 
 - 2026-10-31: **Raphi Studio** (`escritorio/studio/`), el escritorio nativo de la familia de los studios: barra lateral

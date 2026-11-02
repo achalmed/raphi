@@ -169,13 +169,17 @@ cuenta solo ve lo suyo.
 
 ## Raphi Studio (`escritorio/studio/`)
 
-El escritorio nativo, de la familia de los studios del espacio de trabajo (marco de `gui_comun`: barra lateral,
-paleta Ctrl+K, avisos, consola y tema con acento violeta). Sus páginas salen del motor: una rejilla por familia
-(`familias.py` lee la familia de cada ficha por su entrada y sus extensiones), la página de una herramienta con el
-formulario de su ficha (`formulario.py`, un control por tipo de parámetro), recetas y sistema. Corre `motor.ejecutar`
-en un `FunctionWorker` de `gui_comun`, en su proceso; las carpetas vigiladas (`escritorio/vigilancia.py`) le piden al
-«servidor» `MotorLocal`, que resuelve sin HTTP. Lo soltado sobre la ventana abre las herramientas que sirven para esos
-archivos. Sin `gui_comun`, `raphi` abre la ventana web.
+El escritorio nativo, de la familia de los studios del espacio de trabajo: desde el 2026-11-02, QML + Kirigami sobre
+`gui-comun` 2.7 (`docs/rediseno.md`), un espacio de trabajo al estilo Dolphin/Kate: la tabla de herramientas por
+familia (`familias.py` lee la familia de cada ficha por su entrada y sus extensiones) o la de trabajos por estado, los
+archivos de entrada en una sola lista, y la herramienta elegida con su Resumen, sus Opciones (el formulario generado de
+su ficha con `PaginaFormulario` del marco: un control por tipo de parámetro), su Resultado y su Registro. F5 simula
+(`simular=True` como trabajo) y Ctrl+Intro aplica tras confirmar. **La ventana corre con el Python del sistema**
+(PySide6 y Kirigami de apt) y **el motor corre como proceso con el `.venv` del repo** (`corredor.py`: fichas, doctor y
+cada trabajo con su progreso en líneas `## progreso` y su informe en JSON), por `gui_comun.tareas`; la cola de la
+ventana es suya (`escritorio/studio/servicios/trabajos.py`, persistida en su caché), no la de la API. Las carpetas vigiladas
+(`escritorio/vigilancia.py`) encolan en esa cola. Lo soltado sobre la ventana va a la lista y la tabla queda con las
+herramientas que lo aceptan. Sin PySide6 con QML en el sistema, `raphi` abre la ventana web.
 
 ## La web (`web/`)
 
