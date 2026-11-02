@@ -11,13 +11,14 @@ del backend que se toque. El plan por fases vive en el repo de Qillqa: `qillqa/d
 ## Reglas que no se negocian
 
 - **Ninguna pantalla se escribe a mano por herramienta** (R4 del 2026-10-27, revisada por R9 del 2026-10-31): la web
-  (`web/`) y Raphi Studio (`escritorio/studio/`, QML + Kirigami sobre `gui-comun` 2.7; `docs/rediseno.md`) arman sus
+  (`web/`) y Raphi Studio (`escritorio/studio/`, QML + Kirigami sobre `gui-comun` 3.0; `docs/reingenieria.md`) arman sus
   formularios de la ficha de cada operación (`PaginaFormulario`). Raphi Studio solo nombra operaciones en
   `familias.py` (lo vigilan `tests/test_studio.py` y `tests/studio/`). La ventana corre con `/usr/bin/python3` (su
   PySide6 carga Kirigami) y el motor como proceso con el `.venv` (`corredor.py`); nada de QtWidgets en el studio;
-  `gui_comun` llega instalado o por `GUI_COMUN_DIR`, nunca subiendo carpetas. F5 simula, Ctrl+Intro aplica tras
-  confirmar. La ventana que muestra la web (`escritorio/ventana.py`, `raphi --web`) sigue, y es la que abre `raphi`
-  sin PySide6 con QML en el sistema; lo propio de ella se ofrece en la web con `hayEscritorio()`.
+  `gui_comun` llega instalado o por `GUI_COMUN_DIR`, nunca subiendo carpetas. Es un estudio (catálogo por áreas,
+  espacio de trabajo por herramienta, cola), no un explorador; F5 simula y Ctrl+Intro procesa tras la confirmación de
+  la base. La ventana que muestra la web (`escritorio/ventana.py`, `raphi --web`) sigue, y es la que abre `raphi` sin
+  PySide6 con QML en el sistema; lo propio de ella se ofrece en la web con `hayEscritorio()`.
 - **Una operación existe en un solo lugar**: su función con `@operacion(...)` en `raphi/motor/`. De su ficha salen la
   CLI, la API, el formulario de la web y el menú de formatos. Nada de formularios escritos a mano.
 - **Los tres principios viven en el núcleo** (`raphi/motor/base.py`): error por archivo, nunca por lote; la salida

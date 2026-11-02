@@ -127,9 +127,9 @@ logotipo dentro de la ventana; ningún color ni fuente propios. Soltar archivos 
 
 | captura | qué muestra |
 |---|---|
-| `figuras/raphi-studio-oscuro.png` | Lliphi Oscuro: la tabla de herramientas de la familia PDF, una herramienta elegida con sus archivos de muestra y la pestaña Opciones generada de su ficha |
-| `figuras/raphi-studio-claro.png` | Lliphi Claro: la tabla de trabajos con un trabajo hecho y su Resultado (el plan y las salidas) |
-| `figuras/raphi-studio-paleta.png` | la paleta de órdenes (Ctrl+K) buscando una herramienta |
+| `figuras/antes/raphi-studio-oscuro.png` | Lliphi Oscuro: la tabla de herramientas de la familia PDF, una herramienta elegida con sus archivos de muestra y la pestaña Opciones generada de su ficha |
+| `figuras/antes/raphi-studio-claro.png` | Lliphi Claro: la tabla de trabajos con un trabajo hecho y su Resultado (el plan y las salidas) |
+| `figuras/antes/raphi-studio-paleta.png` | la paleta de órdenes (Ctrl+K) buscando una herramienta |
 
 Las capturas se toman sobre los archivos de muestra (`escritorio/studio/muestra.py`), con HOME, configuración y
 caché temporales (ninguna ruta de la máquina en pantalla), con `escritorio/studio/capturar.py`.

@@ -20,14 +20,14 @@ Capturas de antes: `docs/figuras/antes/raphi-studio-{oscuro,claro,paleta}.png`.
 
 | pieza | dónde | qué hace de verdad |
 |---|---|---|
-| fichas | `servicios/fichas.py`, `corredor.py fichas` | las 62 operaciones del motor y las recetas, con lo que falta en la máquina (calculado con el intérprete del motor); en caché y releídas en segundo plano. **Correcto** |
-| familias | `familias.py` | cada operación en una de seis familias (Documentos, PDF, Imágenes, Audio y video, Archivos, Recetas) leída de su ficha. Correcto, pero no son las áreas que pide el encargo (no hay Transcripción, Conversión ni Lotes; Audio y Vídeo van juntos) |
-| tabla de herramientas | `controladores/herramientas.py`, `Main.qml` | una `TablaDatos` de 66 filas (Herramienta · Estado): la vista principal es una tabla |
-| archivos | `controladores/archivos.py` | una lista única de entradas (soltar, diálogo, Dolphin, otra instancia); filtra la tabla a lo que los acepta. Correcto |
-| opciones | `componentes/Opciones.qml` | `PaginaFormulario` desde la ficha, valores recordados por herramienta, destino. **Correcto** (R4/R9 se cumplen) |
-| simular y aplicar | `controladores/operaciones.py` | F5 encola el trabajo simulado; Ctrl+Intro, tras un diálogo propio, el real. Correcto |
-| cola | `controladores/trabajos.py`, `servicios/trabajos.py` | cola persistida (200), uno a la vez con `gui_comun.tareas`, progreso `## progreso`, informe del corredor, cancelar. **Correcto**; falta **repetir** un trabajo |
-| vista previa | `servicios/archivos.py` | solo imagen o texto, y solo de una salida; nada de PDF, audio ni vídeo, nada de las entradas |
+| fichas | `escritorio/studio/servicios/fichas.py`, `corredor.py fichas` | las 62 operaciones del motor y las recetas, con lo que falta en la máquina (calculado con el intérprete del motor); en caché y releídas en segundo plano. **Correcto** |
+| familias | `escritorio/studio/familias.py` | cada operación en una de seis familias (Documentos, PDF, Imágenes, Audio y video, Archivos, Recetas) leída de su ficha. Correcto, pero no son las áreas que pide el encargo (no hay Transcripción, Conversión ni Lotes; Audio y Vídeo van juntos) |
+| tabla de herramientas | `escritorio/studio/controladores/herramientas.py`, `Main.qml` | una `TablaDatos` de 66 filas (Herramienta · Estado): la vista principal es una tabla |
+| archivos | `escritorio/studio/controladores/archivos.py` | una lista única de entradas (soltar, diálogo, Dolphin, otra instancia); filtra la tabla a lo que los acepta. Correcto |
+| opciones | `escritorio/studio/qml/componentes/Opciones.qml` | `PaginaFormulario` desde la ficha, valores recordados por herramienta, destino. **Correcto** (R4/R9 se cumplen) |
+| simular y aplicar | `escritorio/studio/controladores/operaciones.py` | F5 encola el trabajo simulado; Ctrl+Intro, tras un diálogo propio, el real. Correcto |
+| cola | `escritorio/studio/controladores/trabajos.py`, `escritorio/studio/servicios/trabajos.py` | cola persistida (200), uno a la vez con `gui_comun.tareas`, progreso `## progreso`, informe del corredor, cancelar. **Correcto**; falta **repetir** un trabajo |
+| vista previa | `escritorio/studio/servicios/archivos.py` | solo imagen o texto, y solo de una salida; nada de PDF, audio ni vídeo, nada de las entradas |
 | Whisper, descarga | `raphi/motor/medios.py` (`transcribir`, `descargar`) | existen y corren como cualquier herramienta. Correcto; no se simula nada |
 
 ### 1.2 Lo incompleto y lo que no se comporta
@@ -46,7 +46,7 @@ Capturas de antes: `docs/figuras/antes/raphi-studio-{oscuro,claro,paleta}.png`.
 
 - `FileDialog`/`FolderDialog` con la `QGuiApplication` de 2.7: el diálogo «extraño» de Qt Quick. Con `gui-comun` 3.0
   (`QApplication`, `ElegirArchivos`, `ElegirCarpeta`) es el de KDE.
-- «Mostrar en la carpeta» y «Abrir» son de `controladores/espacio.py` (`xdg-open`): con 3.0, las funciones de
+- «Mostrar en la carpeta» y «Abrir» son de `escritorio/studio/controladores/espacio.py` (`xdg-open`): con 3.0, las funciones de
   `escritorio` de la base (`dolphin --select`).
 
 ### 1.4 Riesgos
@@ -54,10 +54,10 @@ Capturas de antes: `docs/figuras/antes/raphi-studio-{oscuro,claro,paleta}.png`.
 | riesgo | mitigación |
 |---|---|
 | tocar archivos del usuario | el motor nunca pisa una entrada (principio del núcleo); aplicar confirma con herramienta, archivos, opciones y salida (operación «escritura» de la base) |
-| red o transcripciones en las pruebas | las pruebas usan los archivos de muestra (`muestra.py`, ahora con un WAV); nunca `descargar` ni `transcribir` de verdad |
+| red o transcripciones en las pruebas | las pruebas usan los archivos de muestra (`escritorio/studio/muestra.py`, ahora con un WAV); nunca `descargar` ni `transcribir` de verdad |
 | prometer vista previa de audio y vídeo | comprobado antes: el módulo QML `QtMultimedia` del sistema está (con el plugin de ffmpeg); el binding de Python no lo trae, y no hace falta |
 | el lanzador (`run.sh escritorio %F`) | no cambia: `escritorio/__main__.py` sigue relanzando al Python del sistema |
-| la regla R4/R9 (ninguna pantalla a mano) | las áreas y los formatos se leen de la ficha en `familias.py`, el único archivo que nombra operaciones |
+| la regla R4/R9 (ninguna pantalla a mano) | las áreas y los formatos se leen de la ficha en `escritorio/studio/familias.py`, el único archivo que nombra operaciones |
 
 ## 2. Referencias y distribución
 
@@ -82,7 +82,7 @@ Cola: en curso (progreso) · en cola · hechos · fallidos; cada trabajo con sus
 ## 3. Decisiones
 
 - **X1. Áreas del encargo** (Documentos y PDF, Imágenes, Audio, Vídeo, Transcripción, Conversión, Procesamiento por
-  lotes, Automatización y recetas), calculadas de la ficha en `familias.py`: una herramienta puede estar en varias
+  lotes, Automatización y recetas), calculadas de la ficha en `escritorio/studio/familias.py`: una herramienta puede estar en varias
   (convertir vídeo: Vídeo y Conversión). «Lotes» son las que trabajan con carpetas o reúnen muchos archivos en uno
   (todas aceptan varios archivos). Las familias de antes siguen para el icono y para la CLI de Dolphin.
 - **X2. Catálogo en cuadrícula** (`GridView` de tarjetas) con búsqueda rápida (título, descripción, palabras de la
@@ -107,3 +107,39 @@ Cola: en curso (progreso) · en cola · hechos · fallidos; cada trabajo con sus
 - **X11. Pruebas sin red ni transcripción**: la muestra gana un WAV escrito con `wave` (sin ffmpeg); un vídeo de
   prueba solo si ffmpeg está, generado en un temporal.
 - **X12. Repo público**: capturas con `HOME` y caché temporales; `scripts/escanear.py --trabajo` antes de cada commit.
+
+## 5. Lo construido
+
+| antes (2.0) | después (3.0) |
+|---|---|
+| ![2.0: tabla de herramientas](figuras/antes/raphi-studio-oscuro.png) | ![3.0: catálogo por áreas, Lliphi Oscuro](figuras/raphi-studio-catalogo.png) |
+| ![2.0: tabla de trabajos](figuras/antes/raphi-studio-claro.png) | ![3.0: la cola, Lliphi Claro](figuras/raphi-studio-cola.png) |
+
+![3.0: el espacio de trabajo de «Rotar páginas» con el PDF rotado de verdad en el monitor](figuras/raphi-studio-herramienta.png)
+
+![3.0: el catálogo filtrado a Audio con un WAV de entrada y la paleta de órdenes](figuras/raphi-studio-paleta.png)
+
+Capturas reales (`escritorio/studio/capturar.py`) sobre los archivos de muestra, con `HOME`, configuración y caché
+temporales fuera de la carpeta de inicio; la herramienta corre de verdad con el motor (simular y procesar).
+
+| pieza | dónde | pruebas |
+|---|---|---|
+| áreas y formatos (X1) | `escritorio/studio/familias.py` (`areas_de`, `formatos_texto`), `escritorio/studio/servicios/fichas.py` | `tests/test_studio.py` (cada operación del motor en un área; cada área con alguna), `tests/studio/test_servicios.py` |
+| catálogo (X2) | `escritorio/studio/controladores/herramientas.py`, `escritorio/studio/qml/componentes/PaginaCatalogo.qml`, `BarraEstudio.qml` | `tests/studio/test_controladores.py` (áreas, búsqueda sin tildes, las que aceptan las entradas) |
+| espacio de trabajo y vista previa (X3, X4) | `escritorio/studio/qml/componentes/EspacioHerramienta.qml`, `VistaPrevia.qml`, `ReproductorMedios.qml`, `escritorio/studio/controladores/vista.py`, `escritorio/studio/servicios/vista_previa.py` | imagen, PDF (`pdftoppm` y poda reales), audio, texto y carpeta; la ventana con un WAV y un PDF |
+| cola y repetir (X5) | `escritorio/studio/controladores/trabajos.py`, `escritorio/studio/qml/componentes/PaginaCola.qml` | simular, procesar, dos en cola, repetir sin pisar la salida anterior, repetir sin su entrada, un trabajo que falla |
+| base 3.0 (X6–X8) | `escritorio/studio/qml/Main.qml` (`VentanaBase`, `ElegirArchivos`, `ElegirCarpeta`), `escritorio/studio/aplicacion.py` (`operacion=`), `escritorio/studio/controladores/espacio.py` (`escritorio`) | la ventana es una `QApplication`; Procesar es una escritura con confirmación |
+
+**Sesión real (Plasma 6.6, Wayland, `gui-comun` 3.0)**: «Añadir archivos» y «Añadir una carpeta» abren el diálogo de
+KDE (lugares de Dolphin, en español); la vista previa de un WAV carga y da su duración. Las capturas de esa prueba
+muestran rutas de la máquina y quedaron con las notas de la jornada, fuera del repo. El lanzador (`run.sh escritorio`)
+arranca igual que antes.
+
+## 6. Lo que quedó fuera
+
+- **Miniaturas de PDF en la lista de entradas**: solo las imágenes tienen miniatura; un PDF muestra su icono (la vista
+  previa sí lo pinta entero).
+- **Vista previa de vídeo con un archivo real**: probada con QtMultimedia sobre audio; un vídeo de la muestra exigiría
+  ffmpeg para crearlo en las pruebas, y no se añadió.
+- **Comparar entrada y resultado lado a lado**: el monitor alterna entre una y otro.
+- **La bandeja del sistema y la Mesa de trabajo** siguen en la ventana web (como en 2.0).

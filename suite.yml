@@ -17,7 +17,7 @@ comandos:
 estado: activo
 interfaz: gui
 depende_de:
-- PySide6 (el del sistema para Raphi Studio: python3-pyside6.* con Kirigami y gui-comun 2.7; el del .venv para la ventana web)
+- PySide6 (el del sistema para Raphi Studio: python3-pyside6.* con Kirigami y QtMultimedia de QML, y gui-comun 3.0; el del .venv para la ventana web)
 - pikepdf
 - PyMuPDF
 nota: motor y CLI en raphi/ (python -m raphi); la web en web/ y la ventana en escritorio/ (la misma interfaz); docflow, en backends/docflow (pdf-suite y page-counter se retiraron en R8)

@@ -10,6 +10,18 @@ lo revocado se marca «Superada por …» y no se borra. Los pendientes, con fec
 
 ## Producto
 
+### 2026-11-02 · R12: Raphi Studio es un estudio multimedia sobre gui-comun 3.0; revisa R11
+
+Encargo del autor (reingeniería de los diez studios, `reingenieria.md`): Raphi no debe parecerse a Dolphin. La ventana
+pasa de la distribución navegación · tabla · detalles · consola a `VentanaBase` con tres vistas: el **catálogo** de
+herramientas en cuadrícula por las ocho áreas del encargo (calculadas de la ficha en `familias.py`, el único archivo
+que nombra operaciones; R4/R9 siguen), el **espacio de trabajo** de cada herramienta (entradas · vista previa de
+imagen, PDF, audio, vídeo y texto · opciones de la ficha) y la **cola** como vista propia, con repetir. Procesar
+(Ctrl+Intro) lo confirma la base (`operacion="escritura"` con sus consecuencias); abrir y mostrar en Dolphin son de
+`escritorio` de la base; elegir archivos y carpetas, `ElegirArchivos`/`ElegirCarpeta` (el diálogo de KDE, comprobado
+en la sesión real). El motor, el corredor, las fichas, los trabajos y la regla de no escribir pantallas a mano no
+cambian. Se conserva todo en la rama `respaldo/antes-reingenieria-2026-11-02`.
+
 ### 2026-11-02 · R11: Raphi Studio es un espacio de trabajo QML + Kirigami sobre gui-comun 2.7; revisa R9
 
 Fase 5 de la modernización de la familia de studios (piloto Git Studio, aprobado por Edison el 2026-11-01). El diseño
@@ -166,7 +178,10 @@ conserva el original. Lo que tenía de decisión está en la primera entrada de 
 
 | fecha | pendiente | dueño |
 |---|---|---|
-| 2026-11-02 | Validar Raphi Studio 2.0 en la sesión real (Lliphi, Wayland) soltando archivos desde Dolphin, simulando y aplicando una herramienta, un trabajo largo (transcribir) con su progreso y Esc; después fusionar `wip/2026-11-02-qml` en `main` y `rediseno.md` pasa a `hecho` | autor |
+| 2026-11-02 | Usar Raphi Studio 3.0 en la sesión real (Lliphi, Wayland): soltar archivos desde Dolphin sobre el catálogo y sobre una herramienta, la vista previa de un vídeo propio, procesar y repetir, un trabajo largo (transcribir) con su progreso y Esc | autor |
+| 2026-11-02 | Fusionar `wip/2026-11-02-reingenieria` (reingeniería, R12) en `main`, en local | director |
+| 2026-11-02 | La vista previa de PDF repite lo esencial del visor de LaTeX Studio (`pdftoppm` por demanda en una caché acotada): candidato a componente de `gui-comun` | director |
+| 2026-11-02 | La prueba `test_servidor_con_ficha` (`tests/test_escritorio.py`) necesita `web/dist` construido (`npm run web:construir`): en un worktree recién creado falla hasta construirlo o enlazarlo | director |
 | 2026-11-02 | La bandeja del sistema con su zona para soltar quedó solo en la ventana web (QtWidgets); si se quiere en el studio, `org.kde.notification` o un `QSystemTrayIcon` fuera del proceso QML | director |
-| 2026-11-02 | `install.sh` sigue instalando `gui-comun@v1.0.0` desde GitHub cuando el repo de al lado no está: el studio necesita 2.7 (publicar la etiqueta y subir la referencia) | director |
+| 2026-11-02 | `install.sh` sigue instalando `gui-comun@v1.0.0` desde GitHub cuando el repo de al lado no está: el studio necesita 3.0 (publicar la etiqueta y subir la referencia) | director |
 | 2026-11-02 | El progreso de un trabajo depende de que la operación llame a `ctx.avisar`; las que no lo hacen muestran solo «en curso» hasta terminar | director |

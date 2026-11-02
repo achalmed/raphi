@@ -60,6 +60,12 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 #### Cambiado
 
+- 2026-11-02: **reingeniería** (`docs/reingenieria.md`, decisión R12): Raphi Studio deja la distribución de Dolphin por
+  un estudio multimedia sobre `VentanaBase` de `gui-comun` 3.0 — catálogo de herramientas en cuadrícula por áreas
+  (Documentos y PDF, Imágenes, Audio, Vídeo, Transcripción, Conversión, Procesamiento por lotes, Automatización y
+  recetas) con búsqueda sin tildes y disponibilidad real; espacio de trabajo por herramienta con entradas, vista previa
+  (imagen, PDF, audio y vídeo con QtMultimedia, texto) y opciones de la ficha; la cola como vista propia con repetir;
+  Procesar con la confirmación de la base; el diálogo de archivos de KDE; abrir y mostrar en Dolphin de la base.
 - 2026-11-02: Raphi Studio pasa a QML + Kirigami sobre `gui-comun` 2.7 (`docs/rediseno.md`): espacio de trabajo con la
   tabla de herramientas por familia o la de trabajos por estado, los archivos de entrada en una sola lista, las
   opciones generadas de la ficha con `PaginaFormulario`, el resultado con vista previa y el registro; F5 simula y
