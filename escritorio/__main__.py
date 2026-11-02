@@ -25,6 +25,13 @@ def _carpeta_gui_comun() -> str:
         return str(vecino) if (vecino / "gui_comun").is_dir() else ""
 
 
+def _es_python_sistema() -> bool:
+    """¿Este intérprete es el del sistema y no el de un `.venv`? El `python` de un `.venv` es un enlace a
+    `/usr/bin/python3`: resolver la ruta no basta (los dos dan `/usr/bin/python3.14`) y, si se confunden, la ventana
+    carga el PySide6 de pip del `.venv`, que no trae Kirigami."""
+    return sys.prefix == sys.base_prefix and Path(sys.executable).resolve() == Path(PYTHON_SISTEMA).resolve()
+
+
 def _sistema_sirve() -> bool:
     if not Path(PYTHON_SISTEMA).is_file():
         return False
@@ -41,7 +48,7 @@ def main(argv: list[str]) -> int:
         print("raphi: sin gui_comun o sin el PySide6 del sistema (Kirigami): se abre la ventana web.", file=sys.stderr)
         from escritorio.ventana import main as web
         return web(argv)
-    if Path(sys.executable).resolve() == Path(PYTHON_SISTEMA).resolve():
+    if _es_python_sistema():
         from escritorio.studio.aplicacion import main as studio
         return studio(argv)
     entorno = {**os.environ, "RAPHI_MOTOR_PYTHON": sys.executable, "GUI_COMUN_DIR": carpeta,

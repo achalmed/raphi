@@ -68,3 +68,17 @@ def test_raphi_no_importa_el_escritorio():
     for archivo in (RAIZ / "raphi").rglob("*.py"):
         texto = archivo.read_text()
         assert "PySide6" not in texto and "import escritorio" not in texto and "from escritorio" not in texto, archivo
+
+
+def test_el_python_del_venv_no_pasa_por_el_del_sistema(monkeypatch):
+    """El `python` del `.venv` es un enlace a `/usr/bin/python3`: si se tomara por el del sistema, Raphi Studio cargaría
+    el PySide6 de pip del `.venv` (sin Kirigami) en vez de relanzarse con el del sistema (fallo del acceso directo,
+    2026-11-02)."""
+    import sys
+    from escritorio import __main__ as entrada
+    monkeypatch.setattr(sys, "executable", entrada.PYTHON_SISTEMA)
+    monkeypatch.setattr(sys, "prefix", "/ruta/al/.venv")
+    monkeypatch.setattr(sys, "base_prefix", "/usr")
+    assert not entrada._es_python_sistema()
+    monkeypatch.setattr(sys, "prefix", "/usr")
+    assert entrada._es_python_sistema() == (Path(entrada.PYTHON_SISTEMA).is_file())

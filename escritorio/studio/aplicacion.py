@@ -51,7 +51,7 @@ ACENTO = "violeta"
 
 
 def datos_lanzador() -> dict:
-    return dict(app_id=APP_ID, nombre=NOMBRE, comentario="Documentos, PDF, imágenes, audio y video", orden=[str(REPO / "run.sh")],
+    return dict(app_id=APP_ID, nombre=NOMBRE, comentario="Documentos, PDF, imágenes, audio y video", orden=[str(REPO / "run.sh"), "escritorio"],
                 logo_svg=(RECURSOS_DIR / "marca.svg").read_text(encoding="utf-8"), acento=ACENTO, categorias="Office;",
                 palabras="pdf;convertir;comprimir;ocr;audio;video;transcribir;whisper;imagen;fotos;", archivos=True)
 
