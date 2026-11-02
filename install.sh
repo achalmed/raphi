@@ -1,7 +1,8 @@
 #!/usr/bin/env bash
 # install.sh — Instalador de Raphi escritorio (antes DocFlow Studio)
 #
-# 1. Crea un entorno virtual local (.venv) e instala PySide6 + dependencias.
+# 1. Crea un entorno virtual local (.venv) e instala PySide6 (para la ventana web) + las dependencias del motor.
+#    Raphi Studio (la ventana QML) corre con el Python del sistema; el motor, como proceso con este .venv.
 # 2. Enlaza el lanzador en ~/.local/bin/raphi.
 # 3. Instala la entrada de escritorio (menú de aplicaciones).
 # 4. Retira el lanzador y la entrada del nombre anterior (docflow-studio), si existen.
@@ -52,7 +53,10 @@ ln -sf "${DIR}/run.sh" "${BIN_DIR}/raphi"
 
 echo "==> Instalando el acceso directo en el menú de aplicaciones…"
 mkdir -p "$APPS_DIR"
-if ! PYTHONPATH="$DIR" "${DIR}/.venv/bin/python" -m escritorio.studio --instalar-lanzador; then
+# Raphi Studio corre con el Python del sistema (PySide6 y Kirigami de apt); el lanzador lo escribe gui_comun.lanzador
+GUI_COMUN="${GUI_COMUN_DIR:-}"
+[[ -z "$GUI_COMUN" && -d "${DIR}/../gui-comun/gui_comun" ]] && GUI_COMUN="$(cd "${DIR}/../gui-comun" && pwd)"
+if ! PYTHONPATH="$DIR" GUI_COMUN_DIR="$GUI_COMUN" /usr/bin/python3 -m escritorio.studio --instalar-lanzador; then
 cat > "${APPS_DIR}/raphi.desktop" <<DESKTOP
 [Desktop Entry]
 Type=Application
