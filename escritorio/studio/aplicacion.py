@@ -81,7 +81,9 @@ def construir(app: Aplicacion, cache: Path | None = None, releer: bool = True) -
     operaciones = Operaciones(espacio, herramientas, archivos, trabajos, consola, tareas, cache=cache)
     vista = Vista(herramientas._cache)
     acciones = Acciones()
-    acciones.estandar(NOMBRE)
+    # VentanaBase: sin los conmutadores de los paneles de VentanaStudio (ventana.inferior tomaba F4, que es de
+    # «Salida del motor»: un atajo en dos acciones no ejecuta ninguna; prueba en la sesión real, 2026-11-02)
+    acciones.estandar(NOMBRE, paneles=False)
     pedir = lambda que, **datos: (lambda *_: interfaz.pedir.emit(que, datos))
 
     def objetivo() -> str:
