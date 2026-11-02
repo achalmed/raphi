@@ -139,7 +139,7 @@ def test_sin_qtwidgets_y_sin_subir_carpetas():
     assert "GUI_COMUN_DIR" in init and "d.parent" not in init                       # instalado o por la variable, nunca subiendo carpetas
     run = (REPO / "run.sh").read_text(encoding="utf-8")
     assert "GUI_COMUN_DIR" in run
-    assert "ninguna prueba descarga ni transcribe" in (REPO / "tests" / "studio" / "test_studio.py").read_text(encoding="utf-8")
+    assert "ninguna prueba descarga ni transcribe" in (REPO / "tests" / "studio" / "test_ventana.py").read_text(encoding="utf-8")
 
 
 def test_ninguna_pantalla_a_mano():
