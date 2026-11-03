@@ -15,7 +15,7 @@ propios: la tabla de lo que se maneja, una operación actual, F5 simula y Ctrl+I
 documento aplica ese diseño al escritorio nativo de Raphi: la auditoría de lo que hay (§1), las ocho preguntas de
 producto (§2), la arquitectura de información (§3), la ventana (§4), lo construido (§5), los componentes (§6), lo
 que el marco necesitó (§7) y las decisiones (§8). **Está construido** (rama `wip/2026-11-02-qml`, 2026-11-02): las
-capturas de §5 son reales; pasa a `hecho` cuando el autor lo valide en la sesión real (`decisiones.md` §Pendientes).
+capturas de §5 son reales; pasa a `hecho` cuando el autor lo valide en la sesión real (`estado.md` §Por hacer).
 
 Tres reglas condicionan todo lo demás. **Ninguna pantalla se escribe a mano por herramienta** (R4/R9 de
 `decisiones.md`): el formulario de cada operación sale de su ficha (`raphi/motor/base.py`: `Operacion.ficha()` y

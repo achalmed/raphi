@@ -49,7 +49,8 @@ Raíz admitida: `README.md`, `CLAUDE.md`, `AGENTS.md`, `suite.yml`, `LICENSE`, `
 | algo que solo el escritorio puede hacer | un `@Slot` en `escritorio/puente.py` y su firma en `web/src/lib/escritorio.ts` | una ventana nueva |
 | cómo se usa | `README.md` §Uso; una opción de un backend, `docs/referencia-*.md` | un `GUIA.md` |
 | cómo funciona por dentro | `docs/arquitectura.md` | un segundo documento de arquitectura |
-| por qué se decidió algo · un pendiente | `docs/decisiones.md` (entrada fechada · §Pendientes con fecha y dueño) | un `TODO.md` |
+| por qué se decidió algo | `docs/decisiones.md` (entrada fechada) | un `TODO.md` |
+| un pendiente | `estado.md` §Por hacer, con fecha y dueño | `docs/decisiones.md` |
 | qué cambió | `CHANGELOG.md`, bajo la herramienta y su «Sin publicar» | el README |
 
 Lo que hiciste en esta sesión va al mensaje de commit, no a un archivo. Si nada encaja, pregunta antes.

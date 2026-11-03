@@ -1,5 +1,5 @@
 # Dependencias Python de whisper-transcriber.
 # ffmpeg es dependencia de SISTEMA (no pip): sudo apt install ffmpeg
 openai-whisper==20250625   # motor de transcripción/traducción (CLI `whisper`)
-yt-dlp==2026.3.17           # solo para entradas URL (YouTube y similares)
+yt-dlp==2026.10.26          # solo para entradas URL (YouTube y similares); ≥ 2026.7.4 por cinco avisos de seguridad
 pysrt==1.1.2               # solo para --shorten-srt / entradas .srt

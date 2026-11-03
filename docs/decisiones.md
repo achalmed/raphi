@@ -141,7 +141,7 @@ invocación para poder paralelizar.
 Cuatro `suite.yml` (`document_studio` en la raíz, uno por backend) con bloques de README generados por
 `core/suites.py`; patrón `main` + `config` + `lib` en cada suite; núcleo compartido de `core/`. Dos
 excepciones declaradas: docflow conserva su logger propio (niveles, `--quiet`, stdout reservado para
-datos) y `page-counter` resuelve la raíz de los blogs con `Path.home()` (ver Pendientes).
+datos) y `page-counter` resuelve la raíz de los blogs con `Path.home()` (los pendientes, en `estado.md`).
 
 ### 2026-09-20 · La arquitectura vive en `docs/`, no en el backend
 
@@ -173,15 +173,17 @@ transcripción de una conversación con un asistente. Contra la regla de que un 
 edita, manda la de no dejar rastro de conversaciones con asistentes en un repo público: se eliminó y git
 conserva el original. Lo que tenía de decisión está en la primera entrada de este registro.
 
-## Pendientes
+### 2026-11-03 · Los pendientes pasan a `estado.md`; las alertas de Dependabot
 
+**`estado.md`** (RQ-DOC-02 del validador): la regla 10 de la guía raíz pide que lo pendiente viva en `estado.md`
+§Por hacer, con fecha y dueño, y una guía de repo concreta la raíz, no la contradice. La tabla de §Pendientes de este
+documento pasó entera a `estado.md` (lo resuelto, a §Hecho); este registro vuelve a ser solo de decisiones.
 
-| fecha | pendiente | dueño |
-|---|---|---|
-| 2026-11-02 | Usar Raphi Studio 3.0 en la sesión real (Lliphi, Wayland): soltar archivos desde Dolphin sobre el catálogo y sobre una herramienta, la vista previa de un vídeo propio, procesar y repetir, un trabajo largo (transcribir) con su progreso y Esc | autor |
-| 2026-11-02 | Fusionar `wip/2026-11-02-reingenieria` (reingeniería, R12) en `main`, en local | director |
-| 2026-11-02 | La vista previa de PDF repite lo esencial del visor de LaTeX Studio (`pdftoppm` por demanda en una caché acotada): candidato a componente de `gui-comun` | director |
-| 2026-11-02 | La prueba `test_servidor_con_ficha` (`tests/test_escritorio.py`) necesita `web/dist` construido (`npm run web:construir`): en un worktree recién creado falla hasta construirlo o enlazarlo | director |
-| 2026-11-02 | La bandeja del sistema con su zona para soltar quedó solo en la ventana web (QtWidgets); si se quiere en el studio, `org.kde.notification` o un `QSystemTrayIcon` fuera del proceso QML | director |
-| 2026-11-02 | `install.sh` sigue instalando `gui-comun@v1.0.0` desde GitHub cuando el repo de al lado no está: el studio necesita 3.0 (publicar la etiqueta y subir la referencia) | director |
-| 2026-11-02 | El progreso de un trabajo depende de que la operación llame a `ctx.avisar`; las que no lo hacen muestran solo «en curso» hasta terminar | director |
+**Dependabot** (87 alertas abiertas, todas de pip; npm sin ninguna, `npm audit`): las cinco de yt-dlp se cierran
+con 2026.10.26 en `backends/whisper-transcriber/requirements.txt` (versión por fecha: no hay mayor que cruzar; las
+opciones que pasan `video-downloader` y `whisper-transcriber` existen en ella, y `--user-agent`, que no sale en su
+ayuda, se sigue aceptando como antes). Las 82 de Pillow piden 13.0.0: es un cambio de mayor y la versión es la de
+Qillqa (Raphi corre en su proceso), así que no se cambia aquí sola. Se probó sin tocar el `.venv`: Pillow 13.0.0
+instalado aparte y antepuesto en `PYTHONPATH` (con `pillow-heif` 1.8.1 registrándose bien), la suite del motor
+(`.venv/bin/python -m pytest -q tests`) da el mismo resultado que con 12.3.0. Queda al autor subirla a la vez en los
+dos proyectos (`estado.md`).

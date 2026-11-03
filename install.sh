@@ -42,7 +42,7 @@ fi
 if [[ -f "${DIR}/../gui-comun/pyproject.toml" ]]; then
     "${DIR}/.venv/bin/python" -m pip install -q -e "${DIR}/../gui-comun"
 else
-    "${DIR}/.venv/bin/python" -m pip install -q "gui-comun @ git+https://github.com/achalmed/gui-comun.git@v1.0.0" \
+    "${DIR}/.venv/bin/python" -m pip install -q "gui-comun @ git+https://github.com/achalmed/gui-comun.git@v3.0.0" \
         || echo "   (sin gui-comun: raphi abrirá la ventana web)"
 fi
 

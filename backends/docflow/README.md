@@ -92,8 +92,6 @@ salida: `docs/referencia-docflow.md`.
   `suite.yml`; la salida al usuario va a stderr y stdout queda para datos (`--json`).
 - **En Raphi escritorio solo se usa su PDF/A**; las demás operaciones de `docflow pdf` existen en la CLI
   pero la app las hace con pdf-suite.
-- **El bloque generado de arriba cita `main.sh convert`**, que no existe: el manifiesto está pendiente de
-  corregir (`docs/decisiones.md` §Pendientes); el comando es `to-pdf`.
 - Estado fuera del repo: `~/.config/docflow/config.toml`, sesiones en `~/.local/state/docflow/sessions/`
   (se conservan 50) y caché en ~/.cache/docflow/.
 
