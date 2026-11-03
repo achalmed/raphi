@@ -70,11 +70,12 @@ def test_vista_previa_servicio(muestra_sesion, tmp_path):
     m = muestra_sesion
     assert [vp.tipo(m.archivos[k]) for k in ("png", "pdf", "wav", "srt", "md", "carpeta")] == ["imagen", "pdf", "audio", "texto", "texto", "carpeta"]
     assert vp.tipo(tmp_path / "x.mkv") == "video" and vp.tipo(tmp_path / "x.docx") == ""
-    if shutil.which("pdftoppm") and shutil.which("pdfinfo"):
-        assert len(vp.paginas_pdf(m.archivos["pdf"])) == 2
-        png = vp.renderizar(m.archivos["pdf"], 1, 40, tmp_path)
-        assert png and png.read_bytes()[:4] == b"\x89PNG" and vp.renderizar(m.archivos["pdf"], 1, 40, tmp_path) == png
-        assert vp.podar(tmp_path, limite=0) > 0
+    if shutil.which("pdftoppm") and shutil.which("pdfinfo"):                 # las páginas, con el visor de gui-comun 3.2
+        from gui_comun import visor_pdf
+        assert len(visor_pdf.paginas(m.archivos["pdf"])) == 2
+        png = visor_pdf.renderizar(m.archivos["pdf"], 1, 40, tmp_path)
+        assert png and png.read_bytes()[:4] == b"\x89PNG" and visor_pdf.renderizar(m.archivos["pdf"], 1, 40, tmp_path) == png
+        assert visor_pdf.podar(tmp_path, limite=0) > 0
 
 
 def test_fichas_herramientas_resumen_y_campos():

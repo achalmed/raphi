@@ -89,7 +89,7 @@ Cola: en curso (progreso) · en cola · hechos · fallidos; cada trabajo con sus
   ficha, formatos) y filtros por área; la disponibilidad es la real (`faltan` de la ficha, calculada con el motor).
 - **X3. Espacio de trabajo por herramienta**: entradas · vista previa · opciones, a la vez. Las opciones siguen siendo
   `PaginaFormulario` desde la ficha (R4/R9).
-- **X4. Vista previa** de entradas y salidas: imagen (`Image`), PDF (páginas con `pdftoppm` por demanda, en la caché),
+- **X4. Vista previa** de entradas y salidas: imagen (`Image`), PDF (`VistaPdf` de `gui-comun` 3.2 desde el 2026-11-03; antes, páginas propias de `pdftoppm` por demanda),
   audio y vídeo (`QtMultimedia` de QML, si el módulo carga; si no, el aviso), texto (`VistaTexto`).
 - **X5. La cola es una vista propia** (Ctrl+3) con en curso, en cola, hechos y fallidos; cada trabajo con su
   progreso, registro, salidas (abrir con su aplicación, mostrar en Dolphin) y **repetir** (el mismo trabajo, con sus

@@ -1,5 +1,5 @@
 // VistaPrevia — lo que muestra el monitor del espacio de trabajo (reingeniería X4), del controlador studio.vista: una
-// imagen, un PDF página a página (pdftoppm, por demanda), audio o vídeo (ReproductorMedios, con QtMultimedia), un
+// imagen, un PDF (VistaPdf de gui-comun 3.2: zoom, miniaturas, selección, enlaces y búsqueda), audio o vídeo (ReproductorMedios, con QtMultimedia), un
 // texto (subtítulos, Markdown, una transcripción) o, si no hay nada que mostrar, qué es y cómo abrirlo. Solo lee.
 import QtQuick
 import QtQuick.Layouts
@@ -47,36 +47,10 @@ QQC2.Control {
                 sourceSize.width: Math.max(64, width * 2)
                 Accessible.name: "Imagen: " + raiz.v.nombre
             }
-            ListView {                                                     // 2 · PDF
-                id: paginas
-                clip: true
-                model: raiz.v.paginas
-                spacing: Kirigami.Units.largeSpacing
-                topMargin: Kirigami.Units.largeSpacing
-                bottomMargin: Kirigami.Units.largeSpacing
-                Accessible.name: "Páginas del PDF"
-                QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
-                delegate: Item {
-                    id: hoja
-                    required property var model
-                    // la proporción de la imagen ya renderizada manda: pdfinfo da el tamaño sin la rotación de la página
-                    readonly property real proporcion: lienzo.status === Image.Ready && lienzo.implicitWidth > 0 ? lienzo.implicitHeight / lienzo.implicitWidth
-                                                                                                                 : model.alto / model.ancho
-                    width: paginas.width
-                    height: (paginas.width - Kirigami.Units.gridUnit * 2) * proporcion
-                    Component.onCompleted: raiz.v.pedir(model.pagina)
-                    Rectangle {
-                        anchors.horizontalCenter: parent.horizontalCenter
-                        width: paginas.width - Kirigami.Units.gridUnit * 2
-                        height: parent.height
-                        color: Kirigami.Theme.backgroundColor
-                        border.color: Kirigami.Theme.disabledTextColor
-                        border.width: 1
-                        Image { id: lienzo; anchors.fill: parent; anchors.margins: 1; source: hoja.model.imagen; asynchronous: true; fillMode: Image.PreserveAspectFit; mipmap: true }
-                        QQC2.BusyIndicator { anchors.centerIn: parent; running: hoja.model.imagen === ""; visible: running }
-                        QQC2.Label { anchors.right: parent.right; anchors.bottom: parent.bottom; anchors.margins: Kirigami.Units.smallSpacing; text: hoja.model.pagina; font: Kirigami.Theme.smallFont; color: Kirigami.Theme.disabledTextColor }
-                    }
-                }
+            VistaPdf {                                                     // 2 · PDF (gui-comun 3.2)
+                visor: raiz.v.visorPdf
+                mensajeVacio: "Sin páginas"
+                explicacionVacia: "No se pudo leer el PDF (¿está dañado o protegido?): ábrelo con su aplicación."
             }
             Loader {                                                       // 3 · audio
                 active: raiz.v.tipo === "audio"

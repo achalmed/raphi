@@ -16,6 +16,7 @@ vivían en `docs/decisiones.md` §Pendientes por una regla propia del repo; desd
 
 | fecha | qué | dónde se ve |
 |---|---|---|
+| 2026-11-03 | **gui-comun 3.2 adoptado**: la vista previa de PDF es `VistaPdf` de la base sobre `gui_comun.visor_pdf.VisorPdf` (QtPdf o `pdftoppm`, zoom, miniaturas, selección, enlaces y búsqueda); retirado el renderizado propio (`controladores/vista.py`, `servicios/vista_previa.py`) | `escritorio/studio/README.md` |
 | 2026-11-03 | **Alertas de Dependabot** (87 abiertas, todas de pip): yt-dlp a 2026.10.26 en `backends/whisper-transcriber/requirements.txt` (cierra las cinco; las opciones que pasan los backends existen en esa versión). Las 82 de Pillow piden 13.0.0, un cambio de mayor: anotado abajo con la prueba hecha. npm: `npm audit` sin vulnerabilidades | `docs/decisiones.md`, entrada del 2026-11-03 |
 | 2026-11-03 | `install.sh` instala `gui-comun` 3.0.0 (la etiqueta `v3.0.0` ya está en su remoto) cuando el repo de al lado no está; antes, la 1.0.0 | `install.sh` |
 | 2026-11-03 | `estado.md` adoptado (RQ-DOC-02): los pendientes salen de `docs/decisiones.md` §Pendientes | este archivo |
@@ -39,8 +40,6 @@ nada en curso
 - 2026-11-02 · dueño: **el autor** · usar Raphi Studio 3.0 en la sesión real (Lliphi, Wayland): soltar archivos desde
   Dolphin sobre el catálogo y sobre una herramienta, la vista previa de un vídeo propio, procesar y repetir, un trabajo
   largo (transcribir) con su progreso y Esc.
-- 2026-11-02 · dueño: director · la vista previa de PDF repite lo esencial del visor de LaTeX Studio (`pdftoppm` por
-  demanda en una caché acotada): candidato a componente de `gui-comun` (carril A, 3.1; se adopta cuando esté en `main`).
 - 2026-11-02 · dueño: director · la prueba `test_servidor_con_ficha` (`tests/test_escritorio.py`) necesita `web/dist`
   construido (`npm run web:construir`): en un worktree recién creado falla hasta construirlo o enlazarlo.
 - 2026-11-02 · dueño: director · la bandeja del sistema con su zona para soltar quedó solo en la ventana web
