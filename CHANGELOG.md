@@ -17,6 +17,8 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 ### Sin publicar
 
+- **Nada de nubes de pastillas** (web, 2026-11-08, Edison; `../qillqa/docs/decisiones.md` §Nada de nubes de pastillas): las recetas de Herramientas son una lista con su descripción (`ListaCatalogo` de Tiqsi web).
+
 #### Añadido
 
 - 2026-10-31: `descargar` (yt-dlp), `transcribir` (Whisper local), `ajustar_subtitulos`, `auditar_fechas_fotos` y

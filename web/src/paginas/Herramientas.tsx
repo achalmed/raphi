@@ -14,8 +14,7 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import SearchIcon from '@mui/icons-material/Search'
-import MenuBookOutlinedIcon from '@mui/icons-material/MenuBookOutlined'
-import { Marco, PALETA, api, modo } from '@qillqa/tiqsi'
+import { Marco, PALETA, api, modo, ListaCatalogo } from '@qillqa/tiqsi'
 import ElegirArchivos from '../componentes/Archivos'
 import MenuFormatos from '../componentes/MenuFormatos'
 import PanelTrabajo from '../componentes/PanelTrabajo'
@@ -126,12 +125,8 @@ export default function Herramientas() {
               <Typography sx={{ fontWeight: 700, fontSize: 17 }}>Recetas</Typography>
               <Typography variant="body2" color="text.secondary">Varios pasos de una vez, con un clic</Typography>
             </Stack>
-            <Stack direction="row" spacing={1} flexWrap="wrap" useFlexGap>
-              {cat.recetas.filter((r) => !r.sin_entradas || cat.fuentes.includes('hub')).map((r) => (
-                <Chip key={r.id} label={r.nombre} variant="outlined" onClick={() => navegar(`/raphi/h/receta:${r.id}`)} title={r.descripcion}
-                  icon={<MenuBookOutlinedIcon sx={{ fontSize: '17px !important' }} />} sx={{ bgcolor: PALETA.superficie ?? 'background.paper' }} />
-              ))}
-            </Stack>
+            <ListaCatalogo buscar={false} alElegir={(i) => navegar(`/raphi/h/receta:${i.clave}`)}
+              items={cat.recetas.filter((r) => !r.sin_entradas || cat.fuentes.includes('hub')).map((r) => ({ clave: r.id, titulo: r.nombre, descripcion: r.descripcion }))} />
           </Box>
         )}
 
