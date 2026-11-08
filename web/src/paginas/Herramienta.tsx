@@ -38,6 +38,8 @@ export default function Herramienta() {
 
   useEffect(() => { cargarCatalogo().then(setCat).catch((e) => setError(e.message)) }, [])
   useEffect(() => { if (op) setValores(iniciales(op.parametros)) }, [op])
+  // «Seguir con…» cambia de herramienta sin salir de esta pantalla: lo de la anterior (sus trabajos, su error) no se queda.
+  useEffect(() => { setTrabajos([]); setError('') }, [id])
   useEffect(() => {
     const ids = (consulta.get('archivos') ?? '').split(',').filter(Boolean)
     if (ids.length) Promise.all(ids.map((a) => api<Archivo>(`${BASE}/archivos/${a}`))).then(setArchivos).catch(() => undefined)

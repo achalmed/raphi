@@ -28,16 +28,22 @@ PATRONES = {
 
 
 def _buscar(pagina, terminos: list[str], patrones: list[str]) -> list:
-    """Los rectángulos de cada aparición: los términos literales (sin distinguir mayúsculas) y los patrones."""
-    import pymupdf
+    """Los rectángulos de cada aparición: los términos literales (sin distinguir mayúsculas) y los patrones.
+
+    Los patrones se buscan sobre el texto corrido de la página, no palabra por palabra: así un celular escrito
+    «987 654 321» o un DNI seguido de una coma también se encuentran; cada dato hallado se localiza con `search_for`."""
     cajas = []
     for t in terminos:
         cajas += pagina.search_for(t)
     if patrones:
-        for palabra in pagina.get_text("words"):
-            texto = palabra[4]
-            if any(re.fullmatch(PATRONES[p], texto.strip(".,;:()")) for p in patrones):
-                cajas.append(pymupdf.Rect(palabra[:4]))
+        texto = pagina.get_text()
+        hallados: list[str] = []
+        for p in patrones:
+            for m in re.finditer(PATRONES[p], texto):
+                if m.group(0) not in hallados:
+                    hallados.append(m.group(0))
+        for dato in hallados:
+            cajas += pagina.search_for(dato)
     return cajas
 
 
@@ -126,8 +132,9 @@ def nota(ctx):
     doc = _doc(ctx.entrada)
     n = ctx.p("pagina") - 1
     if n >= doc.page_count:
+        paginas = doc.page_count
         doc.close()
-        raise ErrorOperacion(f"El documento tiene {doc.page_count} páginas.")
+        raise ErrorOperacion(f"El documento tiene {paginas} páginas.")
     destino = ctx.salida()
     if ctx.simular:
         doc.close()

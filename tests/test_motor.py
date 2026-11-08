@@ -130,6 +130,8 @@ def test_comprimir_hasta_un_tope(corpus, salida):
 def test_reparar_validar_pdfa_linearizar(corpus, salida):
     rep = correr("reparar", [corpus["danado"]], salida).archivos[0]
     assert paginas_de(rep) == 3
+    inf = motor.ejecutar("reparar", [corpus["nopdf"]], {}, destino=salida)       # ni qpdf ni Ghostscript pueden
+    assert not inf.ok and not list(salida.glob("nopdf*")), "Ghostscript no debe dejar un archivo a medias"
     v = correr("validar", [corpus["texto"]], salida).elementos[0].resultado
     assert v.datos["valido"] is True and not v.archivos
     a = correr("pdfa", [corpus["texto"]], salida).archivos[0]
@@ -161,6 +163,13 @@ def test_foliar_numerar_sello_marca(corpus, salida):
         assert "CONFIDENCIAL" in doc[0].get_text()
     inf = motor.ejecutar("numerar", [corpus["texto"]], {"formato": "{x}"}, destino=salida)
     assert not inf.ok and "{n}" in inf.elementos[0].error
+    # simular numerar y pedir una página que no existe: mensajes claros, no «document closed»
+    inf = motor.ejecutar("numerar", [corpus["texto"]], {"desde": 2}, destino=salida, simular=True)
+    assert inf.ok and "numerar 2 páginas desde la 2" in inf.elementos[0].resultado.plan[0]
+    for op in ("numerar", "sello", "nota"):
+        clave = "desde" if op == "numerar" else "pagina"
+        inf = motor.ejecutar(op, [corpus["texto"]], {clave: 9, "texto": "x"} if op == "nota" else {clave: 9}, destino=salida)
+        assert not inf.ok and inf.elementos[0].error == "El documento tiene 3 páginas.", (op, inf.elementos[0].error)
 
 
 def test_foliar_respeta_paginas_rotadas(corpus, salida):
@@ -181,6 +190,10 @@ def test_cifrar_descifrar_metadatos_firmas(corpus, salida):
         pikepdf.open(c)
     inf = motor.ejecutar("descifrar", [c], {"clave": "mala"}, destino=salida)
     assert not inf.ok and "contraseña" in inf.elementos[0].error
+    inf = motor.ejecutar("descifrar", [c], {"clave": "mala"}, destino=salida, simular=True)
+    assert not inf.ok and "contraseña" in inf.elementos[0].error       # también al simular: la clave se comprueba
+    i = correr("info", [c], salida).elementos[0].resultado
+    assert i.datos["cifrado"] and i.mensajes[0].startswith("Protegido con contraseña")
     d = correr("descifrar", [c], salida, clave="secreta").archivos[0]
     assert paginas_de(d) == 3
     inf = motor.ejecutar("rotar", [corpus["cifrado"]], {}, destino=salida)

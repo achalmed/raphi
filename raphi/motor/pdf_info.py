@@ -63,6 +63,8 @@ def info(ctx):
     d = informacion(ctx.entrada)
     if d.get("valido") is False:
         raise ErrorOperacion(d["mensaje"])
+    if d.get("cifrado") and d.get("paginas") is None:
+        return Resultado(datos=d, mensajes=[f"Protegido con contraseña · {d['peso']}: descífrelo para ver el resto."])
     mensajes = [f"{d.get('paginas')} páginas · {d['peso']} · PDF {d.get('version', '?')}"]
     if d.get("tamanos"):
         mensajes.append(" · ".join(f"{k}: {v}" for k, v in d["tamanos"].items()))

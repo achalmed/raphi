@@ -38,13 +38,13 @@ def cifrar(ctx):
            palabras=("desbloquear", "decrypt", "unlock"))
 def descifrar(ctx):
     destino = ctx.salida()
-    if ctx.simular:
-        return Resultado(plan=[f"descifrar → {destino.name}"])
     try:
-        pdf = pikepdf.open(ctx.entrada, password=ctx.p("clave"))
+        pdf = pikepdf.open(ctx.entrada, password=ctx.p("clave"))   # también al simular: comprobar la clave es barato
     except pikepdf.PasswordError as e:
         raise ErrorOperacion("La contraseña no es la correcta.") from e
     with pdf:
+        if ctx.simular:
+            return Resultado(plan=[f"descifrar → {destino.name}"] + ([] if pdf.is_encrypted else ["No estaba cifrado."]))
         pdf.save(destino)
     return Resultado([destino])
 

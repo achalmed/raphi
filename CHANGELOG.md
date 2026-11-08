@@ -19,6 +19,27 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 - **Nada de nubes de pastillas** (web, 2026-11-08, Edison; `../qillqa/docs/decisiones.md` §Nada de nubes de pastillas): las recetas de Herramientas son una lista con su descripción (`ListaCatalogo` de Tiqsi web).
 
+#### Corregido (auditoría de las 62 operaciones, 2026-11-08)
+
+- La CLI con Python 3.14: `raphi comprimir …`, `raphi ayuda comprimir` y `raphi accion comprimir` (los menús de
+  Dolphin) reventaban por el «%» de «Ganancia mínima (%)» en la ayuda de argparse; la ayuda escapa el «%».
+- `numerar` simulado reventaba («document closed»); `numerar`, `sello` y `nota` con una página que no existe
+  decían «document closed» en vez de «El documento tiene N páginas».
+- `tachar` no encontraba un celular escrito con espacios («987 654 321») ni un dato pegado a una coma: los patrones
+  se buscan sobre el texto corrido de la página y cada hallazgo se localiza con `search_for`.
+- `quitar_metadatos_archivo` fallaba con docx, xlsx, pptx, odt, ods y odp («exiftool: Can't write DOCX files»): se
+  reescribe el ZIP con las propiedades vacías y sin la miniatura; un PDF va por `quitar_metadatos` (exiftool deja lo
+  viejo recuperable dentro del PDF).
+- `auditar_fechas_fotos` decía «solo lee» pero el backend dejaba `date_audit.csv` dentro de la carpeta auditada y
+  la operación no mostraba nada (el backend escribe en stderr): el CSV sale como salida junto a la carpeta (o al
+  destino) y el resumen se ve; `ordenar_fotos_por_fecha` muestra los renombrados.
+- `reparar` y `pdfa` dejaban un PDF a medias cuando Ghostscript fallaba; ya no.
+- `descifrar` simulado decía que descifraría aunque la clave fuera otra; comprueba la clave también al simular.
+  `miniatura` simulada con una página inexistente ya avisa. `info` de un PDF cifrado decía «None páginas · PDF ?».
+  `comparar_compresion` mostraba la ganancia con «+».
+- Web: «Seguir con…» dejaba en la herramienta nueva los paneles de trabajos de la anterior.
+- README: son 62 operaciones, no 48; `web/dist` reconstruido (estaba desfasado del 31 de octubre).
+
 #### Añadido
 
 - 2026-10-31: `descargar` (yt-dlp), `transcribir` (Whisper local), `ajustar_subtitulos`, `auditar_fechas_fotos` y

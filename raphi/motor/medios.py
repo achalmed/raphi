@@ -426,14 +426,64 @@ def extraer_archivo(ctx):
     return Resultado([carpeta], {"elementos": sum(1 for _ in carpeta.rglob("*"))})
 
 
+OFICINA_ZIP = (".docx", ".xlsx", ".pptx", ".dotx", ".odt", ".ods", ".odp")
+# Lo que queda en lugar de las propiedades de un documento de oficina: el archivo vacío que exige cada formato.
+_CORE_VACIO = (b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<cp:coreProperties '
+               b'xmlns:cp="http://schemas.openxmlformats.org/package/2006/metadata/core-properties" '
+               b'xmlns:dc="http://purl.org/dc/elements/1.1/" xmlns:dcterms="http://purl.org/dc/terms/" '
+               b'xmlns:dcmitype="http://purl.org/dc/dcmitype/" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"/>')
+_APP_VACIO = (b'<?xml version="1.0" encoding="UTF-8" standalone="yes"?>\n<Properties '
+              b'xmlns="http://schemas.openxmlformats.org/officeDocument/2006/extended-properties" '
+              b'xmlns:vt="http://schemas.openxmlformats.org/officeDocument/2006/docPropsVTypes"/>')
+_META_VACIO = (b'<?xml version="1.0" encoding="UTF-8"?>\n<office:document-meta '
+               b'xmlns:office="urn:oasis:names:tc:opendocument:xmlns:office:1.0" '
+               b'xmlns:meta="urn:oasis:names:tc:opendocument:xmlns:meta:1.0" office:version="1.2"><office:meta/></office:document-meta>')
+
+
+def _limpiar_oficina(origen: Path, destino: Path) -> int:
+    """Un docx/xlsx/pptx u odt/ods/odp sin sus propiedades (autor, empresa, fechas, programa, miniatura): se reescribe
+    el ZIP con `docProps/core.xml`, `docProps/app.xml` o `meta.xml` vacíos y sin la miniatura. exiftool no escribe
+    estos formatos. El contenido no se toca."""
+    import zipfile
+    quitados = 0
+    try:
+        with zipfile.ZipFile(origen) as z, zipfile.ZipFile(destino, "w", zipfile.ZIP_DEFLATED) as w:
+            for item in z.infolist():
+                nombre = item.filename
+                datos = z.read(nombre)
+                if nombre == "docProps/core.xml":
+                    datos, quitados = _CORE_VACIO, quitados + 1
+                elif nombre == "docProps/app.xml":
+                    datos, quitados = _APP_VACIO, quitados + 1
+                elif nombre == "meta.xml":
+                    datos, quitados = _META_VACIO, quitados + 1
+                elif nombre in ("docProps/thumbnail.jpeg", "docProps/thumbnail.png", "Thumbnails/thumbnail.png"):
+                    quitados += 1
+                    continue
+                w.writestr(item, datos)         # con su ZipInfo: el «mimetype» de ODF sigue sin comprimir y primero
+    except zipfile.BadZipFile as e:
+        destino.unlink(missing_ok=True)
+        raise ErrorOperacion(f"{origen.name} no es un documento de oficina válido.") from e
+    return quitados
+
+
 @operacion("quitar_metadatos_archivo", "Archivos", "Quitar metadatos (cualquier archivo)",
            "Borra EXIF, GPS, autor y programa de fotos, videos y documentos antes de compartirlos.",
            entrada="archivos", extensiones=(), sufijo="limpio", requiere=("exiftool",),
            palabras=("gps", "exif", "privacidad", "ubicación", "anonimizar"))
 def quitar_metadatos_archivo(ctx):
+    ext = ctx.entrada.suffix.lower()
+    if ext == ".pdf":
+        # exiftool edita un PDF de forma reversible (lo viejo queda dentro): un PDF se limpia con «quitar_metadatos»
+        from raphi.motor.pdf_editar import quitar_metadatos
+        return quitar_metadatos(ctx)
     destino = ctx.salida()
     if ctx.simular:
-        return Resultado(plan=[f"exiftool -all= → {destino.name}"])
+        como = "sin sus propiedades (reescrito el ZIP)" if ext in OFICINA_ZIP else "exiftool -all="
+        return Resultado(plan=[f"{como} → {destino.name}"])
+    if ext in OFICINA_ZIP:
+        quitados = _limpiar_oficina(ctx.entrada, destino)
+        return Resultado([destino], {"quitados": quitados}, [f"{quitados} archivo(s) de propiedades vaciados o quitados"])
     correr(["exiftool", "-q", "-all=", "-o", str(destino), str(ctx.entrada)], timeout=300,
            mensaje="exiftool no pudo limpiarlo")
     return Resultado([destino])

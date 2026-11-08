@@ -9,7 +9,7 @@ creado: 2026-11-02
 
 Fase 5 de la modernización de la familia de studios (`gui-comun/docs/arquitectura-qml-kirigami.md` §8): Raphi Studio
 es el octavo que sigue al piloto Git Studio, cuyo lenguaje visual y arquitectura de información
-(`git-studio/docs/rediseno.md` §2, §4, §6, §8) el autor aprobó el 2026-11-01 «para todos los programas de la
+(`git-studio/docs/reingenieria.md` §2, §4, §6, §8) el autor aprobó el 2026-11-01 «para todos los programas de la
 familia». Biblioteca, Quarto y Simuladores Studio mostraron cómo se aplica a un studio que orquesta un motor con datos
 propios: la tabla de lo que se maneja, una operación actual, F5 simula y Ctrl+Intro aplica tras confirmar. Este
 documento aplica ese diseño al escritorio nativo de Raphi: la auditoría de lo que hay (§1), las ocho preguntas de

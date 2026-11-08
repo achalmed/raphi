@@ -95,13 +95,15 @@ def numerar(ctx):
     doc = _doc(ctx.entrada)
     desde = ctx.p("desde") - 1
     if desde >= doc.page_count:
+        paginas = doc.page_count            # antes de cerrarlo: un documento cerrado ya no sabe cuántas tiene
         doc.close()
-        raise ErrorOperacion(f"El documento tiene {doc.page_count} páginas.")
+        raise ErrorOperacion(f"El documento tiene {paginas} páginas.")
     destino = ctx.salida()
-    total = doc.page_count - desde + ctx.p("inicio") - 1
+    paginas = doc.page_count
+    total = paginas - desde + ctx.p("inicio") - 1
     if ctx.simular:
         doc.close()
-        return Resultado(plan=[f"numerar {doc.page_count - desde} páginas desde la {desde + 1} → {destino.name}"])
+        return Resultado(plan=[f"numerar {paginas - desde} páginas desde la {desde + 1} → {destino.name}"])
     try:
         for i, n in enumerate(range(desde, doc.page_count)):
             texto = ctx.p("formato").format(n=ctx.p("inicio") + i, total=total)
@@ -160,8 +162,9 @@ def sello(ctx):
     doc = _doc(ctx.entrada)
     n = ctx.p("pagina") - 1
     if n >= doc.page_count:
+        paginas = doc.page_count
         doc.close()
-        raise ErrorOperacion(f"El documento tiene {doc.page_count} páginas.")
+        raise ErrorOperacion(f"El documento tiene {paginas} páginas.")
     momento = ctx.p("fecha") or dt.datetime.now().strftime("%d/%m/%Y %H:%M")
     lineas = [ctx.p("titulo")] + ([ctx.p("entidad")] if ctx.p("entidad") else []) + [momento]
     if ctx.p("folios"):

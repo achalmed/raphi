@@ -143,11 +143,11 @@ def detectar_ocr(ctx):
 def miniatura(ctx):
     import pymupdf
     destino = ctx.salida(extension=f".{ctx.p('formato')}", nombre=f"{ctx.entrada.stem}-p{ctx.p('pagina')}")
-    if ctx.simular:
-        return Resultado(plan=[f"miniatura → {destino.name}"])
     with pymupdf.open(ctx.entrada) as doc:
         if ctx.p("pagina") > doc.page_count:
             raise ErrorOperacion(f"El documento tiene {doc.page_count} páginas.")
+        if ctx.simular:
+            return Resultado(plan=[f"miniatura → {destino.name}"])
         pagina = doc[ctx.p("pagina") - 1]
         zoom = ctx.p("ancho") / pagina.rect.width
         imagen = pagina.get_pixmap(matrix=pymupdf.Matrix(zoom, zoom), alpha=False)

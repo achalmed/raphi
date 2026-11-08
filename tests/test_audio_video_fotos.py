@@ -69,6 +69,20 @@ def test_ordenar_fotos_trabaja_sobre_una_copia(tmp_path):
     assert {"20240102_101112.png", "20250314_wa0007.jpg"} <= nombres
 
 
+@pytest.mark.skipif(bool(obtener("auditar_fechas_fotos").faltan()), reason="falta exiftool")
+def test_auditar_fechas_no_escribe_en_la_carpeta(tmp_path):
+    from PIL import Image
+    carpeta = tmp_path / "fotos"
+    carpeta.mkdir()
+    Image.new("RGB", (16, 16), "red").save(carpeta / "IMG-20250314-WA0007.jpg")
+    antes = sorted(p.name for p in carpeta.iterdir())
+    inf = motor.ejecutar("auditar_fechas_fotos", [carpeta], {}, destino=tmp_path / "s")
+    assert inf.ok, inf.elementos[0].error
+    assert sorted(p.name for p in carpeta.iterdir()) == antes            # el backend dejaba date_audit.csv dentro
+    r = inf.elementos[0].resultado
+    assert any("Total auditados" in m for m in r.mensajes) and r.archivos[0].name == "fotos_fechas.csv"
+
+
 def test_la_cli_expande_carpetas_segun_la_operacion(tmp_path):
     (tmp_path / "sub").mkdir()
     for n in ("a.mp3", "b.txt", "sub/c.ogg"):

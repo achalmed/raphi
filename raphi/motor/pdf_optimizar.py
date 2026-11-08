@@ -26,7 +26,11 @@ def ghostscript(entrada: Path, salida: Path, perfil: str = "ebook", ppp: int | N
              "-dDownsampleColorImages=true", "-dDownsampleGrayImages=true", "-dDownsampleMonoImages=true",
              f"-dColorImageResolution={ppp}", f"-dGrayImageResolution={ppp}", f"-dMonoImageResolution={max(ppp, 300)}",
              *(extra or []), f"-sOutputFile={salida}", str(entrada)]
-    correr(orden, timeout=900, mensaje=f"Ghostscript no pudo procesar {entrada.name}")
+    try:
+        correr(orden, timeout=900, mensaje=f"Ghostscript no pudo procesar {entrada.name}")
+    except ErrorOperacion:
+        salida.unlink(missing_ok=True)        # Ghostscript deja un archivo a medias cuando falla: no se entrega
+        raise
     return salida
 
 
@@ -95,7 +99,8 @@ def comparar_compresion(ctx):
         filas.append({"perfil": perfil, "bytes": peso, "legible": tamano_legible(peso),
                       "ganancia": round(100 * (original - peso) / original, 1) if original else 0})
     return Resultado(datos={"original": original, "niveles": filas},
-                     mensajes=[f"{f['perfil']}: {f['legible']} ({f['ganancia']:+.1f} %)" for f in filas])
+                     mensajes=[f"{f['perfil']}: {f['legible']} ({'−' if f['ganancia'] >= 0 else '+'}{abs(f['ganancia']):.1f} %)"
+                               for f in filas])
 
 
 @operacion("linearizar", "Optimizar", "Optimizar para la web",
@@ -164,9 +169,13 @@ def pdfa(ctx):
     destino = ctx.salida()
     if ctx.simular:
         return Resultado(plan=[f"PDF/A-2b → {destino.name}"])
-    correr(["gs", "-q", "-dPDFA=2", "-dBATCH", "-dNOPAUSE", "-dSAFER", "-sColorConversionStrategy=UseDeviceIndependentColor",
-            "-sDEVICE=pdfwrite", "-dPDFACompatibilityPolicy=1", f"-sOutputFile={destino}", str(ctx.entrada)],
-           timeout=900, mensaje="Ghostscript no pudo producir el PDF/A")
+    try:
+        correr(["gs", "-q", "-dPDFA=2", "-dBATCH", "-dNOPAUSE", "-dSAFER", "-sColorConversionStrategy=UseDeviceIndependentColor",
+                "-sDEVICE=pdfwrite", "-dPDFACompatibilityPolicy=1", f"-sOutputFile={destino}", str(ctx.entrada)],
+               timeout=900, mensaje="Ghostscript no pudo producir el PDF/A")
+    except ErrorOperacion:
+        destino.unlink(missing_ok=True)
+        raise
     nivel = es_pdfa(destino)
     if nivel != "2B":
         destino.unlink(missing_ok=True)

@@ -436,7 +436,7 @@ Entrada: pdf (cada archivo por su lado) · .pdf · necesita: nada aparte.
 
 ### `auditar_fechas_fotos` — Auditar fechas de fotos
 
-Compara la fecha del nombre de cada foto o video con la de sus metadatos; solo lee.
+Compara la fecha del nombre de cada foto o video con la de sus metadatos; no toca la carpeta y deja el detalle en un CSV aparte.
 
 Entrada: archivos (cada archivo por su lado) · necesita: exiftool.
 

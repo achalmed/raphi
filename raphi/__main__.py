@@ -66,6 +66,7 @@ def _opciones_de(op, ap: argparse.ArgumentParser) -> None:
             ayuda += f" [{' | '.join(p.valores())}]"
         if p.defecto not in (None, ""):
             ayuda += f" · por omisión: {p.defecto}"
+        ayuda = ayuda.replace("%", "%%")       # argparse expande «%» en la ayuda: «Ganancia mínima (%)» la rompía
         if p.tipo == "casilla":
             ap.add_argument(nombre, dest=p.clave, action=argparse.BooleanOptionalAction, default=None, help=ayuda)
         else:

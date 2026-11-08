@@ -10,7 +10,7 @@ estado: activo
 PDF, ofimática y conversión de archivos (motor, CLI, web y escritorio; antes DocFlow Studio).
 
 - Escribe en: archivos · simula por defecto: no
-- Depende de: {'PySide6 (el del sistema para Raphi Studio': 'python3-pyside6.* con Kirigami y gui-comun 2.7; el del .venv para la ventana web)'}, pikepdf, PyMuPDF
+- Depende de: {'PySide6 (el del sistema para Raphi Studio': 'python3-pyside6.* con Kirigami y QtMultimedia de QML, y gui-comun 3.0; el del .venv para la ventana web)'}, pikepdf, PyMuPDF
 - Nota: motor y CLI en raphi/ (python -m raphi); la web en web/ y la ventana en escritorio/ (la misma interfaz); docflow, en backends/docflow (pdf-suite y page-counter se retiraron en R8)
 
 Comandos:
@@ -25,7 +25,7 @@ python3 -m pytest -q tests
 tests/run.sh
 ```
 
-<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-11-02); no se edita a mano.</sub>
+<sub>Bloque generado desde `suite.yml` por `core/suites.py generar` (2026-11-08); no se edita a mano.</sub>
 <!-- suite:fin -->
 
 <!-- suites:inicio -->
@@ -39,7 +39,7 @@ Suites de esta carpeta (5); índice global en `meta/INDICE_SCRIPTS.md`. Patrón:
 | `whisper_transcriber` | [raphi/backends/whisper-transcriber](backends/whisper-transcriber/) | multimedia | archivos | no |  | activo | `MCL` |
 | `raphi` | [raphi](./) | documentos | archivos | no |  | activo | `MCL` |
 
-<sub>Bloque generado desde los `suite.yml` por `core/suites.py generar` (2026-11-02); no se edita a mano.</sub>
+<sub>Bloque generado desde los `suite.yml` por `core/suites.py generar` (2026-11-08); no se edita a mano.</sub>
 <!-- suites:fin -->
 
 ## Qué es
@@ -49,7 +49,7 @@ conversión de archivos, con tres caras sobre el mismo motor: la **ventana de es
 con cuentas, o como módulo de la plataforma Qillqa) y la **CLI** (`raphi <operación>`). Es local: ningún archivo sale a
 un servicio ajeno.
 
-- **48 operaciones** en un solo registro (`raphi/motor/`): unir, dividir, extraer, rotar, reordenar, componer páginas
+- **62 operaciones** en un solo registro (`raphi/motor/`): unir, dividir, extraer, rotar, reordenar, componer páginas
   de varios PDF; comprimir (también «hasta 10 MB»), linearizar, reparar, validar, PDF/A; OCR; foliar expedientes,
   sello de recepción, numerar, marca de agua, metadatos; cifrar, ver firmas; PDF a imagen, texto, HTML y Word;
   documentos a PDF, entre formatos de oficina y a Markdown; imágenes (con HEIC y AVIF), audio, video, subtítulos y

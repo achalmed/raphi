@@ -20,6 +20,7 @@ def con_datos(tmp_path):
     p = doc.new_page()
     p.insert_text((72, 100), "Solicitante: Ana Quispe, DNI 45678912, correo ana@ejemplo.pe", fontsize=11)
     p.insert_text((72, 130), "Celular 987654321. Empresa RUC 20123456789. Texto que se queda.", fontsize=11)
+    p.insert_text((72, 160), "Otro celular: 987 654 321, y el DNI 11223344.", fontsize=11)   # con espacios y coma
     ruta = tmp_path / "datos.pdf"
     doc.save(ruta)
     return ruta
@@ -34,9 +35,9 @@ def texto(ruta):
 def test_tachar_borra_de_verdad(con_datos, tmp_path):
     t = correr("tachar", [con_datos], tmp_path / "s", terminos="Ana Quispe", dni=True, ruc=True, correo=True, celular=True).archivos[0]
     queda = texto(t)
-    for secreto in ("Ana Quispe", "45678912", "20123456789", "ana@ejemplo.pe", "987654321"):
+    for secreto in ("Ana Quispe", "45678912", "20123456789", "ana@ejemplo.pe", "987654321", "987 654 321", "11223344"):
         assert secreto not in queda
-    assert "Texto que se queda" in queda
+    assert "Texto que se queda" in queda and "Otro celular" in queda
     inf = motor.ejecutar("tachar", [con_datos], {}, destino=tmp_path / "s")
     assert not inf.ok and "Diga qué tachar" in inf.elementos[0].error
 

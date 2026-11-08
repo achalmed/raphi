@@ -83,6 +83,27 @@ def test_quitar_metadatos_de_una_foto(corpus, salida):
     correr("quitar_metadatos_archivo", [corpus["jpg"]], salida)
 
 
+@pytest.mark.skipif(not shutil.which("exiftool"), reason="sin exiftool")
+def test_quitar_metadatos_de_un_documento_de_oficina_y_de_un_pdf(corpus, salida, tmp_path):
+    """exiftool no escribe docx ni odt (los limpia reescribiendo el ZIP) y un PDF va por «quitar_metadatos» (exiftool
+    deja lo viejo recuperable dentro del PDF)."""
+    import zipfile
+    docx = tmp_path / "carta.docx"
+    with zipfile.ZipFile(docx, "w") as z:
+        z.writestr("[Content_Types].xml", "<Types/>")
+        z.writestr("docProps/core.xml", "<cp:coreProperties><dc:creator>Ana Quispe</dc:creator></cp:coreProperties>")
+        z.writestr("docProps/app.xml", "<Properties><Company>Despacho</Company></Properties>")
+        z.writestr("word/document.xml", "<w:document>Hola</w:document>")
+    limpio = correr("quitar_metadatos_archivo", [docx], salida).archivos[0]
+    with zipfile.ZipFile(limpio) as z:
+        assert z.testzip() is None and "Hola" in z.read("word/document.xml").decode()
+        assert b"Ana Quispe" not in z.read("docProps/core.xml") and b"Despacho" not in z.read("docProps/app.xml")
+    pdf = correr("quitar_metadatos_archivo", [corpus["texto"]], salida).archivos[0]
+    import pikepdf
+    with pikepdf.open(pdf) as p:
+        assert "/Metadata" not in p.Root and not p.docinfo.get("/Producer")
+
+
 def test_menu_de_tangerine(corpus):
     foto = {f["a"] for f in formatos_de(corpus["jpg"]) if f["a"]}
     assert {"png", "webp", "heic", "pdf"} <= foto and "jpg" not in foto
@@ -153,6 +174,9 @@ def test_cli(corpus, tmp_path, capsys):
     assert main(["receta", "para-enviar", str(corpus["texto"]), "-o", str(tmp_path / "r"), "-n"]) == 0
     capsys.readouterr()
     assert main(["formatos", str(corpus["jpg"])]) == 0 and "convertir_imagen" in capsys.readouterr().out
+    # «Ganancia mínima (%)»: un «%» en la ayuda rompía argparse (Python 3.14 lo comprueba al declarar la opción)
+    assert main(["ayuda", "comprimir"]) == 0 and "Ganancia mínima (%)" in capsys.readouterr().out
+    assert main(["comprimir", str(corpus["texto"]), "-o", str(tmp_path), "--hasta", "10", "-n"]) == 0
 
 
 def test_la_referencia_de_operaciones_esta_al_dia():
