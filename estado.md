@@ -16,6 +16,7 @@ vivían en `docs/decisiones.md` §Pendientes por una regla propia del repo; desd
 
 | fecha | qué | dónde se ve |
 |---|---|---|
+| 2026-11-11 | **Probado con uso real** (desde Muyu): `descargar` de YouTube a MP3 con el avance real de yt-dlp, `transcribir` lo bajado con Whisper (SRT y su versión de líneas cortas), `quitar_metadatos_archivo` con mat2 sobre una foto con GPS, autor y número de serie (quedan solo los campos del formato) | `tests/test_archivos_multimedia.py` |
 | 2026-11-11 | **La rueda ampliada**, tras probarla el autor en la sesión: vista previa de PDF con el visor de gui-comun (zoom, desplazar, seleccionar, buscar), imagen ampliable, texto; «Ver el original»; panel acotado con Ampliar (F11) y el cerrar de la decoración de KWin; informes de las herramientas de información; enlaces (descargas con avance real, cookies del navegador, listas, subtítulos, SponsorBlock); Okular (D-Bus), macro de LibreOffice, correo y copiar el archivo. En el motor, 13 operaciones nuevas (metadatos, sumas, comprimidos, información de medios, subtítulos, volumen, rotar, unir, carátula, dividir, foto de documento) e ICO y medidas listas; limpieza con mat2 y su comprobación; valores actuales. Okular probado por D-Bus sin pantalla; la macro de LibreOffice, no dentro de LibreOffice | `raphi/motor/archivos.py`, `raphi/motor/multimedia.py`, `tests/test_archivos_multimedia.py`, `docs/decisiones.md` R13 (adenda) |
 | 2026-11-11 | **La rueda de soltar** (R13; ese mismo día se mudó a Muyu, repo `muyu`, su M1): el círculo de formatos (interior) y herramientas (exterior) que sale de `formatos_de`/`opciones_para`, con vista previa en vivo, editor del recorte, encadenar, arrastrar el resultado fuera, deshacer a la papelera y teclado; desde el menú de Dolphin y Krusader, el atajo Meta+Ctrl+R o la franja del borde (`--residente`), con layer-shell en Wayland. En el motor: «Poner fondo» (`fondo_imagen`), `opciones_para`, la pista `vista` de un parámetro y el recorte por rectángulo. Probado sin pantalla y en un KWin anidado (`kwin_wayland --virtual`): no en la sesión real | el repo `muyu`; aquí, `tests/test_rueda.py` y `docs/arquitectura.md` §El corredor como API de Muyu |
 | 2026-11-08 | **Auditoría de las 62 operaciones en las tres caras**: cada una simulada y aplicada sobre un corpus de 34 archivos (318 corridas), la CLI con sus órdenes y errores de uso, la web en el navegador contra `raphi.sola` (subir, simular, aplicar, descargar, «Seguir con…», mesa de trabajo, recetas, sistema) y Raphi Studio sin pantalla sobre la muestra (catálogo, foliar aplicada, la cola con audio). Corregidos: la CLI con Python 3.14 (`%` en la ayuda), `numerar` simulado y los mensajes de página inexistente, `tachar` con celulares con espacios, `quitar_metadatos_archivo` con documentos de oficina y PDF, `auditar_fechas_fotos` que escribía en la carpeta, Ghostscript que dejaba PDF a medias, «Seguir con…» en la web, `web/dist` desfasado, README con 48 operaciones | `CHANGELOG.md` §Sin publicar, las pruebas nuevas en `tests/` |
@@ -31,7 +32,6 @@ nada en curso
 
 ## Por hacer
 
-- 2026-11-11 · dueño: **el autor** · probar con uso real lo del motor que usa Muyu: una descarga de verdad (también «con tu sesión»), transcribir lo bajado, la limpieza con mat2 y su recuento (lo demás de la rueda, en `muyu/estado.md`).
 - 2026-11-11 · dueño: director · `PaginaFormulario` de gui-comun avisa en la consola al cambiar de campos
   («Kirigami FormLayout: Cannot read property 'isSection' of null»; lo ven la rueda y, al cambiar de herramienta, Raphi
   Studio): sin efecto visible; llevarlo a gui-comun.
@@ -55,9 +55,6 @@ nada en curso
   (QtWidgets); si se quiere en el studio, `org.kde.notification` o un `QSystemTrayIcon` fuera del proceso QML.
 - 2026-11-02 · dueño: director · el progreso de un trabajo depende de que la operación llame a `ctx.avisar`; las que
   no lo hacen muestran solo «en curso» hasta terminar.
-- 2026-11-08 · dueño: **el autor** · lo que la auditoría no pudo probar sin red ni horas: `descargar` de verdad (yt-dlp
-  contra un enlace real) y `transcribir` con Whisper (solo simuladas; el backend de Whisper sí corre en las pruebas
-  de `ajustar_subtitulos`). Probarlas una vez a mano desde Raphi Studio.
 - 2026-11-08 · dueño: director · la simulación de `reparar`, `info` y `leer_comprobante` no abre el archivo: con un
   PDF roto o sin texto dice que lo haría; decidir si vale abrirlo al simular (como ya hacen `descifrar` y `miniatura`).
 - 2026-11-08 · dueño: director · el validador avisa de `CHANGELOG.md` fuera de Keep a Changelog (sin `## [Unreleased]`,
