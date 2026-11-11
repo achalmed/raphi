@@ -1,7 +1,7 @@
 ---
 tipo: estado
 estado: activo
-actualizado: 2026-11-08
+actualizado: 2026-11-11
 ---
 # estado.md — raphi (repo `achalmed/raphi`, antes DocFlow Studio)
 
@@ -16,6 +16,8 @@ vivían en `docs/decisiones.md` §Pendientes por una regla propia del repo; desd
 
 | fecha | qué | dónde se ve |
 |---|---|---|
+| 2026-11-11 | **La rueda ampliada**, tras probarla el autor en la sesión: vista previa de PDF con el visor de gui-comun (zoom, desplazar, seleccionar, buscar), imagen ampliable, texto; «Ver el original»; panel acotado con Ampliar (F11) y el cerrar de la decoración de KWin; informes de las herramientas de información; enlaces (descargas con avance real, cookies del navegador, listas, subtítulos, SponsorBlock); Okular (D-Bus), macro de LibreOffice, correo y copiar el archivo. En el motor, 13 operaciones nuevas (metadatos, sumas, comprimidos, información de medios, subtítulos, volumen, rotar, unir, carátula, dividir, foto de documento) e ICO y medidas listas; limpieza con mat2 y su comprobación; valores actuales. Okular probado por D-Bus sin pantalla; la macro de LibreOffice, no dentro de LibreOffice | `raphi/motor/archivos.py`, `raphi/motor/multimedia.py`, `tests/test_archivos_multimedia.py`, `docs/decisiones.md` R13 (adenda) |
+| 2026-11-11 | **La rueda de soltar** (R13; ese mismo día se mudó a Muyu, repo `muyu`, su M1): el círculo de formatos (interior) y herramientas (exterior) que sale de `formatos_de`/`opciones_para`, con vista previa en vivo, editor del recorte, encadenar, arrastrar el resultado fuera, deshacer a la papelera y teclado; desde el menú de Dolphin y Krusader, el atajo Meta+Ctrl+R o la franja del borde (`--residente`), con layer-shell en Wayland. En el motor: «Poner fondo» (`fondo_imagen`), `opciones_para`, la pista `vista` de un parámetro y el recorte por rectángulo. Probado sin pantalla y en un KWin anidado (`kwin_wayland --virtual`): no en la sesión real | el repo `muyu`; aquí, `tests/test_rueda.py` y `docs/arquitectura.md` §El corredor como API de Muyu |
 | 2026-11-08 | **Auditoría de las 62 operaciones en las tres caras**: cada una simulada y aplicada sobre un corpus de 34 archivos (318 corridas), la CLI con sus órdenes y errores de uso, la web en el navegador contra `raphi.sola` (subir, simular, aplicar, descargar, «Seguir con…», mesa de trabajo, recetas, sistema) y Raphi Studio sin pantalla sobre la muestra (catálogo, foliar aplicada, la cola con audio). Corregidos: la CLI con Python 3.14 (`%` en la ayuda), `numerar` simulado y los mensajes de página inexistente, `tachar` con celulares con espacios, `quitar_metadatos_archivo` con documentos de oficina y PDF, `auditar_fechas_fotos` que escribía en la carpeta, Ghostscript que dejaba PDF a medias, «Seguir con…» en la web, `web/dist` desfasado, README con 48 operaciones | `CHANGELOG.md` §Sin publicar, las pruebas nuevas en `tests/` |
 | 2026-11-03 | **gui-comun 3.2 adoptado**: la vista previa de PDF es `VistaPdf` de la base sobre `gui_comun.visor_pdf.VisorPdf` (QtPdf o `pdftoppm`, zoom, miniaturas, selección, enlaces y búsqueda); retirado el renderizado propio (`controladores/vista.py`, `servicios/vista_previa.py`) | `escritorio/studio/README.md` |
 | 2026-11-03 | **Alertas de Dependabot** (87 abiertas, todas de pip): yt-dlp a 2026.10.26 en `backends/whisper-transcriber/requirements.txt` (cierra las cinco; las opciones que pasan los backends existen en esa versión). Las 82 de Pillow piden 13.0.0, un cambio de mayor: anotado abajo con la prueba hecha. npm: `npm audit` sin vulnerabilidades | `docs/decisiones.md`, entrada del 2026-11-03 |
@@ -29,6 +31,12 @@ nada en curso
 
 ## Por hacer
 
+- 2026-11-11 · dueño: **el autor** · probar con uso real lo del motor que usa Muyu: una descarga de verdad (también «con tu sesión»), transcribir lo bajado, la limpieza con mat2 y su recuento (lo demás de la rueda, en `muyu/estado.md`).
+- 2026-11-11 · dueño: director · `PaginaFormulario` de gui-comun avisa en la consola al cambiar de campos
+  («Kirigami FormLayout: Cannot read property 'isSection' of null»; lo ven la rueda y, al cambiar de herramienta, Raphi
+  Studio): sin efecto visible; llevarlo a gui-comun.
+- 2026-11-11 · dueño: director · la web puede adoptar la pista `vista="caja"` (el editor del recorte) y «Poner fondo» con
+  vista previa; hoy los muestra con sus controles de siempre.
 - 2026-11-03 · dueño: **el autor** · **Pillow 13** (82 alertas de Dependabot, varias críticas y altas, todas con arreglo
   solo en 13.0.0): `requirements.txt` y `backends/photo-metadata/requirements.txt` fijan 12.3.0, la versión de Qillqa
   (Raphi corre en su mismo proceso dentro de la plataforma). Probado el 2026-11-03 sin tocar el `.venv`: la suite del

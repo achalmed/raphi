@@ -45,7 +45,8 @@ def test_rutas():
 def test_familias_y_acepta(muestra_sesion):
     f = FICHAS_MINIMAS["operaciones"]
     assert familias.familia_de(f[0]) == "pdf" and familias.familia_de(f[1]) == "audio_video" and familias.familia_de({"id": "descargar", "entrada": "ninguna", "extensiones": []}) == "audio_video"
-    assert familias.icono_de(f[0]) == "application-pdf" and familias.nombre_de("imagenes") == "Imágenes"
+    assert familias.icono_de({"id": "otra_de_pdf", "entrada": "pdf", "extensiones": [".pdf"]}) == "application-pdf"   # la de su familia
+    assert familias.icono_de(f[0]) == "merge" and familias.nombre_de("imagenes") == "Imágenes"                          # salvo la propia
     pdf, srt = str(muestra_sesion.archivos["pdf"]), str(muestra_sesion.archivos["srt"])
     assert familias.acepta(f[1], [srt]) and not familias.acepta(f[1], [pdf]) and not familias.acepta(f[0], [pdf]) and familias.acepta(f[0], [pdf, str(muestra_sesion.archivos["otro"])])
     assert not familias.acepta(f[0], [])

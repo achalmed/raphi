@@ -35,10 +35,18 @@ POR_ID = {
 }
 CON_CARPETAS = {"auditar_fechas_fotos", "ordenar_fotos_por_fecha"}
 
-# El icono de cada operación: el de su familia, salvo estas
+# El icono de cada operación: el de su familia, salvo estas (el catálogo de Raphi Studio y la rueda de soltar)
 ICONO_POR_ID = {"descargar": "download", "transcribir": "text-x-generic", "ajustar_subtitulos": "media-subtitle",
-                "convertir_subtitulos": "media-subtitle", "convertir_video": "video-x-generic", "comprimir_video": "video-x-generic",
-                "recortar_medio": "edit-cut", "auditar_fechas_fotos": "image-x-generic", "ordenar_fotos_por_fecha": "folder-images"}
+                "convertir_subtitulos": "media-subtitle", "convertir_video": "video-x-generic", "comprimir_video": "transform-scale",
+                "recortar_medio": "edit-cut", "auditar_fechas_fotos": "image-x-generic", "ordenar_fotos_por_fecha": "folder-images",
+                "comprimir": "transform-scale", "comprimir_imagen": "transform-scale", "comprimir_archivos": "archive-insert",
+                "extraer_archivo": "archive-extract", "recortar_imagen": "transform-crop", "fondo_imagen": "fill-color",
+                "redimensionar_imagen": "image-resize-symbolic", "quitar_metadatos_archivo": "edit-clear-all",
+                "quitar_metadatos": "edit-clear-all", "metadatos": "document-properties", "ocr": "document-scan",
+                "tachar": "format-text-strikethrough", "nota": "knotes", "marca_agua": "insert-text", "rotar": "object-rotate-right",
+                "dividir": "edit-cut", "foliar": "format-list-ordered", "sello": "document-sign", "resaltar": "draw-highlight",
+                "cifrar": "document-encrypt", "firmas": "security-high", "tablas_a_excel": "x-office-spreadsheet",
+                "leer_comprobante": "document-preview", "unir": "merge", "comparar": "kompare"}
 
 
 def nombre_de(familia: str) -> str:

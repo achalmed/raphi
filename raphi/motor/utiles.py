@@ -68,6 +68,40 @@ def correr(orden: list[str], *, timeout: int = 600, entorno: dict | None = None,
     return r
 
 
+def correr_en_vivo(orden: list[str], al_leer, *, timeout: int = 600, entorno: dict | None = None,
+                   mensaje: str = "") -> None:
+    """Como `correr`, pero lee la salida mientras el programa corre (`al_leer(linea)` por cada línea, también las que
+    terminan en «\r», como las barras de yt-dlp): el avance real de una descarga. Si `al_leer` lanza (la cancelación
+    de `ctx.avisar`), el programa se mata."""
+    import time
+    from collections import deque
+    env = {**os.environ, **(entorno or {})}
+    try:
+        proceso = subprocess.Popen(orden, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, text=True, env=env,
+                                   errors="replace")
+    except FileNotFoundError as e:
+        raise ErrorOperacion(f"Falta el programa «{orden[0]}».") from e
+    ultimas: deque[str] = deque(maxlen=6)
+    inicio = time.monotonic()
+    try:
+        for linea in proceso.stdout:
+            linea = linea.rstrip()
+            if linea:
+                ultimas.append(linea)
+                al_leer(linea)
+            if time.monotonic() - inicio > timeout:
+                raise ErrorOperacion(f"«{orden[0]}» tardó más de {timeout} s y se detuvo.")
+        proceso.wait()
+    except BaseException:
+        proceso.kill()
+        proceso.wait()
+        raise
+    if proceso.returncode != 0:
+        detalle = [l for l in ultimas if not l.startswith("[download]")][-3:] or list(ultimas)[-2:]
+        raise ErrorOperacion((mensaje or f"«{orden[0]}» falló (código {proceso.returncode})")
+                             + (": " + " · ".join(detalle) if detalle else "."))
+
+
 SOFFICE_TIMEOUT = int(os.environ.get("RAPHI_SOFFICE_TIMEOUT", "300"))
 
 

@@ -10,6 +10,36 @@ lo revocado se marca «Superada por …» y no se borra. Los pendientes, con fec
 
 ## Producto
 
+### 2026-11-11 · R13: la rueda de soltar, otra cara del motor para Dolphin, Krusader y KDE
+
+> **2026-11-11, más tarde: la rueda se muda a Muyu** (repo privado `muyu`, su decisión M1). El autor pidió que fuera la
+> aplicación predeterminada de casi todos los archivos y que reuniera Filesystem, Git, LaTeX, Quarto y Huella Studio y
+> KDE-Services: eso ya no es una cara de Raphi, y Raphi es público. Se queda aquí lo del motor y el corredor como API
+> de proceso de Muyu (`docs/arquitectura.md` §El corredor como API de Muyu); la carpeta escritorio/rueda se fue entero.
+
+Encargo del autor: una rueda al estilo de las herramientas de macOS que convierten soltando un archivo sobre un
+sector («y superarla»). Se hace como cara nueva del motor (la carpeta escritorio/rueda), no como herramienta aparte: los
+sectores salen de `formatos_de` y `opciones_para`, las opciones de la ficha, y la rueda no nombra operaciones (lo
+vigila `tests/test_rueda.py`). Lo que la supera: dos anillos (formatos y herramientas) con «Más» en vez de un menú
+fijo de cuatro formatos; cualquier tipo que el motor conozca (PDF, ofimática, imagen, audio, vídeo, subtítulos,
+comprimidos, carpetas); varios archivos a la vez; vista previa en vivo de la operación de verdad; encadenar sin soltar
+el resultado, con deshacer a la papelera; teclado completo; y tres maneras de llamarla en KDE. Lo nuevo del motor que
+pide: «Poner fondo» (`fondo_imagen`), `opciones_para` y la pista de edición `vista` de un parámetro, que deja a una
+interfaz poner un editor a la vista sin nombrar la operación (el recorte; la web puede adoptarla después). En Wayland
+la rueda no puede aparecer sola al empezar un arrastre en otro programa: por eso el menú, el atajo y la franja del
+borde, con layer-shell si está. Se prefirió eso a un plasmoide del panel: no ata la rueda a Plasma ni a un panel, y
+el mismo proceso sirve a las tres entradas.
+
+Adenda del mismo día, tras probarla en la sesión real (encargo del autor: «superar» Video Downloader, Metadata
+Cleaner y KDE-Services, e integrarse con Okular y LibreOffice): lo que esas aplicaciones hacen y cae en el dominio de
+Raphi (documentos, PDF, imágenes, audio, vídeo, archivos) entra **al motor**, no a la rueda, para que la CLI, la web,
+Raphi Studio y Qillqa lo tengan a la vez: 13 operaciones nuevas, la limpieza de metadatos con mat2 y su comprobación,
+las descargas con avance real, cookies del navegador y listas. Lo de KDE-Services que no es de ese dominio
+(administración del sistema, Android, Dropbox, MEGA, SSH, Samba, ISO, kernel, búsquedas, borrado seguro, renombrar en
+masa) queda fuera a propósito: no es de un estudio de documentos y medios, y renombrar o destruir originales choca con
+el principio de no tocar la entrada. Okular y LibreOffice se complementan por fuera (D-Bus, una macro), sin depender de
+ellos.
+
 ### 2026-11-02 · R12: Raphi Studio es un estudio multimedia sobre gui-comun 3.0; revisa R11
 
 Encargo del autor (reingeniería de los diez studios, `reingenieria.md`): Raphi no debe parecerse a Dolphin. La ventana

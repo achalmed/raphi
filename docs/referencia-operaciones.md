@@ -434,6 +434,28 @@ Entrada: pdf (cada archivo por su lado) · .pdf · necesita: nada aparte.
 
 ## Información
 
+### `ver_metadatos` — Ver metadatos
+
+Todo lo que el archivo dice de sí y de quien lo hizo (EXIF, GPS, XMP, ID3, autor, programa, fechas), por grupo, con lo que te delata aparte y lo que mat2 quitaría. No escribe nada.
+
+Entrada: archivos (cada archivo por su lado) · necesita: exiftool.
+
+### `verificar_suma` — Verificar suma
+
+Lee un archivo de sumas (.md5, .sha1, .sha256, .sha512, de sha256sum o del estilo BSD) y comprueba que cada archivo que nombra, junto a él, tenga esa huella.
+
+Entrada: archivos (cada archivo por su lado) · .md5 .sha1 .sha256 .sha512 .md5sum .sha1sum .sha256sum .sha512sum · necesita: nada aparte.
+
+### `verificar_comprimido` — Comprobar comprimido
+
+Prueba que el comprimido (ZIP, 7Z, TAR, RAR, ISO…) se pueda extraer entero, sin extraer nada: 7z t.
+
+Entrada: archivos (cada archivo por su lado) · .zip .7z .tar .gz .tgz .bz2 .xz .rar .cbz .cbr .jar .apk .iso · necesita: 7z.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--clave` | Contraseña (si la tiene) | clave |  |
+
 ### `auditar_fechas_fotos` — Auditar fechas de fotos
 
 Compara la fecha del nombre de cada foto o video con la de sus metadatos; no toca la carpeta y deja el detalle en un CSV aparte.
@@ -443,6 +465,12 @@ Entrada: archivos (cada archivo por su lado) · necesita: exiftool.
 | opción | qué es | tipo | por omisión |
 |---|---|---|---|
 | `--anio` | Año esperado (0: el del nombre de la carpeta) | entero | `0` |
+
+### `info_medio` — Información del medio
+
+Duración, contenedor, tasa de bits y cada pista (vídeo con su resolución y fotogramas, audio con sus canales, subtítulos con su idioma), y sus etiquetas. No escribe nada.
+
+Entrada: medios (cada archivo por su lado) · .mp3 .m4a .aac .flac .opus .ogg .wav .mp4 .mov .mkv .webm .avi .m4v .gif · necesita: ffprobe.
 
 ### `comparar` — Comparar dos PDF
 
@@ -491,7 +519,7 @@ Entrada: medios (cada archivo por su lado) · .jpg .jpeg .png .webp .heic .heif 
 
 | opción | qué es | tipo | por omisión |
 |---|---|---|---|
-| `--formato` | A | opcion: jpg · png · webp · avif · heic · tiff · bmp · gif · pdf | `jpg` |
+| `--formato` | A | opcion: jpg · png · webp · avif · heic · tiff · bmp · gif · ico · pdf | `jpg` |
 | `--calidad` | Calidad | entero | `85` |
 | `--metadatos` | Conservar EXIF | casilla | `False` |
 
@@ -503,6 +531,7 @@ Entrada: medios (cada archivo por su lado) · .jpg .jpeg .png .webp .heic .heif 
 
 | opción | qué es | tipo | por omisión |
 |---|---|---|---|
+| `--medida` | Medida (una medida lista manda sobre el ancho y el alto) | opcion:  · 16x16 · 32x32 · 48x48 · 64x64 · 128x128 · 256x256 · 512x512 · 640x480 · 800x600 · 1024x768 · 1280x720 · 1920x1080 · 2560x1440 · 3840x2160 · 7680x4320 · 1080x1080 · 1080x1350 · 1080x1920 · 1200x630 |  |
 | `--ancho` | Ancho máximo (px, 0 = libre) | entero | `1600` |
 | `--alto` | Alto máximo (px, 0 = libre) | entero | `0` |
 | `--porcentaje` | O porcentaje (0 = no) | entero | `0` |
@@ -518,8 +547,38 @@ Entrada: medios (cada archivo por su lado) · .jpg .jpeg .png .webp .heic .heif 
 | opción | qué es | tipo | por omisión |
 |---|---|---|---|
 | `--proporcion` | Proporción | opcion: 1:1 · 4:5 · 9:16 · 16:9 · 3:2 · 2:3 · 4:3 · libre | `1:1` |
-| `--caja` | Rectángulo (x,y,ancho,alto; con «libre») | texto |  |
+| `--caja` | Rectángulo (x,y,ancho,alto) (En píxeles; si se da, manda sobre la proporción) | texto |  |
 | `--calidad` | Calidad | entero | `90` |
+
+### `fondo_imagen` — Poner fondo
+
+Pone la imagen sobre un fondo de color o degradado, con margen, esquinas redondeadas, sombra y la proporción del lienzo (1:1, 4:5, 9:16…): capturas y fotos listas para publicar.
+
+Entrada: medios (cada archivo por su lado) · .jpg .jpeg .png .webp .heic .heif .avif .tif .tiff .bmp .gif .svg · necesita: PIL.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--color` | Fondo | color | `#F2994A` |
+| `--color2` | Degradado hacia (Vacío: fondo liso) | color |  |
+| `--margen` | Margen (% del lado menor) | entero | `8` |
+| `--esquinas` | Esquinas (% del lado menor) | entero | `4` |
+| `--sombra` | Sombra (% del lado menor) | entero | `3` |
+| `--proporcion` | Lienzo | opcion: auto · 1:1 · 4:5 · 9:16 · 16:9 · 4:3 · 3:2 | `auto` |
+| `--formato` | Formato | opcion: png · jpg · webp | `png` |
+| `--calidad` | Calidad | entero | `92` |
+
+### `foto_documento` — Foto de documento
+
+La foto a la medida de un pasaporte, una visa o un carné (35×45 mm, 2×2 pulgadas, 30×40 mm…), a 300 ppp: recortada para llenar sin deformar, con un poco más de arriba (la cara) y el fondo que se elija detrás.
+
+Entrada: medios (cada archivo por su lado) · .jpg .jpeg .png .webp .heic .heif .avif .tif .tiff .bmp .gif .svg · necesita: PIL.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--medida` | Medida | opcion: 35x45 · 51x51 · 30x40 · 25x30 · 40x50 | `35x45` |
+| `--ppp` | Resolución (ppp) | entero | `300` |
+| `--fondo` | Fondo (si la foto tiene transparencia) | color | `#FFFFFF` |
+| `--formato` | Formato | opcion: jpg · png | `jpg` |
 
 ### `comprimir_imagen` — Comprimir imagen
 
@@ -587,7 +646,7 @@ Entrada: medios (cada archivo por su lado) · .srt .vtt · necesita: nada aparte
 
 ### `descargar` — Descargar video o audio
 
-De YouTube, Facebook, TikTok y más (yt-dlp): video, solo audio o un tramo exacto.
+De YouTube, Facebook, Instagram, TikTok, X, Vimeo y más de mil sitios (yt-dlp): vídeo a la calidad que se elija, solo el audio, un tramo exacto, listas enteras o algunos de sus elementos, subtítulos (también los automáticos), carátula y capítulos, sin los patrocinios; y lo privado o con sesión, con las cookies de tu navegador.
 
 Entrada: ninguna (todas juntas) · necesita: yt-dlp, ffmpeg.
 
@@ -599,6 +658,12 @@ Entrada: ninguna (todas juntas) · necesita: yt-dlp, ffmpeg.
 | `--formato-audio` | Formato del audio | opcion: mp3 · m4a · opus · flac · wav | `mp3` |
 | `--tramo` | Tramo (INI-FIN, p. ej. 1:02:00-1:05:30) (vacío: todo el video) | texto |  |
 | `--subtitulos` | Bajar subtítulos (es, en) | casilla | `False` |
+| `--subtitulos-auto` | También los subtítulos automáticos | casilla | `False` |
+| `--lista` | Si el enlace es una lista | opcion: todo · solo_video | `todo` |
+| `--elementos` | Elementos de la lista (p. ej. 1:10 o 1,3,5) (vacío: todos) | texto |  |
+| `--caratula` | Incrustar la carátula | casilla | `False` |
+| `--sponsorblock` | Quitar patrocinios y autopromoción (SponsorBlock) | casilla | `False` |
+| `--cookies` | Con la sesión de tu navegador (vídeos privados) (usa las cookies del navegador elegido; nada sale de tu máquina) | opcion:  · firefox · chrome · chromium · brave · edge · opera · vivaldi |  |
 
 ### `transcribir` — Transcribir con Whisper
 
@@ -635,7 +700,86 @@ Entrada: archivos (cada archivo por su lado) · necesita: exiftool.
 | `--incrustar` | Escribir la fecha en EXIF/QuickTime | casilla | `True` |
 | `--nombre-manda` | Fotos escaneadas: el nombre manda sobre el EXIF | casilla | `False` |
 
+### `extraer_subtitulos` — Extraer subtítulos
+
+Cada pista de subtítulos del vídeo (MKV, MP4, WebM…) a su propio archivo, con su idioma en el nombre.
+
+Entrada: medios (cada archivo por su lado) · .mp4 .mov .mkv .webm .avi .m4v .gif · necesita: ffmpeg, ffprobe.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--formato` | A | opcion: srt · vtt · ass | `srt` |
+
+### `incrustar_subtitulos` — Incrustar subtítulos
+
+Un vídeo y sus subtítulos (SRT, VTT o ASS) en un solo archivo: como pista que el reproductor activa y desactiva (al instante, sin recodificar) o quemados en la imagen (para redes sociales).
+
+Entrada: archivos (todas juntas) · .mp4 .mov .mkv .webm .avi .m4v .gif .srt .vtt .ass .ssa · necesita: ffmpeg, ffprobe.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--modo` | Cómo | opcion: pista · quemar | `pista` |
+| `--idioma` | Idioma de la pista (código) | texto | `spa` |
+
+### `normalizar_audio` — Normalizar volumen
+
+El volumen al nivel estándar (loudnorm, EBU R128): todo el audio parejo, sin saturar. En un vídeo, la imagen no se toca.
+
+Entrada: medios (cada archivo por su lado) · .mp3 .m4a .aac .flac .opus .ogg .wav .mp4 .mov .mkv .webm .avi .m4v .gif · necesita: ffmpeg, ffprobe.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--nivel` | Nivel | opcion: podcast · plataformas · radio | `podcast` |
+
+### `rotar_video` — Rotar vídeo
+
+Gira el vídeo 90°, 180° o 270° (un vídeo grabado de lado), o lo voltea en espejo.
+
+Entrada: medios (cada archivo por su lado) · .mp4 .mov .mkv .webm .avi .m4v .gif · necesita: ffmpeg, ffprobe.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--giro` | Giro | opcion: 90 · 270 · 180 · espejo · vertical | `90` |
+
+### `unir_medios` — Unir audios o vídeos
+
+Varios audios o vídeos, uno tras otro, en un solo archivo (en el orden dado). Sin recodificar si todos tienen el mismo formato; si no, se recodifican al del primero.
+
+Entrada: medios (todas juntas) · .mp3 .m4a .aac .flac .opus .ogg .wav .mp4 .mov .mkv .webm .avi .m4v .gif · necesita: ffmpeg, ffprobe.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--nombre` | Nombre del archivo (sin extensión) | texto | `unido` |
+| `--recodificar` | Recodificar siempre (si los formatos no coinciden) | casilla | `False` |
+
+### `portada_audio` — Poner carátula
+
+Una imagen (JPG o PNG) como carátula de un MP3, M4A o FLAC (la que muestran los reproductores y el móvil).
+
+Entrada: archivos (todas juntas) · .mp3 .m4a .flac .jpg .jpeg .png .webp .heic .heif .avif .tif .tiff .bmp .gif .svg · necesita: ffmpeg, ffprobe.
+
+### `dividir_medio` — Dividir en partes
+
+Corta un audio o vídeo largo en partes de N minutos, sin recodificar (cada corte, en el fotograma clave más cercano). Las partes van a una carpeta.
+
+Entrada: medios (cada archivo por su lado) · .mp3 .m4a .aac .flac .opus .ogg .wav .mp4 .mov .mkv .webm .avi .m4v .gif · necesita: ffmpeg, ffprobe.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--minutos` | Minutos por parte | decimal | `10` |
+
 ## Archivos
+
+### `suma_verificacion` — Suma de verificación
+
+La huella MD5, SHA-1, SHA-256 o SHA-512 del archivo (o todas) y, si se pide, el archivo .sha256 a su lado, como sha256sum: para comprobar después que nadie lo cambió.
+
+Entrada: archivos (cada archivo por su lado) · necesita: nada aparte.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--algoritmo` | Algoritmo | opcion: md5 · sha1 · sha256 · sha512 · todas | `sha256` |
+| `--escribir` | Guardar el archivo de la suma al lado | casilla | `True` |
 
 ### `comprimir_archivos` — Comprimir en un archivo
 
@@ -661,6 +805,11 @@ Entrada: archivos (cada archivo por su lado) · .zip .tar .gz .tgz .7z .rar .xz 
 
 ### `quitar_metadatos_archivo` — Quitar metadatos (cualquier archivo)
 
-Borra EXIF, GPS, autor y programa de fotos, videos y documentos antes de compartirlos.
+Borra EXIF, GPS, autor, programa, miniaturas y lo demás que delate a quien lo hizo, de fotos, audio, vídeo y documentos, antes de compartirlos: con mat2 si está (a fondo) o exiftool, en una copia, y después comprueba qué quedó. Los PDF se limpian sin rasterizar (sus textos siguen seleccionables).
 
 Entrada: archivos (cada archivo por su lado) · necesita: exiftool.
+
+| opción | qué es | tipo | por omisión |
+|---|---|---|---|
+| `--motor` | Con | opcion: auto · mat2 · exiftool | `auto` |
+| `--ligero` | Limpieza ligera (mat2 no recodifica: deja algún dato técnico) | casilla | `False` |

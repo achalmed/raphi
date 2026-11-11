@@ -181,6 +181,23 @@ ventana es suya (`escritorio/studio/servicios/trabajos.py`, persistida en su cac
 (`escritorio/vigilancia.py`) encolan en esa cola. Lo soltado sobre la ventana va a la lista y la tabla queda con las
 herramientas que lo aceptan. Sin PySide6 con QML en el sistema, `raphi` abre la ventana web.
 
+## El corredor como API de Muyu
+
+La rueda de soltar nació aquí (R13) y desde el 2026-11-11 es **Muyu** (repo privado `muyu`), la rueda universal del
+escritorio, que reúne a Raphi con los demás programas. Raphi no la conoce: le ofrece el corredor
+(`escritorio/studio/corredor.py`) como API de proceso, con el `.venv` del repo:
+
+- `rueda <rutas o enlaces…>`: JSON con lo que se ofrece (`motor.medios.opciones_para`, o `audio_video.opciones_para_enlaces`
+  para enlaces), con la ficha y el icono de cada opción (`familias.icono_de`);
+- `vista <trabajo.json>`: la operación de verdad sobre una copia en la carpeta que diga el trabajo (la salida misma:
+  un PDF entero, una imagen, un texto), nunca junto al original;
+- `actuales <operación> <archivo>`: lo que el archivo ya tiene en esos parámetros (`Operacion.actuales`);
+- `ejecutar <trabajo.json>`: el trabajo con su avance (`## progreso`) y su informe.
+
+Lo que el motor ganó para la rueda es del motor y lo tienen la CLI, la web y Raphi Studio: «Poner fondo», la pista de
+edición `vista` («caja»), los valores actuales, las operaciones de archivos y de audio y vídeo, las descargas con
+avance real.
+
 ## La web (`web/`)
 
 `web/` es el módulo web de Tiqsi (`@qillqa/raphi`, `web/src/modulo.ts`): Qillqa lo monta en su menú, `raphi.sola` y

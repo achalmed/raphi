@@ -178,9 +178,24 @@ def sello(ctx):
     return Resultado([_guardar(doc, destino)], {"sello": lineas})
 
 
+def _metadatos_actuales(ruta: Path) -> dict:
+    """Título, autor, asunto y palabras clave que el PDF ya tiene (XMP y, si no, DocInfo)."""
+    import pikepdf
+    with pikepdf.open(ruta) as pdf:
+        info = {str(k).lstrip("/"): str(v) for k, v in (pdf.docinfo or {}).items()}
+        with pdf.open_metadata() as meta:
+            xmp = {k: meta.get(k) for k in ("dc:title", "dc:creator", "dc:description", "pdf:Keywords")}
+    creador = xmp.get("dc:creator")
+    if isinstance(creador, (list, tuple)):
+        creador = ", ".join(str(c) for c in creador)
+    return {"titulo": xmp.get("dc:title") or info.get("Title", ""), "autor": creador or info.get("Author", ""),
+            "asunto": xmp.get("dc:description") or info.get("Subject", ""),
+            "palabras": xmp.get("pdf:Keywords") or info.get("Keywords", "")}
+
+
 @operacion("metadatos", "Editar", "Editar metadatos",
            "Título, autor, asunto y palabras clave (DocInfo y XMP); o el título tomado del nombre del archivo.",
-           sufijo="metadatos",
+           sufijo="metadatos", actuales=_metadatos_actuales,
            parametros=(Parametro("titulo", "Título", "texto", ""), Parametro("autor", "Autor", "texto", ""),
                        Parametro("asunto", "Asunto", "texto", ""), Parametro("palabras", "Palabras clave", "texto", ""),
                        Parametro("titulo_del_nombre", "Título desde el nombre del archivo", "casilla", False)),

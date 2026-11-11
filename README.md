@@ -71,6 +71,7 @@ vive en el repo de Qillqa: `qillqa/docs/plataforma/propuesta-raphi.md`.
 ./install.sh                                          # una vez: .venv (Python del sistema), Tiqsi, lanzador raphi y entrada de escritorio
 npm install && npm run web:construir                  # la web (web/dist), que usan la ventana y raphi.sola
 raphi                                                 # Raphi Studio (QML + Kirigami; raphi --web: la ventana web); raphi escritorio a.pdf abre con archivos
+raphi ver_metadatos foto.jpg · raphi suma_verificacion iso.img --algoritmo todas   # lo de Metadata Cleaner y KDE-Services, en la CLI
 tests/run.sh                                          # las pruebas de Raphi Studio sobre archivos de muestra (escritorio/studio/README.md)
 raphi lista · raphi doctor                            # las operaciones y lo que falta en esta máquina
 raphi comprimir *.pdf --hasta 10 -n                   # cualquier operación: -n simula, -o carpeta de salida, --json
@@ -107,6 +108,7 @@ carpeta de trabajos de Raphi o a la que se elija.
 - **Editar el texto existente de un PDF** no está (sí tachar, sellar, foliar y numerar encima); la firma digital se
   verifica, no se hace (R7).
 - **La configuración y la caché de docflow** (`docflow config`, `docflow cache`) se ven desde su CLI: la web no las muestra.
+- **La rueda de soltar es Muyu** (repo privado `muyu`, desde el 2026-11-11): usa el corredor de Raphi (`escritorio/studio/corredor.py`: `rueda`, `ejecutar`, `vista`, `actuales`) como su API; Raphi no sabe de ella.
 - **El OCR es pesado**: la cola corre `RAPHI_CONCURRENCIA` trabajos a la vez (1 por omisión).
 - **Estado fuera del repo**: `RAPHI_DIR` (~/.local/share/raphi: subidos y trabajos, borrados a las 24 h; base
   SQLite), recetas propias en ~/.config/raphi/recetas/, ajustes de la ventana en ~/.config/achalma/raphi.conf;

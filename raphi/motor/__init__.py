@@ -11,8 +11,8 @@ from __future__ import annotations
 
 from raphi.motor.base import (REGISTRO, Cancelado, ErrorOperacion, Informe, Operacion, OperacionDesconocida,
                               Parametro, Resultado, ejecutar, obtener, operacion)
-from raphi.motor import (audio_video, documentos, fotos, medios, pdf_avanzado, pdf_contenido,  # noqa: F401  registran
-                         pdf_editar, pdf_info, pdf_optimizar, pdf_organizar, pdf_seguridad)
+from raphi.motor import (archivos, audio_video, documentos, fotos, medios, multimedia, pdf_avanzado,  # noqa: F401  registran
+                         pdf_contenido, pdf_editar, pdf_info, pdf_optimizar, pdf_organizar, pdf_seguridad)
 
 __all__ = ["REGISTRO", "Cancelado", "ErrorOperacion", "Informe", "Operacion", "OperacionDesconocida", "Parametro",
            "Resultado", "ejecutar", "obtener", "operacion", "operaciones", "categorias"]

@@ -40,6 +40,9 @@ class Cancelado(Exception):
 # --- parámetros ------------------------------------------------------------------------------------------------
 
 TIPOS = ("texto", "multilinea", "entero", "decimal", "opcion", "casilla", "paginas", "clave", "color", "tamano", "json")
+# Pistas de edición visual: la interfaz que las conoce pone un editor a la vista; la que no, el control de su tipo.
+# «caja»: un rectángulo «x,y,ancho,alto» en píxeles de la imagen de entrada (ya girada según su EXIF).
+VISTAS = ("", "caja")
 
 
 @dataclass(frozen=True)
@@ -55,10 +58,13 @@ class Parametro:
     maximo: float | None = None
     ayuda: str = ""
     obligatorio: bool = False
+    vista: str = ""                # cómo se edita a la vista, si la interfaz sabe (ver VISTAS); si no, por su tipo
 
     def __post_init__(self):
         if self.tipo not in TIPOS:
             raise ValueError(f"Tipo de parámetro desconocido: {self.tipo}")
+        if self.vista not in VISTAS:
+            raise ValueError(f"Vista de parámetro desconocida: {self.vista}")
 
     def valores(self) -> list[str]:
         return [o[0] if isinstance(o, tuple) else o for o in self.opciones]
@@ -131,6 +137,7 @@ class Operacion:
     minimo_entradas: int = 1
     sufijo: str = ""                # el sufijo de la salida por omisión (sin él, el id)
     palabras: tuple[str, ...] = ()  # para el buscador de la web («juntar», «combinar»…)
+    actuales: Callable[[Path], dict] | None = None   # los valores que ya tiene un archivo (rellena el formulario)
 
     def faltan(self) -> list[str]:
         """Lo que esta máquina no tiene para correrla."""
@@ -140,7 +147,8 @@ class Operacion:
         return {"id": self.id, "categoria": self.categoria, "titulo": self.titulo, "descripcion": self.descripcion,
                 "entrada": self.entrada, "lote": self.lote, "parametros": [p.ficha() for p in self.parametros],
                 "requiere": list(self.requiere), "faltan": self.faltan(), "extensiones": list(self.extensiones),
-                "minimo_entradas": self.minimo_entradas, "palabras": list(self.palabras)}
+                "minimo_entradas": self.minimo_entradas, "palabras": list(self.palabras),
+                "con_actuales": self.actuales is not None}
 
 
 REGISTRO: dict[str, Operacion] = {}
@@ -161,6 +169,20 @@ def operacion(id: str, categoria: str, titulo: str, descripcion: str, **kw) -> C
         return funcion
 
     return registrar
+
+
+def actuales(id: str, ruta: str | Path) -> dict:
+    """Lo que el archivo ya tiene en los parámetros de la operación (el título y el autor de un PDF para «metadatos»):
+    con qué se rellena su formulario. Vacío si la operación no lo sabe o el archivo no se puede leer."""
+    op = obtener(id)
+    if op.actuales is None:
+        return {}
+    try:
+        valores = op.actuales(Path(ruta))
+    except Exception:       # noqa: BLE001  rellenar es una ayuda: un archivo raro deja el formulario vacío
+        return {}
+    claves = {p.clave for p in op.parametros}
+    return {k: v for k, v in (valores or {}).items() if k in claves and v not in (None, "")}
 
 
 def obtener(id: str) -> Operacion:

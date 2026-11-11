@@ -17,6 +17,44 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 ### Sin publicar
 
+#### Añadido (2026-11-11, la rueda de soltar)
+
+- **`fondo_imagen` («Poner fondo»)**: la imagen sobre un fondo de color o degradado diagonal, con margen, esquinas
+  redondeadas, sombra y la proporción del lienzo (1:1, 4:5, 9:16, 16:9, 4:3, 3:2); los tamaños son porcentajes del lado
+  menor, así que el mismo ajuste sirve para una captura y para una foto grande. Está en el menú de formatos de toda imagen.
+- **`motor.medios.opciones_para(rutas)`**: lo que se ofrece para varios archivos juntos (lo común de `formatos_de`
+  más unir y comparar PDF), con `junta` en cada opción (una salida con todos o una por archivo).
+- **La pista de edición `vista` de un parámetro** (`Parametro(..., vista="caja")`, `base.VISTAS`): la interfaz que la
+  conoce pone un editor a la vista (la rueda, el rectángulo de recorte sobre la imagen); las demás, el control de su tipo.
+
+#### Añadido (2026-11-11, la rueda ampliada: KDE-Services, Metadata Cleaner y Video Downloader dentro del motor)
+
+- **Archivos** (`raphi/motor/archivos.py`): `ver_metadatos` (todo lo que exiftool lee, por grupo, con «lo que te
+  delata» aparte y lo que mat2 quitaría), `suma_verificacion` (MD5, SHA-1, SHA-256, SHA-512 o todas, y el `.sha256` al
+  lado), `verificar_suma` (archivos de sha256sum o del estilo BSD) y `verificar_comprimido` (`7z t`).
+- **Audio y vídeo** (`raphi/motor/multimedia.py`): `info_medio` (ffprobe: contenedor, duración, pistas, etiquetas),
+  `extraer_subtitulos`, `incrustar_subtitulos` (como pista o quemados), `normalizar_audio` (loudnorm: podcast,
+  plataformas, EBU R128), `rotar_video` (90°, 180°, 270°, espejo), `unir_medios` (sin recodificar si se puede),
+  `portada_audio` (carátula de MP3, M4A o FLAC) y `dividir_medio` (partes de N minutos).
+- **Imágenes**: `foto_documento` (pasaporte o visa 35×45 mm, visa de EE. UU. 2×2 pulgadas, carnés, a 300 ppp), ICO con
+  todos sus tamaños en `convertir_imagen`, y medidas listas en `redimensionar_imagen` (iconos, VGA a 8K, Instagram,
+  historias, enlaces).
+- **`descargar`**: avance real de yt-dlp (porcentaje, velocidad, lo que falta, elemento n de N), cookies del navegador
+  para lo privado o con sesión, solo el vídeo o la lista entera, qué elementos de la lista, subtítulos automáticos,
+  carátula y SponsorBlock; `opciones_para_enlaces` (lo que la rueda ofrece para un enlace) y `utiles.correr_en_vivo`.
+- **Valores actuales** (`Operacion.actuales`, `base.actuales`, `corredor.py actuales`): lo que un archivo ya tiene en
+  los parámetros de una operación; «Editar metadatos» llega con el título y el autor del PDF.
+- `formatos_de` y `opciones_para` ofrecen todo lo anterior (transcribir a SRT o TXT desde el audio y el vídeo; vídeo +
+  SRT para incrustar; audios + una imagen para la carátula; varios audios o vídeos para unir).
+
+#### Cambiado (2026-11-11)
+
+- `quitar_metadatos_archivo`: con mat2 si está (más a fondo que exiftool; `--lightweight` a pedido), sobre una copia,
+  y comprueba después cuántos campos quedan (antes y después, y cuáles). Los PDF siguen sin rasterizarse.
+- `recortar_imagen`: el rectángulo (`caja`) manda sobre la proporción si se da (antes solo contaba con «libre»).
+- `formatos_de`: las herramientas de un PDF en el orden de uso (comprimir, OCR, tachar, nota, marca de agua…) y con
+  nota, marca de agua, metadatos y resaltar; las de una imagen, con «Poner fondo».
+
 - **Nada de nubes de pastillas** (web, 2026-11-08, Edison; `../qillqa/docs/decisiones.md` §Nada de nubes de pastillas): las recetas de Herramientas son una lista con su descripción (`ListaCatalogo` de Tiqsi web).
 
 #### Corregido (auditoría de las 62 operaciones, 2026-11-08)
@@ -80,6 +118,41 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 ## Raphi escritorio (GUI; antes DocFlow Studio)
 
 ### Sin publicar
+
+#### Añadido (2026-11-11)
+
+- **La rueda de soltar** (decisión R13; **desde el 2026-11-11 es Muyu**, repo `muyu`: lo de abajo vive allí y aquí queda el corredor como su API): un círculo que aparece bajo el puntero
+  con lo soltado en el centro, el anillo interior «Convertir a» (los destinos de `formatos_de`, los más pedidos
+  primero) y el exterior «Herramientas»; «Más» abre el resto en el mismo anillo (también pasando encima con un
+  arrastre). Clic o soltar encima corre; clic derecho, o una herramienta que pide algo (un texto, una clave, un color),
+  abre el panel de opciones generado de la ficha con la **vista previa en vivo** (la operación de verdad sobre una
+  copia reducida en la caché: imágenes, y PDF en Editar, Seguridad y Organizar) o, con la pista `caja`, el **editor
+  del recorte** sobre la imagen. El resultado queda en el centro: **se arrastra fuera** (a Dolphin, al escritorio, a
+  otra aplicación) o **sigue** con los anillos ya rehechos para su tipo; Deshacer lo manda a la papelera y Volver
+  regresa al archivo anterior. Varios archivos a la vez (lo común a todos, y lo que los junta). Teclado completo.
+  Aparece desde el menú «Raphi ▸ Rueda de Raphi…» de **Dolphin y Krusader** (Krusader lee los menús de servicio de KDE),
+  con el **atajo global Meta+Ctrl+R** en medio de un arrastre o, `--residente`, con una franja en el borde de la
+  pantalla que la abre al llegar un arrastre. En Wayland es una capa de superposición de layer-shell (org.kde.layershell);
+  sin él, una ventana sin marco a pantalla completa. Instancia única: las llamadas siguientes le pasan los archivos.
+  `raphi rueda --instalar [--residente] [-n]` pone el acceso, el atajo y el inicio con la sesión (simula con `-n`).
+- El corredor del motor (`escritorio/studio/corredor.py`) responde `rueda <archivos o enlaces…>`, `vista <trabajo.json>`
+  (deja la salida misma: un PDF entero, una imagen, un texto) y `actuales <operación> <archivo>`.
+- 2026-11-11, tras probarla en la sesión: la **vista previa** de un PDF es el visor de gui-comun (desplazar, zoom,
+  miniaturas, seleccionar y copiar texto, buscar), una imagen se amplía y se arrastra, un texto se lee; «Ver el
+  original» compara; si a la operación le falta algo, se ve el original con un aviso (no un recuadro vacío en rojo).
+  El panel de opciones tiene tamaño acotado, los botones siempre a la vista, las opciones con desplazamiento y
+  **Ampliar** (F11): casi toda la pantalla, con la vista a la izquierda. El **cerrar** de los paneles es el de las
+  ventanas de la sesión: un punto rojo en el lado que dice la decoración de KWin (`ButtonsOnLeft`).
+- **Enlaces**: soltados desde el navegador o pegados con Ctrl+V, abren la rueda de descargas (Mejor, 4K, 1080p, 720p,
+  480p, MP3, M4A, Opus, FLAC; con subtítulos, sin patrocinios, solo este vídeo, un tramo, con tu sesión, todas las
+  opciones), con el avance real; el resultado sigue en la rueda (transcribirlo, convertirlo, recortarlo).
+- **Informes**: lo que dice una herramienta de información (metadatos, información de un PDF o un vídeo, sumas) se ve
+  en un panel con buscador y «Copiar todo».
+- **Okular**: la rueda vacía ofrece lo que Okular está mostrando; lo que trabaja en una página (sello, nota) llega con
+  la página que se está leyendo; un PDF se abre en Okular con un botón. **LibreOffice**: la macro «Rueda de Raphi»
+  (`raphi rueda --instalar`) manda el documento abierto a la rueda. **Correo** (xdg-email) y **copiar el archivo** al
+  portapapeles, desde la tarjeta del resultado.
+- Iconos propios para las herramientas más usadas en `familias.py` (también en el catálogo de Raphi Studio).
 
 #### Cambiado
 

@@ -1,4 +1,4 @@
-"""Los menús del clic derecho en Dolphin (KDE): «Raphi ▸ Abrir en Raphi · Comprimir PDF · PDF a Word · A JPG · A PDF ·
+"""Los menús del clic derecho en Dolphin y Krusader (KDE; Krusader los lee con KFileItemActions): «Raphi ▸ Abrir en Raphi · Comprimir PDF · PDF a Word · A JPG · A PDF ·
 Quitar metadatos…». Las acciones rápidas corren la CLI junto al original y avisan al terminar (`raphi accion`); «Abrir
 en Raphi» manda los archivos a la ventana.
 

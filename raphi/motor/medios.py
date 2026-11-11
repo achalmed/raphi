@@ -19,7 +19,8 @@ from raphi.motor.base import ErrorOperacion, Parametro, Resultado, disponible, o
 from raphi.motor.utiles import correr
 
 IMG = (".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".avif", ".tif", ".tiff", ".bmp", ".gif", ".svg")
-IMG_DESTINO = ("jpg", "png", "webp", "avif", "heic", "tiff", "bmp", "gif", "pdf")
+IMG_DESTINO = ("jpg", "png", "webp", "avif", "heic", "tiff", "bmp", "gif", "ico", "pdf")
+TAMANOS_ICO = (16, 24, 32, 48, 64, 128, 256)
 AUD = (".mp3", ".m4a", ".aac", ".flac", ".opus", ".ogg", ".wav")
 AUD_DESTINO = ("mp3", "m4a", "flac", "opus", "ogg", "wav")
 VID = (".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v", ".gif")
@@ -72,6 +73,13 @@ def _guardar_imagen(img, destino: Path, formato: str, calidad: int, conservar_me
         opciones.update(optimize=True, progressive=True)
     if nombre == "PNG":
         opciones["optimize"] = True
+    if nombre == "ICO":                                  # un .ico con todos sus tamaños (16 a 256), cuadrado
+        lado = max(img.size)
+        if img.size[0] != img.size[1]:
+            cuadro = _pil().new("RGBA", (lado, lado), (0, 0, 0, 0))
+            cuadro.paste(img.convert("RGBA"), ((lado - img.width) // 2, (lado - img.height) // 2))
+            img = cuadro
+        opciones["sizes"] = [(t, t) for t in TAMANOS_ICO if t <= lado] or [(lado, lado)]
     if conservar_metadatos and origen is not None and "exif" in getattr(origen, "info", {}):
         opciones["exif"] = origen.info["exif"]
     try:
@@ -99,9 +107,19 @@ def convertir_imagen(ctx):
     return Resultado([_guardar_imagen(img, destino, formato, ctx.p("calidad"), ctx.p("metadatos"), img)])
 
 
+MEDIDAS = (("", "La de abajo (ancho y alto)"), ("16x16", "Icono 16"), ("32x32", "Icono 32"), ("48x48", "Icono 48"),
+           ("64x64", "Icono 64"), ("128x128", "Icono 128"), ("256x256", "Icono 256"), ("512x512", "Icono 512"),
+           ("640x480", "VGA 640×480"), ("800x600", "SVGA 800×600"), ("1024x768", "XGA 1024×768"),
+           ("1280x720", "HD 1280×720"), ("1920x1080", "Full HD 1920×1080"), ("2560x1440", "QHD 2560×1440"),
+           ("3840x2160", "4K 3840×2160"), ("7680x4320", "8K 7680×4320"), ("1080x1080", "Instagram cuadrada"),
+           ("1080x1350", "Instagram vertical 4:5"), ("1080x1920", "Historias y reels 9:16"), ("1200x630", "Enlace (Facebook, X)"))
+
+
 @operacion("redimensionar_imagen", "Medios", "Redimensionar imagen", "Cambia el tamaño por ancho, alto o porcentaje, sin deformar.",
            entrada="medios", extensiones=IMG, sufijo="redimensionada", requiere=("py:PIL",),
-           parametros=(Parametro("ancho", "Ancho máximo (px, 0 = libre)", "entero", 1600, minimo=0),
+           parametros=(Parametro("medida", "Medida", "opcion", "",
+                                 opciones=MEDIDAS, ayuda="una medida lista manda sobre el ancho y el alto"),
+                       Parametro("ancho", "Ancho máximo (px, 0 = libre)", "entero", 1600, minimo=0),
                        Parametro("alto", "Alto máximo (px, 0 = libre)", "entero", 0, minimo=0),
                        Parametro("porcentaje", "O porcentaje (0 = no)", "entero", 0, minimo=0, maximo=1000),
                        Parametro("formato", "Formato (vacío = el mismo)", "texto", ""),
@@ -117,6 +135,10 @@ def redimensionar_imagen(ctx):
     w, h = img.size
     if ctx.p("porcentaje"):
         nuevo = (max(1, w * ctx.p("porcentaje") // 100), max(1, h * ctx.p("porcentaje") // 100))
+    elif ctx.p("medida"):                             # cabe en esa medida, sin deformar (y puede agrandar)
+        aw, ah = (int(v) for v in ctx.p("medida").split("x"))
+        escala = min(aw / w, ah / h)
+        nuevo = (max(1, round(w * escala)), max(1, round(h * escala)))
     else:
         aw, ah = ctx.p("ancho") or 10**9, ctx.p("alto") or 10**9
         escala = min(aw / w, ah / h, 1.0 if not ctx.p("porcentaje") else 10.0)
@@ -131,13 +153,14 @@ def redimensionar_imagen(ctx):
            entrada="medios", extensiones=IMG, sufijo="recortada", requiere=("py:PIL",),
            parametros=(Parametro("proporcion", "Proporción", "opcion", "1:1",
                                  opciones=("1:1", "4:5", "9:16", "16:9", "3:2", "2:3", "4:3", "libre")),
-                       Parametro("caja", "Rectángulo (x,y,ancho,alto; con «libre»)", "texto", ""),
+                       Parametro("caja", "Rectángulo (x,y,ancho,alto)", "texto", "", vista="caja",
+                                 ayuda="En píxeles; si se da, manda sobre la proporción"),
                        Parametro("calidad", "Calidad", "entero", 90, minimo=10, maximo=100)),
            palabras=("crop", "cuadrado", "historias", "proporción"))
 def recortar_imagen(ctx):
     img = _abrir_imagen(ctx.entrada, ctx)
     w, h = img.size
-    if ctx.p("proporcion") == "libre":
+    if ctx.p("caja") or ctx.p("proporcion") == "libre":
         try:
             x, y, cw, ch = (int(v) for v in ctx.p("caja").split(","))
         except (ValueError, AttributeError) as e:
@@ -153,6 +176,126 @@ def recortar_imagen(ctx):
     if ctx.simular:
         return Resultado(plan=[f"recorte {cw}×{ch} en ({x},{y}) → {destino.name}"])
     return Resultado([_guardar_imagen(img.crop((x, y, x + cw, y + ch)), destino, formato, ctx.p("calidad"))])
+
+
+@operacion("fondo_imagen", "Medios", "Poner fondo",
+           "Pone la imagen sobre un fondo de color o degradado, con margen, esquinas redondeadas, sombra y la proporción "
+           "del lienzo (1:1, 4:5, 9:16…): capturas y fotos listas para publicar.",
+           entrada="medios", extensiones=IMG, sufijo="con_fondo", requiere=("py:PIL",),
+           parametros=(Parametro("color", "Fondo", "color", "#F2994A"),
+                       Parametro("color2", "Degradado hacia", "color", "", ayuda="Vacío: fondo liso"),
+                       Parametro("margen", "Margen (% del lado menor)", "entero", 8, minimo=0, maximo=100),
+                       Parametro("esquinas", "Esquinas (% del lado menor)", "entero", 4, minimo=0, maximo=50),
+                       Parametro("sombra", "Sombra (% del lado menor)", "entero", 3, minimo=0, maximo=30),
+                       Parametro("proporcion", "Lienzo", "opcion", "auto",
+                                 opciones=(("auto", "Como la imagen"), "1:1", "4:5", "9:16", "16:9", "4:3", "3:2")),
+                       Parametro("formato", "Formato", "opcion", "png", opciones=("png", "jpg", "webp")),
+                       Parametro("calidad", "Calidad", "entero", 92, minimo=10, maximo=100)),
+           palabras=("add bg", "background", "marco", "captura", "sombra", "esquinas", "publicar"))
+def fondo_imagen(ctx):
+    formato = ctx.p("formato")
+    destino = ctx.salida(extension=f".{formato}")
+    if ctx.simular:
+        lienzo = "como la imagen" if ctx.p("proporcion") == "auto" else ctx.p("proporcion")
+        return Resultado(plan=[f"fondo {ctx.p('color')}{(' → ' + ctx.p('color2')) if ctx.p('color2') else ''}, margen "
+                               f"{ctx.p('margen')} %, esquinas {ctx.p('esquinas')} %, sombra {ctx.p('sombra')} %, lienzo "
+                               f"{lienzo} → {destino.name}"])
+    img = _abrir_imagen(ctx.entrada, ctx).convert("RGBA")
+    salida = componer_fondo(img, ctx.p("color"), ctx.p("color2"), ctx.p("margen"), ctx.p("esquinas"), ctx.p("sombra"),
+                            ctx.p("proporcion"))
+    return Resultado([_guardar_imagen(salida, destino, formato, ctx.p("calidad"))], {"tamano": list(salida.size)})
+
+
+def _color(texto: str) -> tuple[int, int, int]:
+    from PIL import ImageColor
+    try:
+        return ImageColor.getrgb(texto)[:3]
+    except ValueError as e:
+        raise ErrorOperacion(f"Color no válido: {texto!r}.") from e
+
+
+def componer_fondo(img, color: str, color2: str, margen: int, esquinas: int, sombra: int, proporcion: str):
+    """La imagen (RGBA) centrada en un lienzo de color o degradado diagonal, con esquinas y sombra. Los tamaños son
+    porcentajes del lado menor: el mismo ajuste da lo mismo en una captura pequeña y en una foto de 24 MP."""
+    from PIL import ImageDraw, ImageFilter
+    Image = _pil()
+    w, h = img.size
+    lado = min(w, h)
+    pad, radio, difuso = (round(lado * v / 100) for v in (margen, esquinas, sombra))
+    ancho, alto = w + 2 * pad, h + 2 * pad
+    if proporcion and proporcion != "auto":
+        a, b = (int(v) for v in proporcion.split(":"))
+        if ancho / alto < a / b:
+            ancho = round(alto * a / b)
+        else:
+            alto = round(ancho * b / a)
+    x, y = (ancho - w) // 2, (alto - h) // 2
+    c1 = _color(color)
+    lienzo = Image.new("RGBA", (ancho, alto), c1 + (255,))
+    if color2:
+        rampa = Image.linear_gradient("L").rotate(45, expand=True, resample=Image.BICUBIC)
+        lado_r = round(256 / 2 ** 0.5)
+        m = (rampa.width - lado_r) // 2
+        rampa = rampa.crop((m, m, m + lado_r, m + lado_r)).resize((ancho, alto), Image.BICUBIC)
+        lienzo = Image.composite(Image.new("RGBA", (ancho, alto), _color(color2) + (255,)), lienzo, rampa)
+    mascara = Image.new("L", (w, h), 255)
+    if radio:
+        radio = min(radio, w // 2, h // 2)
+        grande = Image.new("L", (radio * 8, radio * 8), 0)        # el círculo a 4× y reducido: bordes suaves
+        ImageDraw.Draw(grande).ellipse((0, 0, radio * 8 - 1, radio * 8 - 1), fill=255)
+        circulo = grande.resize((radio * 2, radio * 2), Image.LANCZOS)
+        for cx, cy, px, py in ((0, 0, 0, 0), (radio, 0, w - radio, 0), (0, radio, 0, h - radio), (radio, radio, w - radio, h - radio)):
+            mascara.paste(circulo.crop((cx, cy, cx + radio, cy + radio)), (px, py))
+    if "A" in img.getbands():
+        from PIL import ImageChops
+        mascara = ImageChops.multiply(mascara, img.getchannel("A"))
+    if difuso:
+        capa = Image.new("RGBA", (ancho, alto), (0, 0, 0, 0))
+        negra = Image.new("RGBA", (w, h), (0, 0, 0, 120))
+        capa.paste(negra, (x, y + difuso // 2), mascara)
+        lienzo = Image.alpha_composite(lienzo, capa.filter(ImageFilter.GaussianBlur(difuso)))
+    lienzo.paste(img, (x, y), mascara)
+    return lienzo
+
+
+FOTOS_DOCUMENTO = {"35x45": ("Pasaporte o visa Schengen, 35×45 mm", 35, 45), "51x51": ("Visa de EE. UU., 2×2 pulgadas", 51, 51),
+                   "30x40": ("Carné 30×40 mm", 30, 40), "25x30": ("Carné 25×30 mm", 25, 30),
+                   "40x50": ("40×50 mm", 40, 50)}
+
+
+@operacion("foto_documento", "Medios", "Foto de documento",
+           "La foto a la medida de un pasaporte, una visa o un carné (35×45 mm, 2×2 pulgadas, 30×40 mm…), a 300 ppp: "
+           "recortada para llenar sin deformar, con un poco más de arriba (la cara) y el fondo que se elija detrás.",
+           entrada="medios", extensiones=IMG, sufijo="documento", requiere=("py:PIL",),
+           parametros=(Parametro("medida", "Medida", "opcion", "35x45",
+                                 opciones=tuple((k, v[0]) for k, v in FOTOS_DOCUMENTO.items())),
+                       Parametro("ppp", "Resolución (ppp)", "entero", 300, minimo=150, maximo=1200),
+                       Parametro("fondo", "Fondo (si la foto tiene transparencia)", "color", "#FFFFFF"),
+                       Parametro("formato", "Formato", "opcion", "jpg", opciones=("jpg", "png"))),
+           palabras=("pasaporte", "visa", "carné", "dni", "foto carnet", "id", "35x45"))
+def foto_documento(ctx):
+    _, mm_ancho, mm_alto = FOTOS_DOCUMENTO[ctx.p("medida")]
+    ppp = ctx.p("ppp")
+    ancho, alto = round(mm_ancho / 25.4 * ppp), round(mm_alto / 25.4 * ppp)
+    formato = ctx.p("formato")
+    destino = ctx.salida(extension=f".{formato}")
+    if ctx.simular:
+        return Resultado(plan=[f"{ancho}×{alto} px ({mm_ancho}×{mm_alto} mm a {ppp} ppp) → {destino.name}"])
+    Image = _pil()
+    img = _abrir_imagen(ctx.entrada, ctx).convert("RGBA")
+    fondo = Image.new("RGBA", img.size, _color(ctx.p("fondo")) + (255,))
+    img = Image.alpha_composite(fondo, img).convert("RGB")
+    w, h = img.size
+    escala = max(ancho / w, alto / h)                     # llenar: lo que sobra se recorta
+    img = img.resize((max(ancho, round(w * escala)), max(alto, round(h * escala))), Image.LANCZOS)
+    x = (img.width - ancho) // 2
+    y = round((img.height - alto) * 0.3)                  # más de arriba que de abajo: la cara suele estar arriba
+    img = img.crop((x, y, x + ancho, y + alto))
+    if formato == "jpg":
+        img.save(destino, "JPEG", quality=95, dpi=(ppp, ppp))
+    else:
+        img.save(destino, "PNG", dpi=(ppp, ppp))
+    return Resultado([destino], {"pixeles": f"{ancho}×{alto}", "milimetros": f"{mm_ancho}×{mm_alto}", "ppp": ppp})
 
 
 @operacion("comprimir_imagen", "Medios", "Comprimir imagen", "Baja el peso: con pérdida (calidad) o sin ella (PNG optimizado).",
@@ -200,10 +343,11 @@ def duracion(ruta: Path) -> float:
         return 0.0
 
 
-def _ffmpeg(ctx, orden: list[str], destino: Path) -> Path:
-    """ffmpeg sin preguntar, con el avance leído de su salida (-progress) y la cancelación respetada."""
+def _ffmpeg(ctx, orden: list[str], destino: Path, total: float | None = None) -> Path:
+    """ffmpeg sin preguntar, con el avance leído de su salida (-progress) y la cancelación respetada. `total`: la
+    duración que se espera (por omisión, la de la entrada; al unir varios, la suma)."""
     import subprocess
-    total = duracion(ctx.entrada) or 1.0
+    total = total or duracion(ctx.entrada) or 1.0
     proceso = subprocess.Popen(["ffmpeg", "-hide_banner", "-nostdin", "-y", "-progress", "pipe:1", "-nostats", *orden,
                                 str(destino)], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True)
     try:
@@ -468,25 +612,52 @@ def _limpiar_oficina(origen: Path, destino: Path) -> int:
 
 
 @operacion("quitar_metadatos_archivo", "Archivos", "Quitar metadatos (cualquier archivo)",
-           "Borra EXIF, GPS, autor y programa de fotos, videos y documentos antes de compartirlos.",
+           "Borra EXIF, GPS, autor, programa, miniaturas y lo demás que delate a quien lo hizo, de fotos, audio, vídeo y "
+           "documentos, antes de compartirlos: con mat2 si está (a fondo) o exiftool, en una copia, y después comprueba "
+           "qué quedó. Los PDF se limpian sin rasterizar (sus textos siguen seleccionables).",
            entrada="archivos", extensiones=(), sufijo="limpio", requiere=("exiftool",),
-           palabras=("gps", "exif", "privacidad", "ubicación", "anonimizar"))
+           parametros=(Parametro("motor", "Con", "opcion", "auto",
+                                 opciones=(("auto", "El más a fondo que haya (mat2; si no, exiftool)"), ("mat2", "mat2"),
+                                           ("exiftool", "exiftool"))),
+                       Parametro("ligero", "Limpieza ligera (mat2 no recodifica: deja algún dato técnico)", "casilla", False)),
+           palabras=("gps", "exif", "privacidad", "ubicación", "anonimizar", "mat2", "metadata cleaner", "limpiar"))
 def quitar_metadatos_archivo(ctx):
     ext = ctx.entrada.suffix.lower()
+    if ctx.entrada.is_dir():
+        raise ErrorOperacion(f"{ctx.entrada.name} es una carpeta: elige sus archivos.")
     if ext == ".pdf":
-        # exiftool edita un PDF de forma reversible (lo viejo queda dentro): un PDF se limpia con «quitar_metadatos»
+        # exiftool edita un PDF de forma reversible (lo viejo queda dentro) y mat2 lo rasteriza: un PDF, con «quitar_metadatos»
         from raphi.motor.pdf_editar import quitar_metadatos
         return quitar_metadatos(ctx)
+    pedido = ctx.p("motor") or "auto"
+    con_mat2 = pedido == "mat2" or (pedido == "auto" and disponible("mat2") and ext not in OFICINA_ZIP)
+    if pedido == "mat2" and not disponible("mat2"):
+        raise ErrorOperacion("mat2 no está instalado (sudo apt install mat2).")
     destino = ctx.salida()
     if ctx.simular:
-        como = "sin sus propiedades (reescrito el ZIP)" if ext in OFICINA_ZIP else "exiftool -all="
+        como = ("mat2" + (" --lightweight" if ctx.p("ligero") else "")) if con_mat2 else \
+            "sin sus propiedades (reescrito el ZIP)" if ext in OFICINA_ZIP else "exiftool -all="
         return Resultado(plan=[f"{como} → {destino.name}"])
-    if ext in OFICINA_ZIP:
-        quitados = _limpiar_oficina(ctx.entrada, destino)
-        return Resultado([destino], {"quitados": quitados}, [f"{quitados} archivo(s) de propiedades vaciados o quitados"])
-    correr(["exiftool", "-q", "-all=", "-o", str(destino), str(ctx.entrada)], timeout=300,
-           mensaje="exiftool no pudo limpiarlo")
-    return Resultado([destino])
+    from raphi.motor.archivos import TECNICOS, contar_personales, leer_metadatos
+    antes = contar_personales(leer_metadatos(ctx.entrada))
+    if con_mat2:
+        copia = ctx.carpeta_temporal() / f"limpio{ext}"
+        shutil.copy2(ctx.entrada, copia)
+        orden = ["mat2", "--inplace"] + (["--lightweight"] if ctx.p("ligero") else []) + [str(copia)]
+        correr(orden, timeout=1800, mensaje="mat2 no pudo limpiarlo")
+        shutil.move(str(copia), destino)
+    elif ext in OFICINA_ZIP:
+        _limpiar_oficina(ctx.entrada, destino)
+    else:
+        correr(["exiftool", "-q", "-all=", "-o", str(destino), str(ctx.entrada)], timeout=300,
+               mensaje="exiftool no pudo limpiarlo")
+    quedan = {f"{g} › {c}": v for g, campos in leer_metadatos(destino).items() if g not in TECNICOS for c, v in campos.items()}
+    despues = len(quedan)
+    datos = {"motor": "mat2" if con_mat2 else "exiftool" if ext not in OFICINA_ZIP else "Raphi (ZIP de oficina)",
+             "campos antes": antes, "campos después": despues}
+    if quedan:
+        datos["lo que queda (estructura del formato)"] = dict(list(quedan.items())[:60])
+    return Resultado([destino], datos, [f"quitados {max(0, antes - despues)} de {antes} campos; quedan {despues}"])
 
 
 # --- el menú de Tangerine ----------------------------------------------------------------------------------------
@@ -511,36 +682,87 @@ def formatos_de(ruta: str | Path) -> list[dict]:
         for f in IMG_DESTINO:
             if f != ext.lstrip(".").replace("jpeg", "jpg"):
                 a(f, "convertir_imagen", formato=f) if f != "pdf" else a("pdf", "imagenes_a_pdf")
-        for op in ("redimensionar_imagen", "recortar_imagen", "comprimir_imagen", "quitar_metadatos_archivo"):
+        for op in ("comprimir_imagen", "recortar_imagen", "fondo_imagen", "redimensionar_imagen", "quitar_metadatos_archivo",
+                   "ver_metadatos", "foto_documento"):
             a(None, op)
     elif ext in VID:
         for f in VID_DESTINO:
             if f != ext.lstrip("."):
                 a(f, "convertir_video", formato=f)
-        for op in ("recortar_medio", "comprimir_video", "quitar_metadatos_archivo"):
+        a("srt", "transcribir", formato="srt")
+        a("txt", "transcribir", formato="txt")
+        for op in ("recortar_medio", "comprimir_video", "rotar_video", "extraer_subtitulos", "normalizar_audio", "info_medio",
+                   "dividir_medio", "quitar_metadatos_archivo", "ver_metadatos"):
             a(None, op)
     elif ext in AUD:
         for f in AUD_DESTINO:
             if f != ext.lstrip("."):
                 a(f, "convertir_audio", formato=f)
-        a(None, "recortar_medio")
+        a("srt", "transcribir", formato="srt")
+        a("txt", "transcribir", formato="txt")
+        for op in ("recortar_medio", "normalizar_audio", "info_medio", "dividir_medio", "quitar_metadatos_archivo", "ver_metadatos"):
+            a(None, op)
     elif ext in SUB:
         a("vtt" if ext == ".srt" else "srt", "convertir_subtitulos")
     elif ext in ARC:
         a(None, "extraer_archivo")
+        a(None, "verificar_comprimido")
     elif ext == ".pdf":
         for f, op, kw in (("docx", "pdf_a_word", {}), ("txt", "pdf_a_texto", {}), ("png", "pdf_a_imagen", {"formato": "png"}),
                           ("jpg", "pdf_a_imagen", {"formato": "jpg"}), ("html", "pdf_a_html", {}),
                           ("md", "a_markdown", {}), ("pdf/a", "pdfa", {})):
             a(f, op, **kw)
-        for op in ("comprimir", "ocr", "dividir", "rotar", "foliar", "sello", "tachar", "firmas", "tablas_a_excel",
-                   "leer_comprobante", "cifrar", "quitar_metadatos"):
+        for op in ("comprimir", "ocr", "tachar", "nota", "marca_agua", "rotar", "dividir", "metadatos", "foliar", "sello",
+                   "resaltar", "cifrar", "quitar_metadatos", "info", "ver_metadatos", "firmas", "tablas_a_excel",
+                   "leer_comprobante", "reparar", "descifrar"):
             a(None, op)
     elif ext in OFIMATICA:
         a("pdf", "a_pdf")
         a("md", "a_markdown")
         for f in destinos_de(ext)[1]:
             a(f, "ofimatica", formato=f)
+        a(None, "quitar_metadatos_archivo")
+        a(None, "ver_metadatos")
+    elif ext in (".md5", ".sha1", ".sha256", ".sha512", ".md5sum", ".sha1sum", ".sha256sum", ".sha512sum"):
+        a(None, "verificar_suma")
     if ext not in ARC:
         a("zip", "comprimir_archivos", formato="zip")
+    if p.suffix:                                         # un archivo (no una carpeta): su huella
+        a(None, "suma_verificacion")
+    return salida
+
+
+def opciones_para(rutas: list[str | Path]) -> list[dict]:
+    """Lo que se ofrece para varios archivos juntos (la rueda de soltar): lo que `formatos_de` da para todos, más lo
+    que trabaja con todos a la vez (unir PDF, comparar dos). Cada opción lleva `junta`: True si da UNA salida con
+    todos (imágenes a un PDF, un ZIP), False si da una por archivo."""
+    import json
+    from raphi.motor.base import REGISTRO
+    rutas = [Path(r) for r in rutas]
+    if not rutas:
+        return []
+    clave = lambda o: (o["operacion"], json.dumps(o["params"], sort_keys=True))  # noqa: E731
+    listas = [formatos_de(r) for r in rutas]
+    otras = [{clave(o) for o in lista} for lista in listas[1:]]
+    salida = [dict(o) for o in listas[0] if all(clave(o) in c for c in otras)]
+    exts = [r.suffix.lower() for r in rutas]
+    juntar = []
+    if len(rutas) > 1:
+        videos, subs = [e for e in exts if e in VID], [e for e in exts if e in SUB + (".ass", ".ssa")]
+        audios, imagenes = [e for e in exts if e in AUD], [e for e in exts if e in IMG]
+        if len(videos) == 1 and subs and len(videos) + len(subs) == len(exts):
+            juntar.append(("incrustar_subtitulos", None))
+        if audios and len(imagenes) == 1 and len(audios) + 1 == len(exts) and set(audios) <= {".mp3", ".m4a", ".flac"}:
+            juntar.append(("portada_audio", None))
+        if len(audios) == len(exts) or len(videos) == len(exts):
+            juntar.append(("unir_medios", (audios or videos)[0].lstrip(".")))
+    for op, formato in juntar:
+        if op in REGISTRO and not REGISTRO[op].faltan():
+            salida.insert(0, {"a": formato, "operacion": op, "params": {}, "titulo": REGISTRO[op].titulo})
+    if len(rutas) > 1 and {r.suffix.lower() for r in rutas} == {".pdf"}:
+        for op, formato in (("unir", "pdf"),) + ((("comparar", None),) if len(rutas) == 2 else ()):
+            if op in REGISTRO and not REGISTRO[op].faltan():
+                salida.insert(0, {"a": formato, "operacion": op, "params": {}, "titulo": REGISTRO[op].titulo})
+    for o in salida:
+        o["junta"] = len(rutas) > 1 and not REGISTRO[o["operacion"]].lote
     return salida

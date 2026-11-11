@@ -7,13 +7,14 @@ de ahí cada archivo pasa a su destino con `ctx.salida`, así que nada se pisa (
 from __future__ import annotations
 
 import os
+import re
 import shutil
 import sys
 from pathlib import Path
 
 from raphi.motor.base import ErrorOperacion, Parametro, Resultado, operacion
 from raphi.motor.medios import AUD, VID
-from raphi.motor.utiles import correr
+from raphi.motor.utiles import correr, correr_en_vivo
 
 BACKENDS = Path(__file__).resolve().parents[2] / "backends"
 DESCARGADOR = BACKENDS / "video-downloader" / "main.sh"
@@ -45,8 +46,14 @@ def _traer(ctx, temporal: Path, destino: Path | None, nombre=lambda p: p.stem) -
     return salidas
 
 
+NAVEGADORES = (("", "Ninguno (vídeos públicos)"), ("firefox", "Firefox"), ("chrome", "Chrome"), ("chromium", "Chromium"),
+               ("brave", "Brave"), ("edge", "Edge"), ("opera", "Opera"), ("vivaldi", "Vivaldi"))
+
+
 @operacion("descargar", "Medios", "Descargar video o audio",
-           "De YouTube, Facebook, TikTok y más (yt-dlp): video, solo audio o un tramo exacto.",
+           "De YouTube, Facebook, Instagram, TikTok, X, Vimeo y más de mil sitios (yt-dlp): vídeo a la calidad que se "
+           "elija, solo el audio, un tramo exacto, listas enteras o algunos de sus elementos, subtítulos (también los "
+           "automáticos), carátula y capítulos, sin los patrocinios; y lo privado o con sesión, con las cookies de tu navegador.",
            entrada="ninguna", lote=False, minimo_entradas=0, extensiones=(), requiere=("yt-dlp", "ffmpeg"),
            parametros=(Parametro("url", "Enlaces (uno por línea)", "multilinea", obligatorio=True),
                        Parametro("modo", "Qué bajar", "opcion", "video",
@@ -57,8 +64,18 @@ def _traer(ctx, temporal: Path, destino: Path | None, nombre=lambda p: p.stem) -
                                  opciones=("mp3", "m4a", "opus", "flac", "wav")),
                        Parametro("tramo", "Tramo (INI-FIN, p. ej. 1:02:00-1:05:30)", "texto", "",
                                  ayuda="vacío: todo el video"),
-                       Parametro("subtitulos", "Bajar subtítulos (es, en)", "casilla", False)),
-           palabras=("youtube", "facebook", "tiktok", "bajar", "yt-dlp", "descargar audio", "recortar tramo"))
+                       Parametro("subtitulos", "Bajar subtítulos (es, en)", "casilla", False),
+                       Parametro("subtitulos_auto", "También los subtítulos automáticos", "casilla", False),
+                       Parametro("lista", "Si el enlace es una lista", "opcion", "todo",
+                                 opciones=(("todo", "Bajar la lista entera"), ("solo_video", "Solo este vídeo"))),
+                       Parametro("elementos", "Elementos de la lista (p. ej. 1:10 o 1,3,5)", "texto", "",
+                                 ayuda="vacío: todos"),
+                       Parametro("caratula", "Incrustar la carátula", "casilla", False),
+                       Parametro("sponsorblock", "Quitar patrocinios y autopromoción (SponsorBlock)", "casilla", False),
+                       Parametro("cookies", "Con la sesión de tu navegador (vídeos privados)", "opcion", "",
+                                 opciones=NAVEGADORES, ayuda="usa las cookies del navegador elegido; nada sale de tu máquina")),
+           palabras=("youtube", "facebook", "tiktok", "instagram", "bajar", "yt-dlp", "descargar audio", "recortar tramo",
+                     "playlist", "lista", "video downloader", "privado"))
 def descargar(ctx):
     urls = [u.strip() for u in (ctx.p("url") or "").splitlines() if u.strip()]
     if not urls:
@@ -73,13 +90,77 @@ def descargar(ctx):
         orden += ["--audio-format", ctx.p("formato_audio")]
     if ctx.p("tramo"):
         orden += ["--clip", ctx.p("tramo")]
-    if ctx.p("subtitulos"):
-        orden += ["--subs"]
-    ctx.avisar(0.05, f"Descargando {len(urls)} enlace(s)…")
-    correr(orden + urls, timeout=6 * HORAS, mensaje="La descarga falló")
-    ctx.avisar(0.95, "Ordenando lo descargado")
+    if ctx.p("subtitulos") or ctx.p("subtitulos_auto"):
+        orden += ["--subs"] + (["--auto-subs"] if ctx.p("subtitulos_auto") else [])
+    if ctx.p("lista") == "solo_video":
+        orden += ["--no-playlist"]
+    if ctx.p("elementos"):
+        orden += ["--items", ctx.p("elementos")]
+    if ctx.p("caratula"):
+        orden += ["--thumbnail"]
+    if ctx.p("sponsorblock"):
+        orden += ["--sponsorblock"]
+    if ctx.p("cookies"):
+        orden += ["--cookies-browser", ctx.p("cookies")]
+    ctx.avisar(0.01, f"Preparando {len(urls)} enlace(s)…")
+    estado = {"item": 1, "items": 1, "nombre": ""}
+
+    def leer(linea: str) -> None:
+        item = re.search(r"Downloading (?:item|video) (\d+) of (\d+)", linea)
+        if item:
+            estado["item"], estado["items"] = int(item[1]), int(item[2])
+        destino_linea = re.search(r"Destination:\s*(.+)$", linea)
+        if destino_linea:
+            estado["nombre"] = Path(destino_linea[1]).name
+        avance = re.search(r"\[download\]\s+([\d.]+)%", linea)
+        if avance:
+            parte = float(avance[1]) / 100
+            total = (estado["item"] - 1 + parte) / max(1, estado["items"])
+            velocidad = re.search(r"at\s+(\S+)", linea)
+            eta = re.search(r"ETA\s+(\S+)", linea)
+            ctx.avisar(0.02 + 0.9 * total, " · ".join(x for x in (
+                f"{avance[1]} %", estado["nombre"][:50],
+                f"{estado['item']} de {estado['items']}" if estado["items"] > 1 else "",
+                velocidad[1] if velocidad else "", f"quedan {eta[1]}" if eta else "") if x))
+        elif "Merging" in linea or "ExtractAudio" in linea or "[ffmpeg]" in linea:
+            ctx.avisar(0.93, "Uniendo y convirtiendo…")
+    correr_en_vivo(orden + urls, leer, timeout=6 * HORAS, mensaje="La descarga falló")
+    ctx.avisar(0.97, "Ordenando lo descargado")
     destino.mkdir(parents=True, exist_ok=True)
     return Resultado(_traer(ctx, temporal, destino))
+
+
+def opciones_para_enlaces(urls: list[str]) -> list[dict]:
+    """Lo que la rueda ofrece para enlaces (soltados desde el navegador o pegados): la calidad en el anillo interior
+    (Mejor, 4K, 1080p… MP3, M4A…) y en el exterior las maneras (con subtítulos, sin patrocinios, solo este vídeo de la
+    lista, un tramo, con la sesión del navegador, todas las opciones). `enlace` dice qué parámetro recibe los enlaces;
+    `pide`, si se abren las opciones antes; `fijos`, qué parámetros no se preguntan."""
+    from raphi.motor.base import REGISTRO
+    if "descargar" not in REGISTRO or REGISTRO["descargar"].faltan() or not urls:
+        return []
+    titulo = REGISTRO["descargar"].titulo
+    calidades = (("Mejor", "best", "La mejor calidad que haya"), ("4K", "2160", "Hasta 4K (2160p)"), ("1080p", "1080", "Hasta 1080p"),
+                 ("720p", "720", "Hasta 720p (más liviano)"), ("480p", "480", "Hasta 480p (para el móvil)"))
+    salida = [{"a": "mp4", "etiqueta": e, "titulo": f"Vídeo · {t}", "params": {"modo": "video", "calidad": c}} for e, c, t in calidades]
+    salida += [{"a": f, "etiqueta": f.upper(), "titulo": f"Solo el audio en {f.upper()}", "params": {"modo": "audio", "formato_audio": f}}
+               for f in ("mp3", "m4a", "opus", "flac")]
+    maneras = (("Con subtítulos", "media-subtitle", "Vídeo 1080p con subtítulos (también los automáticos)",
+                {"modo": "video", "calidad": "1080", "subtitulos": True, "subtitulos_auto": True}, False),
+               ("Sin patrocinios", "edit-cut", "Vídeo 1080p sin patrocinios ni autopromoción (SponsorBlock)",
+                {"modo": "video", "calidad": "1080", "sponsorblock": True}, False),
+               ("Solo este vídeo", "video-x-generic", "Solo este vídeo, aunque el enlace sea de una lista",
+                {"modo": "video", "calidad": "1080", "lista": "solo_video"}, False),
+               ("Un tramo…", "edit-cut", "Un tramo exacto (desde, hasta)", {"modo": "video", "calidad": "1080"}, True),
+               ("Con tu sesión…", "dialog-password", "Privado o con sesión: con las cookies de tu navegador",
+                {"modo": "video", "calidad": "1080", "cookies": "firefox"}, True),
+               ("Todas las opciones…", "configure", f"{titulo}: todas las opciones", {}, True))
+    for i, (etiqueta, icono, texto, params, pide) in enumerate(maneras):
+        salida.append({"a": None, "etiqueta": etiqueta, "icono": icono, "titulo": texto, "params": params, "pide": pide,
+                       "fijos": [] if pide else list(params), "clave": f"descargar|manera-{i}"})
+    for o in salida:
+        o.update({"operacion": "descargar", "enlace": "url", "junta": len(urls) > 1})
+        o.setdefault("pide", False)
+    return salida
 
 
 @operacion("transcribir", "Medios", "Transcribir con Whisper",
