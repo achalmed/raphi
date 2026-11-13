@@ -100,7 +100,8 @@ export default function Recetas() {
               <Typography variant="body2" color="text.secondary">{r.descripcion}</Typography>
               <Typography variant="caption" color="text.secondary">{r.pasos.map((p) => titulo(p.operacion)).join(' → ')}</Typography>
             </Box>
-            <Button variant="contained" onClick={() => navegar(`/raphi/h/receta:${r.id}`)}>Aplicar</Button>
+            {/* Delineado: una lista de recetas no tiene una principal (Von Restorff, 2026-11-13: eran cuatro rellenos). */}
+            <Button variant="outlined" onClick={() => navegar(`/raphi/h/receta:${r.id}`)}>Aplicar</Button>
             {r.origen === 'usuario' && (
               <IconButton onClick={async () => { if (await confirmar(`¿Borrar la receta «${r.nombre}»?`, { peligro: true })) { await borrarReceta(r.id); recargar() } }}>
                 <DeleteOutlineIcon />
