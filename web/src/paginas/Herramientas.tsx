@@ -54,7 +54,7 @@ export function Tarjeta({ op, alPulsar, alSoltar }: { op: Operacion; alPulsar: (
       }}>
       <IconoOperacion id={op.id} categoria={op.categoria} />
       <Box sx={{ minWidth: 0, flex: 1 }}>
-        <Typography sx={{ fontWeight: 600, fontSize: 15, lineHeight: 1.3 }}>{op.titulo}</Typography>
+        <Typography sx={{ fontWeight: 600, fontSize: 16, lineHeight: 1.3 }}>{op.titulo}</Typography>
         <Typography variant="body2" color="text.secondary"
           sx={{ mt: 0.25, lineHeight: 1.4, display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>
           {op.descripcion}
@@ -72,7 +72,7 @@ function Categoria({ nombre, cuantas }: { nombre: string; cuantas: number }) {
   return (
     <Stack direction="row" alignItems="baseline" spacing={1.25} sx={{ mb: 1.25 }}>
       <Box sx={{ width: 10, height: 10, borderRadius: '3px', bgcolor: colorDe(nombre), alignSelf: 'center', flexShrink: 0 }} />
-      <Typography sx={{ fontWeight: 700, fontSize: 17 }}>{nombre}</Typography>
+      <Typography sx={{ fontWeight: 700, fontSize: 16 }}>{nombre}</Typography>
       <Typography variant="body2" color="text.secondary" sx={{ flex: 1 }} noWrap>{RESUMEN_CATEGORIA[nombre] ?? ''}</Typography>
       <Typography variant="caption" sx={{ color: PALETA.textoTenue ?? 'text.secondary' }}>{cuantas}</Typography>
     </Stack>
@@ -122,7 +122,7 @@ export default function Herramientas() {
         {cat && cat.recetas.length > 0 && (
           <Box>
             <Stack direction="row" alignItems="baseline" spacing={1.25} sx={{ mb: 1 }}>
-              <Typography sx={{ fontWeight: 700, fontSize: 17 }}>Recetas</Typography>
+              <Typography sx={{ fontWeight: 700, fontSize: 16 }}>Recetas</Typography>
               <Typography variant="body2" color="text.secondary">Varios pasos de una vez, con un clic</Typography>
             </Stack>
             <ListaCatalogo buscar={false} alElegir={(i) => navegar(`/raphi/h/receta:${i.clave}`)}

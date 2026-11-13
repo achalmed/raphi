@@ -60,7 +60,7 @@ export default function Trabajos() {
                 sx={{ p: 1.5, border: 1, borderColor: 'divider', borderRadius: '14px', bgcolor: PALETA.superficie ?? 'background.paper', '&:hover': { borderColor: 'text.disabled' } }}>
                 <IconoOperacion id={t.operacion} categoria={categorias[t.operacion] ?? ''} tamano={34} />
                 <Box sx={{ flex: 1, minWidth: 0 }}>
-                  <Typography noWrap sx={{ fontWeight: 500 }}>{t.titulo}{t.simular ? ' (simulación)' : ''}</Typography>
+                  <Typography noWrap sx={{ fontWeight: 400 }}>{t.titulo}{t.simular ? ' (simulación)' : ''}</Typography>
                   <Typography variant="caption" color="text.secondary">
                     {hora(t.creado_en)} · {t.archivos.length} archivo(s){t.mensaje ? ` · ${t.mensaje}` : ''}
                   </Typography>

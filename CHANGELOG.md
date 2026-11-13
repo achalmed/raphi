@@ -17,6 +17,10 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 ### Sin publicar
 
+#### Cambiado (2026-11-12, la escala de diseño de Qillqa)
+
+- Tres títulos de 15 y 17 px a 16 y un peso 500 a 400, según `qillqa/frontend/src/diseno.ts`.
+
 #### Añadido (2026-11-11, la rueda de soltar)
 
 - **`fondo_imagen` («Poner fondo»)**: la imagen sobre un fondo de color o degradado diagonal, con margen, esquinas
