@@ -1,6 +1,7 @@
 // BarraEstudio — la barra de arriba de Raphi Studio: volver al catálogo, la búsqueda rápida de herramientas (Ctrl+F),
-// las áreas del catálogo con cuántas herramientas tiene cada una, las entradas, Simular (F5) y Procesar (Ctrl+Intro)
-// cuando hay una herramienta abierta, y la cola con lo que tiene en curso y pendiente (Ctrl+3).
+// las áreas del catálogo con cuántas herramientas tiene cada una, Simular (F5) y Procesar (Ctrl+Intro) cuando hay una
+// herramienta abierta, y la cola con lo que tiene en curso y pendiente (Ctrl+3). Las entradas, desde el taller del
+// 2026-11-18, en la zona para soltar de debajo (ZonaSoltar).
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as QQC2
@@ -40,13 +41,6 @@ QQC2.ToolBar {
                 Accessible.name: "Buscar una herramienta"
             }
             Item { Layout.fillWidth: true }
-            QQC2.ToolButton {
-                icon.name: "document-open"
-                text: studio.archivos.total > 0 ? studio.archivos.total + " entrada" + (studio.archivos.total === 1 ? "" : "s") : "Añadir archivos"
-                onClicked: studio.acciones.accion("archivo.anadir").disparar()
-                QQC2.ToolTip.text: studio.archivos.total > 0 ? studio.archivos.resumen + " (Ctrl+O añade; se sueltan desde Dolphin)" : "Archivos de entrada (Ctrl+O, o suéltalos desde Dolphin)"
-                QQC2.ToolTip.visible: hovered
-            }
             QQC2.ToolSeparator { visible: barra.e.vista === "herramienta" }
             BotonAccion { visible: barra.e.vista === "herramienta"; accion: studio.acciones.accion("op.simular") }
             QQC2.Button {

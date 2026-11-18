@@ -136,6 +136,31 @@ def test_sin_colores_propios_en_qml():
     assert not malos, "\n".join(malos)
 
 
+def test_la_forma_del_taller():
+    """La forma aprobada el 2026-11-18: arriba la zona para soltar, al centro la paleta por familia, a la derecha la cola
+    con su barra de avance; las entradas viven en la zona (no en la barra ni en una columna de la herramienta)."""
+    main = (QML / "Main.qml").read_text(encoding="utf-8")
+    assert main.index("ZonaSoltar {") < main.index("StackLayout {") < main.index("PanelCola {")
+    assert "arrastrando: soltar.containsDrag" in main
+    cola = (QML / "componentes" / "PanelCola.qml").read_text(encoding="utf-8")
+    assert "QQC2.ProgressBar" in cola and "modeloCompleto" in cola and "indeterminate" in cola
+    assert "h.paleta" in (QML / "componentes" / "PaginaCatalogo.qml").read_text(encoding="utf-8")
+    assert "archivos.total" not in (QML / "componentes" / "BarraEstudio.qml").read_text(encoding="utf-8")
+    assert "// entradas" not in (QML / "componentes" / "EspacioHerramienta.qml").read_text(encoding="utf-8")
+
+
+def test_sin_colores_rgb_ni_toasts_propios():
+    """Ni Qt.rgba/rgb/hsla ni lighter/darker (el color es del tema), y ningún aviso flotante propio: los avisos van a
+    Mensajes de gui-comun (las notificaciones de KDE)."""
+    malos = []
+    for qml in QML.rglob("*.qml"):
+        for n, linea in enumerate(qml.read_text(encoding="utf-8").splitlines(), 1):
+            codigo = linea.split("//")[0]
+            if re.search(r"Qt\.(rgba?|hsla?|lighter|darker)\s*\(", codigo) or re.search(r"\b(Popup|Kirigami\.PassiveNotification|showPassiveNotification)\b", codigo):
+                malos.append(f"{qml.relative_to(STUDIO)}:{n}: {linea.strip()}")
+    assert not malos, "\n".join(malos)
+
+
 def test_sin_marca_dentro_de_la_ventana():
     codigo = "\n".join(l.split("//")[0] for l in (QML / "Main.qml").read_text(encoding="utf-8").splitlines())
     assert "logotipo" not in codigo.lower() and "logo_svg" not in codigo and "marca.svg" not in codigo

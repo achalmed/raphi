@@ -1,10 +1,12 @@
-// Main.qml — Raphi Studio (reingeniería del 2026-11-02, docs/reingenieria.md): un estudio multimedia sobre
-// GuiComun.VentanaBase (sin navegación lateral, tabla ni panel de detalles impuestos). Arriba, la barra del estudio:
-// volver, buscar herramientas, las áreas del catálogo, Simular y Procesar, la cola con su contador. En el centro, una de
-// tres vistas: el Catálogo (cuadrícula de herramientas), la Herramienta (entradas · vista previa · opciones) y la Cola
-// (trabajos con su progreso, su resultado, sus salidas y repetir). Abajo, la barra de estado con el trabajo en curso.
-// Soltar archivos desde Dolphin en cualquier parte los añade a las entradas. Ninguna llamada al motor ni al disco
-// aquí: todo lo hacen los controladores de Python (studio.*).
+// Main.qml — Raphi Studio, un taller (rediseño aprobado del 2026-11-18, sobre la reingeniería del 2026-11-02,
+// docs/reingenieria.md) sobre GuiComun.VentanaBase (sin navegación lateral, tabla ni panel de detalles impuestos).
+// Arriba, la barra del estudio: volver, buscar herramientas, las áreas, Simular y Procesar, la cola con su contador.
+// Debajo, la zona para soltar archivos y carpetas con lo que ya entró (ZonaSoltar). En el centro, una de tres vistas:
+// la paleta de herramientas por familia (PDF, imágenes, audio y video, documentos…), la Herramienta (monitor y
+// opciones) y la Cola (trabajos con su resultado, sus salidas y repetir); a la derecha, salvo en la Cola, la cola con su
+// barra de avance (PanelCola). Abajo, la barra de estado. Soltar desde Dolphin en cualquier parte añade a las
+// entradas. Ninguna llamada al motor ni al disco aquí: todo lo hacen los controladores de Python (studio.*); los
+// avisos sin decisión van a las notificaciones de KDE por los Mensajes de gui-comun.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as QQC2
@@ -42,7 +44,7 @@ VentanaBase {
             case "buscar": barra.enfocarBusqueda(); break
             case "elegir_archivos": selectorArchivos.abrir(archivos.carpetaComun); break
             case "elegir_carpeta": selectorCarpeta.abrir(archivos.carpetaComun); break
-            case "quitar_archivos": if (vistaHerramienta.quitarSeleccion) vistaHerramienta.quitarSeleccion(); else archivos.vaciar(); break
+            case "quitar_archivos": if (archivos.fila >= 0) archivos.quitar(archivos.fila); break
             case "venv": dialogoVenv.open(); break
             case "dolphin": dialogoDolphin.open(); break
             case "vigilar": dialogoVigilar.open(); break
@@ -63,17 +65,46 @@ VentanaBase {
     // ------------------------------------------------------------------ la barra del estudio
     header: BarraEstudio { id: barra }
 
-    // ------------------------------------------------------------------ las tres vistas
-    StackLayout {
+    // ------------------------------------------------------------------ el taller: soltar arriba, las vistas, la cola a la derecha
+    ColumnLayout {
         anchors.fill: parent
-        currentIndex: espacio.indiceVista
-        PaginaCatalogo { id: vistaCatalogo }
-        EspacioHerramienta { id: vistaHerramienta }
-        PaginaCola { id: vistaCola }
+        spacing: 0
+        ZonaSoltar {
+            id: zona
+            Layout.fillWidth: true
+            visible: vista !== "cola"
+            arrastrando: soltar.containsDrag
+            onElegida: indice => {
+                if (vista === "herramienta" && herramientas.hayActual) vistaHerramienta.verEntrada(indice)
+                else archivos.fijarFila(indice)
+            }
+        }
+        Kirigami.Separator { Layout.fillWidth: true; visible: zona.visible }
+        RowLayout {
+            Layout.fillWidth: true
+            Layout.fillHeight: true
+            spacing: 0
+            StackLayout {
+                Layout.fillWidth: true
+                Layout.fillHeight: true
+                currentIndex: espacio.indiceVista
+                PaginaCatalogo { id: vistaCatalogo }
+                EspacioHerramienta { id: vistaHerramienta }
+                PaginaCola { id: vistaCola }
+            }
+            Kirigami.Separator { Layout.fillHeight: true; visible: panelCola.visible }
+            PanelCola {
+                id: panelCola
+                Layout.fillHeight: true
+                Layout.preferredWidth: Kirigami.Units.gridUnit * 16
+                visible: vista !== "cola"
+            }
+        }
     }
 
-    // soltar archivos desde Dolphin en cualquier parte
+    // soltar archivos desde Dolphin en cualquier parte (la zona de arriba se marca mientras tanto)
     DropArea {
+        id: soltar
         anchors.fill: parent
         z: 100
         keys: ["text/uri-list"]
@@ -81,14 +112,6 @@ VentanaBase {
             if (!drop.hasUrls) return
             studio.archivos.recibir(drop.urls.map(u => String(u)))
             drop.accept(Qt.CopyAction)
-        }
-        Rectangle {
-            anchors.fill: parent
-            visible: parent.containsDrag
-            color: Kirigami.Theme.highlightColor
-            opacity: 0.12
-            border.color: Kirigami.Theme.highlightColor
-            border.width: 2
         }
     }
 

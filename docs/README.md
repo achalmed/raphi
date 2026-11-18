@@ -17,6 +17,7 @@ generado por `core/docs.py indice` desde el frontmatter (NORMATIVA §15.6).
 | [rediseno.md](rediseno.md) | `doc` | `hecho` | Rediseño de Raphi Studio como espacio de trabajo: auditoría de la GUI de Widgets, arquitectura de información, distribución de la ventana, componentes y decisiones |
 | [referencia-docflow.md](referencia-docflow.md) | `doc` | `activo` | Referencia de docflow, la CLI de conversión documental |
 | [referencia-operaciones.md](referencia-operaciones.md) | `doc` | `activo` | Referencia de las operaciones de Raphi |
+| [reingenieria.md](reingenieria.md) | `doc` | `activo` | Reingeniería de Raphi Studio (2026-11-02): de una tabla de herramientas a un estudio multimedia |
 
-<sub>Bloque generado por `core/docs.py indice` desde el frontmatter de docs/ (2026-11-02); no se edita a mano.</sub>
+<sub>Bloque generado por `core/docs.py indice` desde el frontmatter de docs/ (2026-11-18); no se edita a mano.</sub>
 <!-- docs:fin -->

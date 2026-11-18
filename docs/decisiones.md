@@ -10,6 +10,39 @@ lo revocado se marca «Superada por …» y no se borra. Los pendientes, con fec
 
 ## Producto
 
+### 2026-11-18 · R14: Raphi Studio es un taller (rediseño visual aprobado); afina R12
+
+El autor aprobó el 2026-11-18 las maquetas «con identidad propia» de diez programas («cada programa tiene sus
+particularidades visuales»; «el color que toman depende de mi tema personal de KDE»; «las notificaciones usan las de
+KDE»). La de Raphi Studio es un **taller**: arriba, la **zona para soltar** archivos y carpetas con lo que ya entró
+(`ZonaSoltar.qml`); en el centro, la **paleta de herramientas por familia**, en el orden PDF, imágenes, audio y video,
+documentos, y después archivos y recetas (`PaginaCatalogo.qml` sobre `herramientas.paleta`, `familias.ORDEN_PALETA`);
+a la derecha, la **cola con su barra de avance** (`PanelCola.qml`, la cola entera sin el filtro de grupo; la barra va
+indeterminada mientras el motor no diga cuánto lleva). Lo que cambia y por qué:
+
+- Las **entradas viven en la zona de arriba** en todas las vistas menos la Cola: salen de la barra del estudio y de la
+  columna izquierda de la herramienta, que las repetían. Elegir una en la zona la muestra en el monitor de la
+  herramienta. La zona se marca con el resaltado del tema mientras algo se arrastra encima; soltar sigue funcionando en
+  toda la ventana.
+- La **paleta agrupa por familia, no por área**: la familia es el tipo de archivo con que trabaja la persona (lo que
+  pidió la maqueta) y cada herramienta tiene una sola, así que nada sale dos veces. Las ocho áreas siguen como filtro
+  en la barra, con la búsqueda y «Solo las que sirven»; con entradas, lo que no sirve para ellas queda tenue en vez de
+  marcar lo que sirve (que en un grupo entero repetía la misma etiqueta). Si las entradas se vacían, «Solo las que
+  sirven» se apaga solo: dejaba la paleta vacía.
+- La **fila del último trabajo** al pie de la herramienta se retira: su avance, Detener e «Ir a la cola» están en el
+  panel de la derecha. La vista Cola (Ctrl+3) sigue para el detalle (resultado, salidas, registro, repetir) y en ella
+  el panel se oculta.
+- **Color**: nada propio (ya no había hex; ahora lo vigilan también `Qt.rgba`, `lighter`, `darker` y los avisos
+  flotantes). Los estados del panel, con `positive/negative/neutral/activeTextColor`; el violeta de la marca queda solo
+  en el lanzador y «Acerca de» (D2 de gui-comun). El cambio de claro a oscuro con la ventana abierta se probó aislado
+  (bus propio, `HOME` y `kdeglobals` temporales).
+- **Avisos**: todos pasaban ya por `Mensajes` sin acciones, así que van a las notificaciones de KDE (gui-comun 4.1),
+  también el fin de un trabajo con la ventana sin foco. En la ventana quedan solo los `InlineMessage` de estado (lo que
+  le falta a la herramienta).
+
+Se pierde la navegación con flechas de la cuadrícula: las piezas de la paleta se recorren con Tab y se abren con
+Espacio (anotado en `estado.md`).
+
 ### 2026-11-11 · R13: la rueda de soltar, otra cara del motor para Dolphin, Krusader y KDE
 
 > **2026-11-11, más tarde: la rueda se muda a Muyu** (repo privado `muyu`, su decisión M1). El autor pidió que fuera la

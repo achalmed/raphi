@@ -1,7 +1,7 @@
 ---
 tipo: estado
 estado: activo
-actualizado: 2026-11-11
+actualizado: 2026-11-18
 ---
 # estado.md — raphi (repo `achalmed/raphi`, antes DocFlow Studio)
 
@@ -16,6 +16,7 @@ vivían en `docs/decisiones.md` §Pendientes por una regla propia del repo; desd
 
 | fecha | qué | dónde se ve |
 |---|---|---|
+| 2026-11-18 | **Raphi Studio, un taller** (rediseño visual aprobado, R14): arriba la zona para soltar con lo que entró, la paleta de herramientas por familia (PDF, imágenes, audio y video, documentos…) y a la derecha la cola con su barra de avance; cero colores propios; los avisos, a las notificaciones de KDE; el cambio de claro a oscuro en vivo probado aislado. Sobre la muestra: `tests/run.sh` 35 pasan | `docs/decisiones.md` R14, `escritorio/studio/README.md`, `docs/figuras/raphi-studio-*.png` |
 | 2026-11-11 | **Probado con uso real** (desde Muyu): `descargar` de YouTube a MP3 con el avance real de yt-dlp, `transcribir` lo bajado con Whisper (SRT y su versión de líneas cortas), `quitar_metadatos_archivo` con mat2 sobre una foto con GPS, autor y número de serie (quedan solo los campos del formato) | `tests/test_archivos_multimedia.py` |
 | 2026-11-11 | **La rueda ampliada**, tras probarla el autor en la sesión: vista previa de PDF con el visor de gui-comun (zoom, desplazar, seleccionar, buscar), imagen ampliable, texto; «Ver el original»; panel acotado con Ampliar (F11) y el cerrar de la decoración de KWin; informes de las herramientas de información; enlaces (descargas con avance real, cookies del navegador, listas, subtítulos, SponsorBlock); Okular (D-Bus), macro de LibreOffice, correo y copiar el archivo. En el motor, 13 operaciones nuevas (metadatos, sumas, comprimidos, información de medios, subtítulos, volumen, rotar, unir, carátula, dividir, foto de documento) e ICO y medidas listas; limpieza con mat2 y su comprobación; valores actuales. Okular probado por D-Bus sin pantalla; la macro de LibreOffice, no dentro de LibreOffice | `raphi/motor/archivos.py`, `raphi/motor/multimedia.py`, `tests/test_archivos_multimedia.py`, `docs/decisiones.md` R13 (adenda) |
 | 2026-11-11 | **La rueda de soltar** (R13; ese mismo día se mudó a Muyu, repo `muyu`, su M1): el círculo de formatos (interior) y herramientas (exterior) que sale de `formatos_de`/`opciones_para`, con vista previa en vivo, editor del recorte, encadenar, arrastrar el resultado fuera, deshacer a la papelera y teclado; desde el menú de Dolphin y Krusader, el atajo Meta+Ctrl+R o la franja del borde (`--residente`), con layer-shell en Wayland. En el motor: «Poner fondo» (`fondo_imagen`), `opciones_para`, la pista `vista` de un parámetro y el recorte por rectángulo. Probado sin pantalla y en un KWin anidado (`kwin_wayland --virtual`): no en la sesión real | el repo `muyu`; aquí, `tests/test_rueda.py` y `docs/arquitectura.md` §El corredor como API de Muyu |
@@ -32,6 +33,15 @@ nada en curso
 
 ## Por hacer
 
+- 2026-11-18 · dueño: **el autor** · ver el taller en la sesión real: soltar desde Dolphin sobre la zona (se marca con
+  el resaltado) y sobre la paleta, la cola de la derecha con un trabajo largo (transcribir: la barra va indeterminada
+  hasta que el motor avisa) y el cambio de claro a oscuro con `plasma-apply-colorscheme` (aquí solo se probó aislado).
+- 2026-11-18 · dueño: director · la paleta se recorre con Tab y Espacio; la cuadrícula anterior tenía flechas e Intro.
+  Si hace falta, un `GridView` por familia con `keyNavigationEnabled`, o un componente común de «paleta por grupos» en
+  gui-comun (propuesta; gui-comun no se tocó).
+- 2026-11-18 · dueño: director · las secciones de la cola (aquí y en la vista Cola) pueden repetirse («Hechos», «Con
+  error», «Hechos») porque los terminados se ordenan por fecha y no por sección; ordenar por sección o quitar los
+  encabezados de terminados.
 - 2026-11-11 · dueño: director · `PaginaFormulario` de gui-comun avisa en la consola al cambiar de campos
   («Kirigami FormLayout: Cannot read property 'isSection' of null»; lo ven la rueda y, al cambiar de herramienta, Raphi
   Studio): sin efecto visible; llevarlo a gui-comun.

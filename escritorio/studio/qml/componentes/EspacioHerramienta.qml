@@ -1,8 +1,8 @@
-// EspacioHerramienta — el espacio de trabajo de la herramienta elegida (reingeniería X3), al estilo de HandBrake:
-// arriba, qué es (icono, nombre, áreas, formatos, qué le falta, su ficha); a la izquierda las entradas (miniaturas,
-// añadir con el diálogo de KDE, soltar desde Dolphin, quitar); en el centro el monitor con la vista previa de la entrada
-// elegida o del resultado; a la derecha las opciones generadas de su ficha y dónde dejar la salida; abajo, el último
-// trabajo de esta herramienta con su progreso. Simular (F5) y Procesar (Ctrl+Intro) están en la barra de arriba.
+// EspacioHerramienta — el espacio de trabajo de la herramienta elegida (reingeniería X3; en el taller del 2026-11-18,
+// sin columna de entradas: lo que entró está en la zona para soltar de arriba, y el avance, en la cola de la derecha):
+// arriba, qué es (icono, nombre, áreas, formatos, qué le falta, su ficha); en el centro el monitor con la vista previa
+// de la entrada elegida o del resultado; a la derecha las opciones generadas de su ficha y dónde dejar la salida.
+// Simular (F5) y Procesar (Ctrl+Intro) están en la barra de arriba y al pie de las opciones.
 import QtQuick
 import QtQuick.Layouts
 import QtQuick.Controls as QQC2
@@ -83,88 +83,12 @@ ColumnLayout {
     }
     Kirigami.Separator { Layout.fillWidth: true; visible: raiz.h.hayActual }
 
-    // ------------------------------------------------------------------ entradas · monitor · opciones
+    // ------------------------------------------------------------------ monitor · opciones
     QQC2.SplitView {
         visible: raiz.h.hayActual
         Layout.fillWidth: true
         Layout.fillHeight: true
         orientation: Qt.Horizontal
-
-        ColumnLayout {                                                     // entradas
-            QQC2.SplitView.preferredWidth: Kirigami.Units.gridUnit * 15
-            QQC2.SplitView.minimumWidth: Kirigami.Units.gridUnit * 10
-            spacing: 0
-            RowLayout {
-                Layout.fillWidth: true
-                Layout.margins: Kirigami.Units.smallSpacing
-                Kirigami.Heading { level: 4; text: raiz.h.sinArchivos ? "Sin entradas" : "Entradas · " + raiz.a.total; Layout.fillWidth: true }
-                BotonAccion { accion: studio.acciones.accion("archivo.anadir"); conTexto: false; visible: !raiz.h.sinArchivos }
-                BotonAccion { accion: studio.acciones.accion("archivo.anadir_carpeta"); conTexto: false; visible: !raiz.h.sinArchivos }
-                BotonAccion { accion: studio.acciones.accion("archivo.vaciar"); conTexto: false; visible: !raiz.h.sinArchivos }
-            }
-            ListView {
-                id: entradas
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                clip: true
-                visible: !raiz.h.sinArchivos
-                model: raiz.a.rutas
-                currentIndex: raiz.a.fila
-                Accessible.name: "Entradas"
-                QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
-                delegate: QQC2.ItemDelegate {
-                    id: entrada
-                    required property var modelData
-                    required property int index
-                    readonly property var f: raiz.a.modelo.fila(index)
-                    readonly property bool esImagen: /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(String(modelData))
-                    width: entradas.width
-                    highlighted: ListView.isCurrentItem
-                    onClicked: raiz.verEntrada(index)
-                    Accessible.name: f.nombre || ""
-                    contentItem: RowLayout {
-                        spacing: Kirigami.Units.smallSpacing
-                        Item {
-                            implicitWidth: Kirigami.Units.iconSizes.large
-                            implicitHeight: implicitWidth
-                            Image {
-                                anchors.fill: parent
-                                visible: entrada.esImagen
-                                source: entrada.esImagen ? "file://" + entrada.modelData : ""
-                                sourceSize.width: width * 2
-                                fillMode: Image.PreserveAspectFit
-                                asynchronous: true
-                            }
-                            Kirigami.Icon { anchors.fill: parent; visible: !entrada.esImagen; source: entrada.f.icono ? entrada.f.icono.nombre : "text-x-generic" }
-                        }
-                        ColumnLayout {
-                            Layout.fillWidth: true
-                            spacing: 0
-                            QQC2.Label { text: entrada.f.nombre || ""; elide: Text.ElideMiddle; Layout.fillWidth: true }
-                            QQC2.Label { text: (entrada.f.tipo || "") + " · " + (entrada.f.tamano || ""); font: Kirigami.Theme.smallFont; color: Kirigami.Theme.disabledTextColor; elide: Text.ElideRight; Layout.fillWidth: true }
-                        }
-                        QQC2.ToolButton { icon.name: "list-remove"; text: "Quitar"; display: QQC2.AbstractButton.IconOnly; onClicked: raiz.a.quitar(entrada.index); Accessible.name: "Quitar " + (entrada.f.nombre || "") }
-                    }
-                }
-                Kirigami.PlaceholderMessage {
-                    anchors.centerIn: parent
-                    width: parent.width - Kirigami.Units.gridUnit * 2
-                    visible: entradas.count === 0
-                    icon.name: "document-open"
-                    text: "Suelta aquí archivos"
-                    explanation: "Desde Dolphin, o con «Añadir archivos» (Ctrl+O). Acepta " + raiz.h.textoAcepta + "."
-                    helpfulAction: Kirigami.Action { text: "Añadir archivos…"; icon.name: "document-open"; onTriggered: studio.acciones.accion("archivo.anadir").disparar() }
-                }
-            }
-            Kirigami.PlaceholderMessage {
-                Layout.fillWidth: true
-                Layout.fillHeight: true
-                visible: raiz.h.sinArchivos
-                icon.name: raiz.h.icono
-                text: "Trabaja sin archivos"
-                explanation: "Lo que necesita (una dirección, una carpeta) está en sus opciones."
-            }
-        }
 
         ColumnLayout {                                                     // monitor
             QQC2.SplitView.fillWidth: true
@@ -202,7 +126,7 @@ ColumnLayout {
                 Layout.fillWidth: true
                 Layout.fillHeight: true
                 visible: raiz.monitor === "entrada" || (raiz.t.ref === raiz.h.ref && raiz.t.nSalidas > 0)
-                vacio: raiz.monitor === "entrada" ? "Elige una entrada a la izquierda para verla aquí" : "Procesa (Ctrl+Intro) para ver el resultado"
+                vacio: raiz.monitor === "entrada" ? "Elige una entrada arriba para verla aquí, o suelta archivos desde Dolphin" : "Procesa (Ctrl+Intro) para ver el resultado"
             }
             VistaTexto {
                 Layout.fillWidth: true
@@ -220,21 +144,6 @@ ColumnLayout {
             QQC2.SplitView.preferredWidth: Kirigami.Units.gridUnit * 22
             QQC2.SplitView.minimumWidth: Kirigami.Units.gridUnit * 16
         }
-    }
-
-    // ------------------------------------------------------------------ el último trabajo de esta herramienta
-    Kirigami.Separator { Layout.fillWidth: true; visible: raiz.h.hayActual && raiz.t.hayActual && raiz.t.ref === raiz.h.ref }
-    RowLayout {
-        visible: raiz.h.hayActual && raiz.t.hayActual && raiz.t.ref === raiz.h.ref
-        Layout.fillWidth: true
-        Layout.margins: Kirigami.Units.smallSpacing
-        spacing: Kirigami.Units.largeSpacing
-        Kirigami.Icon { source: raiz.t.estado === "en_curso" ? "media-playback-start" : raiz.t.estado === "hecho" ? "data-success" : raiz.t.estado === "en_cola" ? "chronometer" : "data-error"; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth }
-        QQC2.Label { text: raiz.t.textoEstado + (raiz.t.simulado ? " (simulación)" : "") + (raiz.t.mensaje ? " · " + raiz.t.mensaje : ""); elide: Text.ElideRight; Layout.fillWidth: true }
-        QQC2.ProgressBar { visible: raiz.t.estado === "en_curso"; from: 0; to: 100; value: raiz.t.progreso; Layout.preferredWidth: Kirigami.Units.gridUnit * 10 }
-        QQC2.Label { text: raiz.t.duracion; color: Kirigami.Theme.disabledTextColor }
-        BotonAccion { accion: studio.acciones.accion("op.cancelar"); conTexto: false; visible: raiz.t.estado === "en_curso" }
-        QQC2.Button { text: "En la cola"; icon.name: "view-task"; flat: true; onClicked: raiz.t.irA(raiz.t.id) }
     }
 
     Kirigami.Dialog {

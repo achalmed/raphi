@@ -7,14 +7,22 @@ estado: activo
 ## Qué es
 
 Un estudio de documentos, PDF, imágenes, audio y vídeo, no un explorador de archivos (`../../docs/reingenieria.md`,
-decisión R12). Tres vistas sobre `VentanaBase` de `gui-comun` 3.0; arriba, la barra del estudio (volver, buscar, las
-áreas, Simular, Procesar, la cola).
+decisión R12). Desde el 2026-11-18 tiene la forma de un **taller** (decisión R14, el rediseño visual aprobado): arriba,
+la barra del estudio (volver, buscar, las áreas, Simular, Procesar, la cola) y, debajo, la **zona para soltar**
+archivos y carpetas con lo que ya entró (miniatura o icono, tipo, tamaño, quitar; añadir, «Solo las que sirven» y
+vaciar); en el centro, una de tres vistas; a la derecha, salvo en la Cola, la **cola** entera con su barra de avance
+(indeterminada si el motor no dice cuánto lleva), Detener y el estado de cada trabajo en color de estado.
 
 | vista | qué se ve |
 |---|---|
-| **Catálogo** (Ctrl+1) | las herramientas del motor y las recetas en cuadrícula: icono, nombre, qué hace, áreas, formatos que acepta y si está lista en esta máquina (o qué le falta); filtros por área — Documentos y PDF, Imágenes, Audio, Vídeo, Transcripción, Conversión, Procesamiento por lotes, Automatización y recetas — y búsqueda (sin distinguir tildes); con entradas, solo las que las aceptan |
-| **Herramienta** (Ctrl+2) | su espacio de trabajo, al estilo de HandBrake: las **entradas** (miniaturas; añadir con el diálogo de KDE o soltando desde Dolphin), el **monitor** con la vista previa de la entrada elegida o del resultado (imagen; PDF con el visor de gui-comun; audio y vídeo con QtMultimedia; texto), las **opciones** generadas de su ficha (`PaginaFormulario`) y dónde dejar la salida, y abajo el último trabajo con su progreso |
+| **Catálogo** (Ctrl+1) | la paleta de herramientas: las herramientas del motor y las recetas agrupadas por familia, en el orden del taller: PDF, Imágenes, Audio y video, Documentos, Archivos y Recetas; cada una con su icono, qué hace, los formatos que acepta y si está lista en esta máquina (o qué le falta). Filtran las áreas de la barra (Documentos y PDF, Imágenes, Audio, Vídeo, Transcripción, Conversión, Procesamiento por lotes, Automatización y recetas), la búsqueda (sin distinguir tildes) y «Solo las que sirven»; con entradas, lo que no sirve para ellas queda tenue |
+| **Herramienta** (Ctrl+2) | su espacio de trabajo, al estilo de HandBrake: el **monitor** con la vista previa de la entrada elegida arriba o del resultado (imagen; PDF con el visor de gui-comun; audio y vídeo con QtMultimedia; texto), las **opciones** generadas de su ficha (`PaginaFormulario`) y dónde dejar la salida; el avance, en la cola de la derecha |
 | **Cola** (Ctrl+3) | los trabajos por sección (en curso con su barra, en cola, hechos, con error), filtrables; el elegido con sus entradas, opciones y salida, el resultado (el plan si fue simulado), las salidas con vista previa y el registro del motor; Detener, Quitar, **Repetir** e Ir a su herramienta |
+
+**Color y avisos.** Todo color sale del esquema activo de KDE (`Kirigami.Theme`; hoy Lliphi Claro u Oscuro) y cambia
+con la ventana abierta; el violeta de Raphi es solo marca (lanzador y «Acerca de»). Un aviso sin decisión («Rotar
+páginas: 2 correctos», «Menús de Dolphin instalados») va a las notificaciones de KDE, también con la ventana sin foco;
+en la ventana queda solo lo que es estado de la herramienta (lo que le falta).
 
 **F5 simula y Ctrl+Intro procesa.** Simular es el `simular=True` del motor como trabajo en la cola: su plan dice qué
 se producirá y dónde. Procesar es una «escritura» de `gui-comun` 3.0: su confirmación dice la herramienta, las
@@ -53,8 +61,8 @@ escritorio/studio/
 ├── familias.py             familia y áreas de cada operación, leídas de su ficha (el único archivo que nombra operaciones)
 ├── servicios/              sin Qt: rutas, fichas (caché), archivos, trabajos (cola persistida), operaciones, vista_previa (qué se muestra)
 ├── controladores/          espacio (vistas, áreas, búsqueda), archivos, herramientas (catálogo), trabajos (cola, repetir), operaciones, vista, ajustes
-├── qml/                    Main.qml sobre GuiComun.VentanaBase y componentes/ (BarraEstudio, PaginaCatalogo, EspacioHerramienta,
-│                           VistaPrevia, ReproductorMedios, Opciones, PaginaCola, diálogos)
+├── qml/                    Main.qml sobre GuiComun.VentanaBase y componentes/ (BarraEstudio, ZonaSoltar, PaginaCatalogo (la
+│                           paleta), EspacioHerramienta, VistaPrevia, ReproductorMedios, Opciones, PanelCola, PaginaCola, diálogos)
 └── muestra.py · capturar.py   los archivos de muestra (PDF, PNG, SRT, Markdown, WAV) y las capturas sobre ellos
 ```
 

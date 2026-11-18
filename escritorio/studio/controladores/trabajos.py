@@ -63,6 +63,8 @@ class Trabajos(QObject):
         self._pintar()
 
     modelo = Property(QObject, lambda self: self._modelo, constant=True)
+    # la cola entera, sin el filtro de grupo de la vista Cola: el panel de la derecha del taller
+    modeloCompleto = Property(QObject, lambda self: self._tabla, constant=True)
     salidasModelo = Property(QObject, lambda self: self._salidas, constant=True)
 
     # ------------------------------------------------------------------ la tabla
@@ -129,6 +131,20 @@ class Trabajos(QObject):
     @Property(bool, notify=cambiado)
     def enCurso(self) -> bool:
         return self._en_curso is not None
+
+    @Property(int, notify=cambiado)
+    def progresoEnCurso(self) -> int:
+        """El porcentaje del trabajo en curso (0 si el motor aún no avisa: la barra del taller va indeterminada)."""
+        return self._en_curso.progreso if self._en_curso is not None else 0
+
+    @Property(str, notify=cambiado)
+    def tituloEnCurso(self) -> str:
+        t = self._en_curso
+        return (t.titulo + (" (simulación)" if t.simular else "")) if t else ""
+
+    @Property(str, notify=cambiado)
+    def mensajeEnCurso(self) -> str:
+        return self._en_curso.mensaje if self._en_curso is not None else ""
 
     @Property(str, notify=cambiado)
     def textoEnCurso(self) -> str:

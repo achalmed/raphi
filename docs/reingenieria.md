@@ -110,6 +110,9 @@ Cola: en curso (progreso) · en cola · hechos · fallidos; cada trabajo con sus
 
 ## 5. Lo construido
 
+Las figuras de «después» se regeneraron el 2026-11-18 con el taller (decisión R14): la paleta por familia, la zona
+para soltar arriba y la cola a la derecha.
+
 | antes (2.0) | después (3.0) |
 |---|---|
 | ![2.0: tabla de herramientas](figuras/antes/raphi-studio-oscuro.png) | ![3.0: catálogo por áreas, Lliphi Oscuro](figuras/raphi-studio-catalogo.png) |

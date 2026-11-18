@@ -18,7 +18,7 @@ from escritorio.studio.servicios import fichas as svc
 from escritorio.studio.servicios import rutas
 
 ROLES = ("ref", "titulo", "descripcion", "icono", "area", "areaTexto", "areas", "formatos", "acepta", "entradas", "opciones",
-         "disponible", "estado", "nivel", "receta", "larga", "buscable")
+         "disponible", "estado", "nivel", "receta", "larga", "buscable", "familia")
 
 
 def _plano(texto: str) -> str:
@@ -85,7 +85,7 @@ class Herramientas(QObject):
     def _fila(self, f: dict) -> dict:
         faltan = [x.removeprefix("py:") for x in f.get("faltan") or []]
         areas = f.get("areas") or [f.get("area", "")]
-        return {"ref": f["ref"], "titulo": f["titulo"], "descripcion": f.get("descripcion", ""), "icono": f.get("icono", ""),
+        return {"ref": f["ref"], "titulo": f["titulo"], "descripcion": f.get("descripcion", ""), "icono": f.get("icono", ""), "familia": f.get("familia", ""),
                 "area": areas[0], "areaTexto": " · ".join(familias.nombre_area(a) for a in areas), "areas": areas,
                 "formatos": f.get("formatos") or svc.acepta_texto(f), "acepta": svc.acepta_texto(f), "entradas": svc.entrada_texto(f),
                 "opciones": len(f.get("parametros", [])) if not f.get("es_receta") else len(f.get("pasos", [])),
@@ -180,6 +180,19 @@ class Herramientas(QObject):
             for a in f.get("areas") or []:
                 c[a] = c.get(a, 0) + 1
         return c
+
+    @Property("QVariantList", notify=cambiado)
+    def paleta(self) -> list:
+        """La paleta del taller: las herramientas visibles (área, búsqueda, «solo las que aceptan») agrupadas por familia,
+        en el orden de `familias.ORDEN_PALETA`; cada una dice si sirve para las entradas de ahora."""
+        sirven = set(self.queAceptan()) if self.archivos.rutas else set()
+        grupos: dict[str, list] = {}
+        for i, f in enumerate(self._tabla.todas()):
+            if self._acepta(i):
+                grupos.setdefault(f.get("familia") or "archivos", []).append(dict(f, sirve=f.get("ref") in sirven))
+        orden = list(familias.ORDEN_PALETA) + sorted(set(grupos) - set(familias.ORDEN_PALETA))
+        return [{"familia": fam, "texto": familias.nombre_de(fam), "icono": familias.icono_familia(fam),
+                 "descripcion": familias.DESCRIPCIONES.get(fam, ""), "herramientas": grupos[fam]} for fam in orden if fam in grupos]
 
     @Property(int, notify=cambiado)
     def visibles(self) -> int:

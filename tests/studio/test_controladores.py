@@ -123,6 +123,31 @@ def test_herramientas_catalogo_filtros_y_actual(piezas):
 
 
 @requiere_binding
+def test_paleta_del_taller(piezas):
+    """La paleta del taller (rediseño del 2026-11-18): lo visible agrupado por familia en el orden PDF, imágenes, audio y
+    video, documentos…; con entradas, cada herramienta dice si sirve para ellas; los filtros de siempre deciden qué entra."""
+    from escritorio.studio import familias
+    h, e, a, m = piezas["herramientas"], piezas["espacio"], piezas["archivos"], piezas["muestra"]
+    grupos = h.paleta
+    orden = [g["familia"] for g in grupos]
+    assert orden == [f for f in familias.ORDEN_PALETA if f in orden] and orden[0] == "pdf" and "recetas" in orden
+    assert sum(len(g["herramientas"]) for g in grupos) == h.visibles == h.total
+    assert grupos[0]["texto"] == "PDF" and grupos[0]["icono"] and grupos[0]["descripcion"]
+    assert all(x["familia"] == g["familia"] for g in grupos for x in g["herramientas"])
+    assert not any(x["sirve"] for g in grupos for x in g["herramientas"])               # sin entradas, ninguna «sirve»
+    a.agregar([str(m.archivos["srt"])])
+    sirven = {x["ref"] for g in h.paleta for x in g["herramientas"] if x["sirve"]}
+    assert sirven == set(h.queAceptan()) and "convertir_subtitulos" in sirven
+    e.fijarSoloAceptan(True)
+    assert {x["ref"] for g in h.paleta for x in g["herramientas"]} == sirven
+    e.fijarSoloAceptan(False)
+    e.fijarBusqueda("subtitulos")
+    assert {x["ref"] for g in h.paleta for x in g["herramientas"]} >= {"convertir_subtitulos"} and "unir" not in {x["ref"] for g in h.paleta for x in g["herramientas"]}
+    e.fijarBusqueda("no-hay-ninguna-asi")
+    assert h.paleta == []
+
+
+@requiere_binding
 def test_operaciones_sin_poder(piezas):
     o, h, a, m = piezas["operaciones"], piezas["herramientas"], piezas["archivos"], piezas["muestra"]
     assert o.actual == "herramienta" and not o.puedeSimular and o.motivoNoSimular == "Elige primero una herramienta en el catálogo."
@@ -174,6 +199,7 @@ def test_trabajos_simular_aplicar_y_la_cli(piezas, app):
     assert t.contadores["en_curso"] + t.contadores["en_cola"] == 2
     _esperar(app, tr, t)
     assert t.contadores == {"todos": 4, "en_cola": 0, "en_curso": 0, "hechos": 4, "con_error": 0}
+    assert not t.enCurso and t.progresoEnCurso == 0 and t.tituloEnCurso == "" and t.mensajeEnCurso == ""   # el panel del taller, en reposo
     assert [f["seccion"] for f in t.modelo.sourceModel().todas()] == ["Hechos"] * 4             # la cola por secciones
     assert sorted(p.name for p in (m.raiz / "salida").iterdir()) == ["oficio_rotado-2.pdf", "oficio_rotado.pdf"]
     assert m.archivos["pdf"].stat().st_size > 0
@@ -191,6 +217,9 @@ def test_trabajos_simular_aplicar_y_la_cli(piezas, app):
     assert o.aplicar()
     _esperar(app, tr, t)
     assert t.estado == "fallido" and t.contadores["con_error"] == 1 and "malo.pdf" in t.resultado
+    # el panel de la cola del taller ve la cola entera aunque la vista Cola filtre por grupo
+    piezas["espacio"].fijarGrupo("con_error")
+    assert t.modelo.filas == 1 and len(t.modeloCompleto.todas()) == t.total == 6
     malo.unlink()
     avisos = []
     t.aviso.connect(lambda texto, tipo: avisos.append(texto))

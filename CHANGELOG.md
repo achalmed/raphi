@@ -123,6 +123,22 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 ### Sin publicar
 
+#### Cambiado (2026-11-18, el taller: rediseño visual aprobado, decisión R14)
+
+- **Arriba, la zona para soltar** archivos y carpetas con lo que ya entró (miniatura o icono, tipo, tamaño, quitar),
+  añadir, «Solo las que sirven» y vaciar; elegir una entrada la muestra en el monitor. Las entradas salen de la barra
+  del estudio y de la columna izquierda de la herramienta.
+- **La paleta de herramientas por familia** (PDF, imágenes, audio y video, documentos, archivos, recetas) en lugar de
+  la cuadrícula de tarjetas; las áreas, la búsqueda y «Solo las que sirven» siguen filtrando; con entradas, lo que no
+  sirve para ellas queda tenue.
+- **A la derecha, la cola** entera con su barra de avance (indeterminada si el motor no avisa), Detener, limpiar los
+  terminados y el estado de cada trabajo en color de estado; un clic lo abre en la vista Cola. Se retira la fila del
+  último trabajo al pie de la herramienta.
+- Sin entradas, «Solo las que sirven» se apaga solo (dejaba la paleta vacía).
+- Pruebas nuevas: la paleta del taller, la cola entera del panel, la barra en reposo, la composición de la ventana y
+  ningún `Qt.rgba`/`lighter`/`darker` ni aviso flotante propio. Figuras de `docs/figuras/raphi-studio-*.png`
+  regeneradas con la muestra.
+
 #### Añadido (2026-11-11)
 
 - **La rueda de soltar** (decisión R13; **desde el 2026-11-11 es Muyu**, repo `muyu`: lo de abajo vive allí y aquí queda el corredor como su API): un círculo que aparece bajo el puntero

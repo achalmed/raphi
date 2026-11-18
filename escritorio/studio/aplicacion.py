@@ -253,6 +253,8 @@ def construir(app: Aplicacion, cache: Path | None = None, releer: bool = True) -
         espacio.fijarContexto(" · ".join(partes))
 
     archivos.recibidos.connect(al_recibir)
+    # sin entradas, «solo las que sirven» dejaría la paleta vacía: se apaga solo (antes lo hacía «Quitar las entradas»)
+    archivos.cambiado.connect(lambda: archivos.total == 0 and espacio.soloAceptan and espacio.fijarSoloAceptan(False))
     herramientas.actualCambiado.connect(lambda: herramientas.hayActual and trabajos.irAlUltimoDe(herramientas.ref))
     herramientas.actualCambiado.connect(lambda: herramientas.hayActual and operaciones.fijar("herramienta"))   # elegir una herramienta es querer correrla
     espacio.vistaCambiada.connect(vista_cambiada)

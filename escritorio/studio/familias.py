@@ -22,6 +22,10 @@ FAMILIAS = (
     ("recetas", "Recetas", "Varias herramientas, una tras otra, con sus opciones guardadas", "view-list-tree"),
 )
 NOMBRES = {id_: nombre for id_, nombre, _p, _i in FAMILIAS}
+DESCRIPCIONES = {id_: para for id_, _n, para, _i in FAMILIAS}
+# El orden de la paleta del taller (rediseño aprobado del 2026-11-18): PDF, imágenes, audio y video, documentos; después
+# lo que trabaja con cualquier archivo y las recetas.
+ORDEN_PALETA = ("pdf", "imagenes", "audio_video", "documentos", "archivos", "recetas")
 ICONOS = {id_: icono for id_, _n, _p, icono in FAMILIAS}
 
 IMG = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".avif", ".tif", ".tiff", ".bmp", ".gif", ".svg"}
