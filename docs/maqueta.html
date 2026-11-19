@@ -3,62 +3,707 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Maqueta — Raphi Studio</title>
+<title>Maqueta de Raphi Studio</title>
 <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@3.19.0/dist/tabler-icons.min.css">
 <style>
-/* Variables de respaldo: imitan las del anfitrión donde se mostró la maqueta. */
-:root{color-scheme:light;
---bg-primary:#ffffff;--surface-1:#f4f3ef;--surface-2:#ffffff;
---text-primary:#1c1c1e;--text-secondary:#6b6b66;--text-muted:#8e8e88;
---text-accent:#2563eb;--text-success:#15803d;--text-warning:#b45309;--text-danger:#b91c1c;
---border:rgba(0,0,0,.12);--border-strong:rgba(0,0,0,.24);--border-accent:#2563eb;--border-danger:#dc2626;--border-warning:#d97706;
---bg-accent:#dbe7fd;--bg-accent-muted:#eef3fe;--bg-success:#dcfce7;--bg-warning:#fef3c7;--bg-danger:#fee2e2;
---fill-accent:#2563eb;--fill-success:#16a34a;--fill-warning:#d97706;--fill-danger:#dc2626;--fill-ghost-selected:rgba(0,0,0,.06);
---on-accent:#ffffff;--radius:8px;
---font-sans:Inter,system-ui,-apple-system,"Segoe UI",sans-serif;--font-mono:"JetBrains Mono",ui-monospace,monospace;--font-voice:Georgia,"Source Serif 4",serif}
-@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){color-scheme:dark;
---bg-primary:#1c1c1e;--surface-1:#242426;--surface-2:#2c2c2e;
---text-primary:#f5f5f0;--text-secondary:#a0a09a;--text-muted:#7c7c76;
---text-accent:#7aa7ff;--text-success:#4ade80;--text-warning:#fbbf24;--text-danger:#f87171;
---border:rgba(255,255,255,.12);--border-strong:rgba(255,255,255,.24);--border-accent:#7aa7ff;
---bg-accent:#1e3a6e;--bg-accent-muted:#1a2740;--bg-success:#14532d;--bg-warning:#4a3410;--bg-danger:#4c1d1d;
---fill-ghost-selected:rgba(255,255,255,.08)}}
-body{margin:0;padding:24px 16px;background:var(--bg-primary);color:var(--text-primary);font-family:var(--font-sans);font-size:14px;line-height:1.5}
-main{max-width:1100px;margin:0 auto}
-.encabezado{margin:0 0 14px}.encabezado h1{font-size:18px;font-weight:600;margin:0}
-.encabezado p{margin:4px 0 0;color:var(--text-secondary);font-size:12px}
-button{font:inherit;color:var(--text-primary);background:var(--surface-2);border:0.5px solid var(--border-strong);border-radius:var(--radius);cursor:pointer}
-input,select,textarea{font:inherit;color:inherit}
-.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}
-</style>
-<style>
-/* La metáfora de Raphi Studio: Un taller: la zona donde se sueltan los archivos, la paleta de herramientas por área y la cola con su avance en violeta. Acento propio #7c3aed; en la app el color sale del tema de KDE. */
-.nota-maqueta{color:var(--text-secondary);font-size:13px;margin:0 0 12px;max-width:820px}
-.win{border:0.5px solid var(--border);border-radius:12px;overflow:hidden;font-size:12px;background:var(--surface-2);box-shadow:0 8px 30px rgb(0 0 0 / .10)}
-.tit{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:0.5px solid var(--border);background:var(--surface-1)}
-.mut{color:var(--text-secondary);font-size:11px}
-.row{display:flex;align-items:center;gap:6px}
-.btn{font-size:11px;padding:3px 9px}
-.dt{width:8px;height:8px;border-radius:50%;display:inline-block;flex:none}
+/* La metáfora: un taller. Arriba se sueltan los archivos; en el centro, la paleta de herramientas por área o el banco
+   de la herramienta elegida (monitor, opciones, antes y después); a la derecha, la cola con su avance en violeta.
+   Neutros de Lliphi Claro y Oscuro; en la aplicación el color sale de Kirigami.Theme y el violeta es la marca. */
+:root{
+  --n0:#fbfcfd;--n1:#f2f3f5;--n2:#ecedef;--n3:#e0e1e5;--n4:#ccced2;--n5:#66676c;--n6:#4b4d53;--n7:#1d1f24;
+  --acento:#7c3aed;--acento-t:#6d28d9;--acento-s:#ede7fd;--pos:#137738;--neg:#b63132;--neu:#915b00;--info:#286cab;
+  --papel:#ffffff;--tinta:#1d1f24;
+  --ui:Inter,"Noto Sans",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace;--serif:Literata,"Noto Serif",Georgia,serif;
+  color-scheme:light;
+}
+:root[data-theme="dark"]{
+  --n0:#101012;--n1:#161719;--n2:#1b1c1e;--n3:#232426;--n4:#3d3e42;--n5:#97989c;--n6:#bcbec1;--n7:#eaebed;
+  --acento:#8b5cf6;--acento-t:#c4b5fd;--acento-s:#2a2142;--pos:#6fc884;--neg:#fb817a;--neu:#ebb25f;--info:#7fb6ee;
+  --papel:#f4f1ea;--tinta:#1d1f24;color-scheme:dark;
+}
+*{box-sizing:border-box}
+body{margin:0;background:var(--n2);color:var(--n7);font:13px/1.5 var(--ui);padding:16px max(16px,env(safe-area-inset-right,0px)) 16px max(16px,env(safe-area-inset-left,0px))}
+button{font:inherit;color:inherit;cursor:pointer}
+button:focus-visible,input:focus-visible,select:focus-visible,textarea:focus-visible{outline:2px solid var(--acento);outline-offset:1px}
+.mandos{display:flex;flex-wrap:wrap;gap:8px 20px;align-items:center;margin:0 auto 12px;max-width:1280px}
+.mandos .grupo{display:flex;gap:2px;flex-wrap:wrap;align-items:center}
+.mandos .rot{color:var(--n5);margin-right:6px}
+.mandos button{border:1px solid var(--n4);background:var(--n0);padding:4px 10px;border-radius:4px}
+.mandos button[aria-pressed="true"]{background:var(--acento);border-color:var(--acento);color:#fff}
+.nota-maqueta{max-width:1280px;margin:0 auto 10px;color:var(--n5)}
+.ventana{max-width:1280px;margin:0 auto;background:var(--n1);border:1px solid var(--n4);border-radius:8px;overflow:hidden;box-shadow:0 8px 30px rgb(0 0 0 / .12);display:flex;flex-direction:column;position:relative}
+.ventana.celular{max-width:390px}
+.titulo{display:flex;align-items:center;gap:8px;padding:6px 10px;background:var(--n2);border-bottom:1px solid var(--n3);color:var(--n6)}
+.titulo .t{flex:1;text-align:center;font-weight:500;color:var(--n7);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.titulo i.p{width:12px;height:12px;border-radius:50%;background:var(--n4);display:inline-block}
+.menu{display:flex;gap:14px;padding:4px 12px;border-bottom:1px solid var(--n3);flex-wrap:wrap}
+.barra{display:flex;align-items:center;gap:6px;padding:6px 10px;border-bottom:1px solid var(--n3);flex-wrap:wrap}
+.b{border:1px solid transparent;background:none;padding:3px 8px;border-radius:4px;white-space:nowrap;display:inline-flex;align-items:center;gap:5px}
+.b:hover{background:var(--n2)}
+.b.marco{border-color:var(--n4);background:var(--n0)}
+.b.prim{background:var(--acento);border-color:var(--acento);color:#fff}
+.b .ti{font-size:15px}
+.b kbd,.k{font:11px var(--mono);color:var(--n5)}
+.b.prim kbd{color:#ffffffcc}
+.sep{width:1px;height:18px;background:var(--n3)}
+.esp{flex:1}
+.buscar{border:1px solid var(--n4);background:var(--n0);border-radius:4px;padding:4px 9px;color:var(--n7);min-width:240px;font:inherit}
+.celular .buscar{min-width:0;flex:1 1 100%;order:-1}
+.areas{display:flex;gap:2px;padding:4px 10px;border-bottom:1px solid var(--n3);overflow-x:auto;scrollbar-width:thin}
+.areas button{border:0;background:none;padding:4px 9px;border-radius:4px;color:var(--n6);white-space:nowrap;display:inline-flex;gap:5px;align-items:center}
+.areas button small{color:var(--n5);font-variant-numeric:tabular-nums}
+.areas button[aria-pressed="true"]{background:var(--acento-s);color:var(--acento-t);font-weight:500}
+.celular .menu,.celular .solo-escritorio{display:none!important}
+
+.zona{margin:8px 10px;border:1.5px dashed var(--acento);border-radius:8px;padding:8px;display:flex;gap:6px;align-items:center;flex-wrap:wrap;background:color-mix(in oklab,var(--acento) 4%,transparent)}
+.zona.sobre{background:color-mix(in oklab,var(--acento) 14%,transparent)}
+.zona>.ti{font-size:20px;color:var(--acento-t)}
+.zona .vacia{color:var(--n5)}
+.ficha{display:inline-flex;align-items:center;gap:7px;border:1px solid var(--n4);background:var(--n0);border-radius:6px;padding:3px 4px 3px 6px;max-width:100%}
+.ficha .ic{width:26px;height:26px;border-radius:4px;display:grid;place-items:center;color:#fff;font-size:15px;flex:none}
+.ficha .nm{display:grid;line-height:1.25;min-width:0}
+.ficha .nm b{font-weight:500;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;max-width:240px}
+.celular .ficha .nm b{max-width:230px}
+.ficha .nm small{color:var(--n5);font-size:11px}
+.ficha button{border:0;background:none;color:var(--n5);padding:2px;border-radius:3px}
+.ficha button:hover{background:var(--n2);color:var(--neg)}
+.zona .acc{display:flex;gap:4px;margin-left:auto;flex-wrap:wrap}
+.cuerpo{display:grid;grid-template-columns:minmax(0,1fr) 300px;min-height:600px;border-top:1px solid var(--n3)}
+.cuerpo.sin-cola{grid-template-columns:minmax(0,1fr)}
+.celular .cuerpo{grid-template-columns:minmax(0,1fr);min-height:0}
+.centro{min-width:0;padding:12px 14px;display:grid;gap:12px;align-content:start}
+.celular .centro{padding:10px}
+
+/* Catálogo */
+.familia h3{margin:4px 0 6px;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--n5);font-weight:500}
+.familia h3 span{text-transform:none;letter-spacing:0;font-weight:400}
+.rejilla{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:8px}
+.herr{display:grid;grid-template-columns:30px minmax(0,1fr);gap:4px 10px;text-align:left;border:1px solid var(--n3);background:var(--n0);border-radius:6px;padding:9px 10px;align-items:start}
+.herr:hover{border-color:var(--acento)}
+.herr .ti{font-size:22px;color:var(--acento-t);grid-row:span 3}
+.herr b{font-weight:500}
+.herr .d{color:var(--n6);font-size:12px}
+.herr .f{color:var(--n5);font-size:11px;display:flex;justify-content:space-between;gap:6px;flex-wrap:wrap}
+.herr .f .ti{font-size:12px;color:inherit}
+.herr .f .ok{color:var(--pos)}
+.herr .f .falta{color:var(--neu)}
+.herr.tenue{opacity:.42}
+.herr.oculta{display:none}
+
+/* Herramienta */
+.cab-h{display:flex;gap:12px;align-items:flex-start}
+.cab-h>.ti{font-size:28px;color:var(--acento-t)}
+.cab-h h2{margin:0;font-size:16px;font-weight:600}
+.cab-h p{margin:2px 0 0;color:var(--n6);max-width:62ch}
+.cab-h .ruta{color:var(--n5);font-size:11.5px}
+.banco{display:grid;grid-template-columns:minmax(0,1.3fr) minmax(280px,1fr);gap:12px}
+.celular .banco{grid-template-columns:minmax(0,1fr)}
+.caja{background:var(--n0);border:1px solid var(--n3);border-radius:6px;min-width:0}
+.caja>.cb{display:flex;align-items:center;gap:8px;padding:6px 10px;border-bottom:1px solid var(--n3);flex-wrap:wrap}
+.caja>.cb b{font-weight:500}
+.caja>.cc{padding:10px}
+.segm{display:inline-flex;border:1px solid var(--n4);border-radius:4px;overflow:hidden}
+.segm button{border:0;background:var(--n0);padding:2px 10px}
+.segm button[aria-pressed="true"]{background:var(--acento);color:#fff}
+.form{display:grid;grid-template-columns:minmax(80px,42%) minmax(0,1fr);gap:7px 10px;align-items:center}
+.form label{color:var(--n6);text-align:right}
+.celular .form{grid-template-columns:minmax(0,1fr)}
+.celular .form label{text-align:left;margin-bottom:-4px}
+.form input[type=text],.form input[type=number],.form select,.form textarea{width:100%;border:1px solid var(--n4);background:var(--n0);color:var(--n7);border-radius:4px;padding:4px 7px;font:inherit}
+.form textarea{min-height:56px;font:12px var(--mono);resize:vertical}
+.form .casilla{display:flex;gap:6px;align-items:center;grid-column:2}
+.celular .form .casilla{grid-column:1}
+.form .ayuda{grid-column:2;color:var(--n5);font-size:11.5px;margin-top:-4px}
+.celular .form .ayuda{grid-column:1}
+.salida-elegir{display:grid;gap:4px;margin-top:10px;padding-top:10px;border-top:1px solid var(--n3)}
+.salida-elegir label{display:flex;gap:6px;align-items:center;flex-wrap:wrap}
+.mono{font-family:var(--mono);font-size:12px}
+.suave{color:var(--n5);font-size:11.5px}
+.mensaje{border:1px solid color-mix(in oklab,var(--c) 45%,transparent);background:color-mix(in oklab,var(--c) 10%,transparent);border-radius:4px;padding:6px 9px;font-size:12px}
+.plan{font:12px/1.55 var(--mono);white-space:pre-wrap;word-break:break-word;margin:0;color:var(--n6)}
+.cifras{display:grid;grid-template-columns:repeat(auto-fit,minmax(120px,1fr));gap:8px}
+.cifra{border:1px solid var(--n3);border-radius:6px;padding:7px 9px;background:var(--n1)}
+.cifra small{color:var(--n5);display:block}
+.cifra b{font-size:16px;font-weight:600;font-variant-numeric:tabular-nums}
+.cifra b.mejor{color:var(--pos)}
+.cifra b.acento{color:var(--acento-t)}
+
+/* Monitor: antes y después */
+.cmp{position:relative;overflow:hidden;border-radius:4px;background:var(--n3);height:380px;--x:50%;user-select:none}
+.celular .cmp{height:300px}
+.cmp .capa{position:absolute;inset:0;display:grid;place-items:center;padding:14px}
+.cmp .capa.antes{clip-path:inset(0 calc(100% - var(--x)) 0 0)}
+.cmp .linea{position:absolute;top:0;bottom:0;left:var(--x);width:2px;background:var(--acento);transform:translateX(-1px);pointer-events:none}
+.cmp .linea::after{content:"";position:absolute;top:50%;left:50%;width:22px;height:22px;border-radius:50%;background:var(--acento);transform:translate(-50%,-50%);box-shadow:0 0 0 3px #fff8}
+.cmp input{position:absolute;inset:0;width:100%;opacity:0;height:100%;cursor:ew-resize;margin:0}
+.cmp .et{position:absolute;top:8px;background:rgb(16 16 18 / .72);color:#fff;font-size:11px;padding:2px 7px;border-radius:3px;z-index:2;pointer-events:none;max-width:46%}
+.cmp .et.i{left:8px}.cmp .et.d{right:8px;text-align:right}
+.pagina{background:var(--papel);color:var(--tinta);width:min(300px,92%);aspect-ratio:1/1.414;box-shadow:0 1px 4px rgb(0 0 0 / .2);padding:7% 8%;font:9px/1.45 var(--serif);overflow:hidden;position:relative}
+.celular .pagina{width:min(220px,86%)}
+.pagina h4{font:600 11.5px/1.25 var(--serif);margin:0 0 6px}
+.pagina p{margin:0 0 5px;text-align:justify;hyphens:auto}
+.pagina .fig{display:flex;align-items:flex-end;gap:4%;height:52px;border-left:1px solid #888;border-bottom:1px solid #888;padding:0 6%;margin:6px 0}
+.pagina .fig i{flex:1;background:#5b4a8b}
+.pagina .pie{position:absolute;bottom:4%;left:0;right:0;text-align:center;font:8px var(--ui);color:#777}
+.pagina.ruido{filter:grayscale(1) contrast(.85) brightness(.97);transform:rotate(-2.4deg);background:#ecebe6 radial-gradient(#0000001a 1px,transparent 1.3px) 0 0/7px 7px}
+.pagina.jpeg{filter:blur(.35px) saturate(.9)}
+.pagina mark{background:#fde68a;color:inherit;outline:1px solid #d9a400}
+.pagina.capa-texto p{outline:1px dashed #7c3aed80;outline-offset:1px}
+
+/* Audio */
+.onda{display:flex;align-items:center;gap:2px;height:84px;position:relative;padding:0 2px}
+.onda i{flex:1;background:var(--n4);border-radius:1px;min-width:1px}
+.onda i.oido{background:var(--acento)}
+.onda .cabezal{position:absolute;top:0;bottom:0;width:2px;background:var(--n7)}
+.reprod{display:flex;gap:8px;align-items:center;margin:8px 0;flex-wrap:wrap}
+.reprod .ti-player-play-filled{font-size:22px;color:var(--acento-t)}
+.subs{display:grid;gap:4px;max-height:200px;overflow:auto}
+.sub{display:grid;grid-template-columns:auto minmax(0,1fr);gap:8px;padding:4px 6px;border-radius:4px}
+.sub .mono{color:var(--n5)}
+.sub.nueva{background:var(--acento-s)}
+
+/* Tablas */
+.tabla{width:100%;border-collapse:collapse;font-size:12px}
+.tabla th{text-align:left;font-weight:500;color:var(--n5);border-bottom:1px solid var(--n3);padding:5px 6px;white-space:nowrap}
+.tabla td{border-bottom:1px solid var(--n2);padding:5px 6px;vertical-align:top}
+.tabla .mono{font-size:11.5px;white-space:nowrap}
+.tabla .aviso{color:var(--neu)}
+.desborde{overflow-x:auto}
+.foto{width:46px;height:34px;border-radius:3px;display:block}
+
+/* Imagen */
+.dos-img{display:grid;grid-template-columns:1.33fr .8fr;gap:12px;align-items:end;padding:12px;background:var(--n3);border-radius:4px}
+.celular .dos-img{grid-template-columns:minmax(0,1fr)}
+.paisaje{position:relative;border-radius:3px;overflow:hidden;background:linear-gradient(#6aa5d8 0,#bcd9ee 46%,#e8c98f 47%,#c9a46a 100%)}
+.paisaje::before{content:"";position:absolute;left:0;right:0;bottom:30%;height:38%;background:#59705a;clip-path:polygon(0 100%,0 55%,14% 22%,26% 48%,40% 8%,55% 50%,68% 26%,82% 52%,100% 30%,100% 100%)}
+.paisaje::after{content:"";position:absolute;left:60%;top:12%;width:9%;aspect-ratio:1;border-radius:50%;background:#fff3c4;box-shadow:0 0 30px #fff3c4}
+.paisaje .templo{position:absolute;left:30%;bottom:18%;width:22%;height:34%;background:#efe6d6;clip-path:polygon(0 100%,0 30%,18% 30%,18% 0,30% 0,30% 30%,70% 30%,70% 0,82% 0,82% 30%,100% 30%,100% 100%)}
+.recorte{cursor:grab;touch-action:none;position:absolute;border:2px solid #fff;box-shadow:0 0 0 999px rgb(0 0 0 / .45);top:6%;left:24%;height:88%;aspect-ratio:4/5}
+.recorte i{position:absolute;width:9px;height:9px;background:#fff;border-radius:1px}
+.dos-img figure{margin:0;display:grid;gap:4px}
+.dos-img figcaption{font-size:11.5px;color:var(--n6)}
+.celular .dos-img figure:last-child .paisaje{max-width:70%}
+
+/* Descargas */
+.descarga{display:grid;grid-template-columns:96px minmax(0,1fr);gap:10px;padding:8px 0;border-bottom:1px solid var(--n2)}
+.celular .descarga{grid-template-columns:64px minmax(0,1fr)}
+.miniv{aspect-ratio:16/9;border-radius:4px;background:linear-gradient(135deg,#3b2f63,#7c3aed);display:grid;place-items:center;color:#fff;position:relative}
+.miniv small{position:absolute;right:3px;bottom:2px;font:10px var(--mono);background:#000a;padding:0 3px;border-radius:2px}
+
+/* Barras de avance */
+.avance{height:6px;background:var(--n3);border-radius:3px;overflow:hidden;position:relative;display:block}
+.avance i{display:block;height:100%;background:var(--acento);border-radius:3px;transition:width .6s}
+.avance.indet i{width:30%!important;animation:indet 1.4s infinite ease-in-out}
+@keyframes indet{0%{transform:translateX(-100%)}100%{transform:translateX(340%)}}
+
+/* Cola */
+.cola{border-left:1px solid var(--n3);background:var(--n1);padding:10px;display:grid;gap:8px;align-content:start;min-width:0}
+.celular .cola{border-left:0;border-top:1px solid var(--n3)}
+.cola h4,.lado h4{margin:4px 0 0;font-size:11px;letter-spacing:.06em;text-transform:uppercase;color:var(--n5);font-weight:500;display:flex;justify-content:space-between}
+.trabajo{background:var(--n0);border:1px solid var(--n3);border-radius:6px;padding:7px 9px;display:grid;gap:4px;text-align:left;width:100%;min-width:0}
+.trabajo.sel{border-color:var(--acento);box-shadow:0 0 0 1px var(--acento)}
+.trabajo .f1{display:flex;gap:6px;align-items:baseline;justify-content:space-between;min-width:0}
+.trabajo .f1 b{font-weight:500;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.trabajo .est{font-size:11.5px;white-space:nowrap;font-variant-numeric:tabular-nums}
+.est.curso{color:var(--acento-t)}.est.hecho{color:var(--pos)}.est.error{color:var(--neg)}.est.espera{color:var(--n5)}.est.sim{color:var(--info)}
+.trabajo .suave{white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.cola .pie-cola{display:flex;gap:6px;flex-wrap:wrap}
+.vista-cola{display:grid;grid-template-columns:300px minmax(0,1fr);gap:12px}
+.celular .vista-cola{grid-template-columns:minmax(0,1fr)}
+.lado{display:grid;gap:8px;align-content:start;min-width:0}
+.pestanas{display:flex;border-bottom:1px solid var(--n3);gap:2px;overflow-x:auto}
+.pestanas button{border:0;background:none;padding:7px 10px;color:var(--n5);border-bottom:2px solid transparent;white-space:nowrap}
+.pestanas button[aria-selected="true"]{color:var(--n7);border-bottom-color:var(--acento)}
+
+.salida-motor{border-top:1px solid var(--n3);background:var(--n0);max-height:170px;overflow:auto}
+.salida-motor .cb{display:flex;justify-content:space-between;gap:8px;padding:4px 12px;border-bottom:1px solid var(--n3);color:var(--n5);font-size:11.5px;position:sticky;top:0;background:var(--n0)}
+.salida-motor pre{margin:0;padding:6px 12px;font:11.5px/1.6 var(--mono);color:var(--n6);white-space:pre-wrap;word-break:break-word}
+.estado{display:flex;gap:14px;padding:4px 12px;border-top:1px solid var(--n3);background:var(--n2);color:var(--n5);font-size:11.5px;flex-wrap:wrap}
+.estado .esp{flex:1}
+.estado b{font-weight:500;color:var(--acento-t)}
+.celular .estado{display:none}
+.abajo-cel{display:none}
+.celular .abajo-cel{display:flex;justify-content:space-around;border-top:1px solid var(--n3);background:var(--n1);padding:6px 4px 8px}
+.abajo-cel button{border:0;background:none;display:grid;justify-items:center;gap:1px;font-size:11px;color:var(--n5)}
+.abajo-cel button .ti{font-size:20px}
+.abajo-cel button[aria-pressed="true"]{color:var(--acento-t)}
+
+/* Diálogos */
+.velo{position:absolute;inset:0;background:rgb(16 16 18 / .42);display:flex;align-items:flex-start;justify-content:center;padding-top:70px;z-index:5}
+.celular .velo{padding-top:0;align-items:flex-end}
+.dialogo{background:var(--n1);border:1px solid var(--n4);border-radius:8px;width:min(560px,94%);box-shadow:0 12px 40px rgb(0 0 0 / .3);display:grid;max-height:calc(100% - 40px);overflow:auto}
+.celular .dialogo{width:100%;border-radius:12px 12px 0 0}
+.dialogo .cab{padding:10px 14px;border-bottom:1px solid var(--n3);font-weight:500;display:flex;justify-content:space-between;gap:8px}
+.dialogo .cd{padding:12px 14px;display:grid;gap:10px}
+.dialogo .pie{padding:10px 14px;border-top:1px solid var(--n3);display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap}
+.dl{display:grid;grid-template-columns:auto minmax(0,1fr);gap:4px 12px;margin:0}
+.dl dt{color:var(--n5)}.dl dd{margin:0;word-break:break-word}
+.paleta input{width:100%;border:0;border-bottom:1px solid var(--n3);background:none;padding:12px 14px;font:inherit;font-size:14px;color:var(--n7)}
+.paleta ul{list-style:none;margin:0;padding:6px;max-height:300px;overflow:auto}
+.paleta li button{width:100%;border:0;background:none;text-align:left;padding:6px 8px;border-radius:4px;display:flex;gap:8px;align-items:center}
+.paleta li button:hover,.paleta li button.on{background:var(--acento-s)}
+.paleta li small{margin-left:auto;color:var(--n5)}
+.aviso-kde{position:absolute;right:14px;bottom:44px;background:var(--n0);border:1px solid var(--n4);border-radius:8px;padding:8px 12px;box-shadow:0 6px 20px rgb(0 0 0 / .2);display:flex;gap:8px;align-items:center;z-index:6;max-width:calc(100% - 28px)}
+.aviso-kde .ti{color:var(--pos);font-size:18px}
+
+.notas{max-width:1280px;margin:22px auto 0;background:var(--n0);border:1px solid var(--n3);border-radius:8px;padding:14px 18px;color:var(--n6)}
+.notas h2{font-size:15px;margin:0 0 8px;color:var(--n7)}
+.notas ul{padding-left:18px}
+.notas li{margin-bottom:5px}
+[hidden]{display:none!important}
 </style>
 </head>
 <body>
-<main>
-<header class="encabezado"><h1>Maqueta — Raphi Studio</h1>
-<p>Aprobada el 2026-11-18 (versión «identidad propia»).</p></header>
-<p class="nota-maqueta">Un taller: la zona donde se sueltan los archivos, la paleta de herramientas por área y la cola con su avance en violeta.</p>
-<div id="vista" aria-label="Ventana de Raphi Studio"></div>
-</main>
+
+<div class="mandos" role="toolbar" aria-label="Mandos de la maqueta">
+  <div class="grupo" id="g-pantalla"><span class="rot">Pantalla</span>
+    <button data-p="catalogo" aria-pressed="true">Catálogo</button>
+    <button data-p="comprimir">Comprimir PDF</button>
+    <button data-p="ocr">OCR</button>
+    <button data-p="fotos">Fechas de fotos</button>
+    <button data-p="transcribir">Transcribir</button>
+    <button data-p="descargar">Descargar</button>
+    <button data-p="imagen">Recortar imagen</button>
+    <button data-p="cola">Cola</button>
+  </div>
+  <div class="grupo" id="g-tema"><span class="rot">Tema</span>
+    <button data-t="light" aria-pressed="true">Lliphi Claro</button>
+    <button data-t="dark">Lliphi Oscuro</button>
+  </div>
+  <div class="grupo" id="g-ancho"><span class="rot">Ancho</span>
+    <button data-a="escritorio" aria-pressed="true">Escritorio</button>
+    <button data-a="celular">Celular (390 px)</button>
+  </div>
+</div>
+<p class="nota-maqueta">Maqueta interactiva: las herramientas, sus opciones y los atajos son los del motor de Raphi; los archivos, las cifras y el avance son de ejemplo; el catálogo muestra 39 de las 86. Prueba F5, Ctrl+Intro, Ctrl+K, F4, Ctrl+1/2/3 y arrastra la línea violeta del antes y después.</p>
+
+<div class="ventana" id="ventana">
+  <div class="titulo"><i class="p"></i><i class="p"></i><i class="p"></i><span class="t" id="t-ventana">Catálogo · Raphi Studio</span></div>
+  <div class="menu"><span>Archivo</span><span>Editar</span><span>Ver</span><span>Herramienta</span><span>Trabajos</span><span>Herramientas</span><span>Ajustes</span><span>Ayuda</span></div>
+  <div class="barra">
+    <button class="b solo-escritorio" id="b-volver" title="Volver al catálogo (Alt+←)"><i class="ti ti-chevron-left"></i>Catálogo</button>
+    <input class="buscar" id="buscar" type="search" placeholder="Buscar herramienta (Ctrl+F)" aria-label="Buscar herramienta">
+    <span class="esp"></span>
+    <button class="b marco" id="b-simular" title="Simular (F5)"><i class="ti ti-eye"></i>Simular <kbd class="solo-escritorio">F5</kbd></button>
+    <button class="b prim" id="b-procesar" title="Procesar (Ctrl+Intro)"><i class="ti ti-player-play"></i>Procesar… <kbd class="solo-escritorio">Ctrl+Intro</kbd></button>
+    <span class="sep solo-escritorio"></span>
+    <button class="b solo-escritorio" id="b-paleta" title="Paleta de órdenes"><i class="ti ti-command"></i><kbd>Ctrl+K</kbd></button>
+    <button class="b solo-escritorio" id="b-salida" title="Salida del motor (F4)"><i class="ti ti-terminal-2"></i><kbd>F4</kbd></button>
+  </div>
+  <div class="areas" id="areas" role="toolbar" aria-label="Áreas"></div>
+  <div class="zona" id="zona" aria-label="Zona para soltar archivos"></div>
+
+  <div class="cuerpo" id="cuerpo">
+    <main class="centro" id="centro"></main>
+    <aside class="cola" id="cola" aria-label="Cola"></aside>
+  </div>
+
+  <div class="salida-motor" id="salida" hidden>
+    <div class="cb"><span>Salida del motor · corredor.py con el .venv del repo</span><span>F4 la oculta</span></div>
+    <pre id="salida-pre"></pre>
+  </div>
+  <div class="estado" id="estado"></div>
+  <div class="abajo-cel" aria-label="Navegación">
+    <button data-v="catalogo" aria-pressed="true"><i class="ti ti-layout-grid"></i>Catálogo</button>
+    <button data-v="herr"><i class="ti ti-adjustments-horizontal"></i>Herramienta</button>
+    <button data-v="cola"><i class="ti ti-list-check"></i>Cola</button>
+  </div>
+
+  <div class="velo" id="d-confirmar" hidden>
+    <div class="dialogo" role="dialog" aria-label="Procesar">
+      <div class="cab"><span id="dc-tit">Procesar</span><span class="k">Esc</span></div>
+      <div class="cd">
+        <dl class="dl" id="dc-dl"></dl>
+        <div class="mensaje" style="--c:var(--info)">El original no se toca: la salida va a su lado con un sufijo y se verifica antes de darla por buena. El trabajo entra a la cola; Esc lo detiene.</div>
+      </div>
+      <div class="pie"><button class="b marco" data-cerrar>Cancelar</button><button class="b prim" id="dc-ok"><i class="ti ti-player-play"></i>Procesar <kbd>Ctrl+Intro</kbd></button></div>
+    </div>
+  </div>
+  <div class="velo" id="d-paleta" hidden>
+    <div class="dialogo paleta" role="dialog" aria-label="Paleta de órdenes">
+      <input id="pal-q" type="text" placeholder="Herramienta, receta u orden…" aria-label="Buscar en la paleta">
+      <ul id="pal-l"></ul>
+      <div class="pie"><span class="suave">↑ ↓ eligen · Intro abre · sin distinguir tildes</span></div>
+    </div>
+  </div>
+  <div class="aviso-kde" id="aviso" hidden><i class="ti ti-circle-check"></i><span id="aviso-t"></span></div>
+</div>
+
+<section class="notas" aria-label="Notas de método">
+  <h2>Notas de método</h2>
+  <ul>
+    <li><b>La forma del taller</b> es la que Edison aprobó el 2026-11-18 (decisión R14): soltar arriba, la paleta por áreas o el banco de la herramienta al centro, la cola a la derecha. El estudio no es un explorador: lo que se maneja son herramientas y trabajos.</li>
+    <li><b>Ninguna pantalla se escribe a mano por herramienta</b> (R4/R9): las opciones de cada banco salen de la ficha de la operación (<span class="mono">Parametro</span> → <span class="mono">PaginaFormulario</span>); aquí se copian sus etiquetas, valores por omisión y ayudas tal como están en <span class="mono">raphi/motor/</span>.</li>
+    <li><b>F5 simula y Ctrl+Intro procesa tras confirmar</b>: simular es el <span class="mono">simular=True</span> del motor como trabajo en la cola, con su plan; procesar abre la confirmación con herramienta, entradas, opciones y salida.</li>
+    <li><b>Antes y después</b> en el monitor: una línea que se arrastra cuando el resultado se compara sobre la misma superficie (compresión, OCR); dos cuadros lado a lado cuando cambia la forma (recorte); dos columnas cuando el resultado son nombres (fechas de fotos).</li>
+    <li><b>El violeta es avance y acción</b>: barras de la cola, la acción rellena y el área elegida; los estados (hecho, con error, simulado) llevan su color de estado. En la aplicación todo sale de <span class="mono">Kirigami.Theme</span>.</li>
+    <li><b>Celular</b>: la búsqueda sube a la primera fila, la cola baja bajo el banco y una barra inferior cambia entre Catálogo, Herramienta y Cola. El menú y los atajos quedan para el escritorio.</li>
+    <li>Las áreas, las familias y el orden de la paleta son los de <span class="mono">escritorio/studio/familias.py</span>; los atajos, los de su README. <span class="mono">#comprimir</span>, <span class="mono">#cola</span>… abren una pantalla directa.</li>
+  </ul>
+</section>
+
 <script>
-const A={"raphi": "#7c3aed"};
-const el=id=>document.getElementById(id);
-const tb=(c,t,extra)=>`<div class="tit"><i class="ti ${t[0]}" style="color:${c};font-size:15px" aria-hidden="true"></i><span style="font-weight:500">${t[1]}</span>${extra||""}</div>`;
-const vista=c=>`<div class="win">${tb(c,["ti-file-stack","Raphi"],`<span class="mut">86 herramientas</span><span style="flex:1"></span><button class="btn">Simular</button><button class="btn" style="background:${c};color:#fff;border-color:${c}">Procesar…</button>`)}
-<div style="padding:10px"><div style="border:1.5px dashed ${c};border-radius:10px;padding:10px;display:flex;gap:6px;align-items:center;flex-wrap:wrap"><i class="ti ti-download" style="color:${c};font-size:18px" aria-hidden="true"></i><span class="mut">Suelta aquí archivos o carpetas</span>${["informe-escaneado.pdf","programa-sabado.mp3","fotos-noviembre/"].map(f=>`<span style="border:0.5px solid var(--border-strong);border-radius:6px;padding:2px 8px">${f}</span>`).join("")}</div></div>
-<div style="display:grid;grid-template-columns:minmax(0,1.4fr) minmax(0,1fr)">
-<div style="padding:0 10px 10px">${[["PDF",["ti-file-type-pdf","OCR"],["ti-arrows-join","Unir"],["ti-cut","Partir"],["ti-file-zip","Comprimir"]],["Audio y video",["ti-language","Transcribir"],["ti-download","Descargar"],["ti-movie","Convertir"],["ti-scissors","Recortar"]],["Imagen",["ti-calendar","Fecha EXIF"],["ti-photo","Convertir"],["ti-crop","Recortar"],["ti-resize","Tamaño"]]].map(a=>`<div class="mut" style="margin:6px 0 4px">${a[0]}</div><div style="display:grid;grid-template-columns:repeat(4,1fr);gap:6px">${a.slice(1).map(t=>`<div style="border:0.5px solid var(--border);border-radius:8px;padding:6px;text-align:center"><i class="ti ${t[0]}" style="font-size:18px;color:${c}" aria-hidden="true"></i><div>${t[1]}</div></div>`).join("")}</div>`).join("")}</div>
-<div style="padding:0 10px 10px;border-left:0.5px solid var(--border)"><div style="font-weight:500;margin:6px 0">Cola</div>${[["programa-sabado.mp3","Transcribir",42],["informe-escaneado.pdf","OCR",0],["fotos-noviembre/","Fecha EXIF",100]].map(q=>`<div style="margin-bottom:8px"><div class="row"><span style="flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${q[0]}</span><span class="mut">${q[2]===100?"listo":q[2]?q[2]+" %":"en espera"}</span></div><div class="mut">${q[1]}</div><div style="height:4px;background:var(--surface-1);border-radius:2px"><div style="height:4px;width:${q[2]}%;background:${c};border-radius:2px"></div></div></div>`).join("")}</div></div></div>`;
-el("vista").innerHTML=vista("#7c3aed");
+(function(){
+'use strict';
+var $=function(s,r){return (r||document).querySelector(s)}, $$=function(s,r){return Array.prototype.slice.call((r||document).querySelectorAll(s))};
+var v=$('#ventana'), raiz=document.documentElement;
+function norm(s){return s.normalize('NFD').replace(/[̀-ͯ]/g,'').toLowerCase()}
+
+var AREAS=[['todas','Todas','ti-apps'],['documentos_pdf','Documentos y PDF','ti-file-type-pdf'],['imagenes','Imágenes','ti-photo'],['audio','Audio','ti-music'],['video','Vídeo','ti-movie'],['transcripcion','Transcripción','ti-microphone'],['conversion','Conversión','ti-transform'],['lotes','Procesamiento por lotes','ti-stack-2'],['recetas','Automatización y recetas','ti-list-details']];
+var FAM=[['pdf','PDF','Unir, dividir, comprimir, OCR, sellos, foliado, firmas y seguridad'],['imagenes','Imágenes','Convertir, redimensionar, recortar, comprimir y ordenar fotos por fecha'],['audio_video','Audio y video','Convertir, recortar, descargar, transcribir y subtítulos'],['documentos','Documentos','Word, Excel, PowerPoint y OpenDocument: a PDF, entre ellos y a Markdown'],['archivos','Archivos','Comprimir, extraer y quitar metadatos de cualquier archivo'],['recetas','Recetas','Varias herramientas, una tras otra, con sus opciones guardadas']];
+// [id, familia, icono, título, qué hace, acepta, áreas, pantalla, falta]
+var H=[
+ ['comprimir','pdf','ti-file-zip','Comprimir PDF','Con un tope («10 MB») prueba del más fiel al más agresivo y se queda con el primero que entra.','pdf','documentos_pdf lotes','comprimir'],
+ ['ocr','pdf','ti-text-recognition','OCR (texto buscable)','Reconoce el texto de un escaneo y le agrega una capa que se puede buscar y copiar.','pdf','documentos_pdf conversion','ocr'],
+ ['unir','pdf','ti-arrows-join','Unir PDF','Junta varios PDF en uno, en el orden dado.','pdf','documentos_pdf lotes'],
+ ['dividir','pdf','ti-cut','Dividir PDF','Parte un PDF por rangos o cada N páginas.','pdf','documentos_pdf'],
+ ['rotar','pdf','ti-rotate-clockwise','Rotar páginas','Gira las páginas elegidas (o todas).','pdf','documentos_pdf'],
+ ['foliar','pdf','ti-list-numbers','Foliar expediente','Folio en cada hoja, en la esquina y el formato que se elija.','pdf','documentos_pdf'],
+ ['marca_agua','pdf','ti-writing','Marca de agua','Escribe un texto en diagonal (o recto) sobre las páginas.','pdf','documentos_pdf'],
+ ['tachar','pdf','ti-strikethrough','Tachar (redactar de verdad)','Borra el texto bajo el tachado, no solo lo tapa.','pdf','documentos_pdf'],
+ ['cifrar','pdf','ti-lock','Proteger con contraseña','AES-256 y, si se quiere, sin imprimir ni copiar.','pdf','documentos_pdf'],
+ ['pdfa','pdf','ti-archive','Convertir a PDF/A (archivo)','PDF/A-2b para conservar a largo plazo.','pdf','documentos_pdf conversion'],
+ ['pdf_a_word','pdf','ti-file-type-docx','PDF a Word (básico)','El texto y las imágenes en un .docx editable.','pdf','documentos_pdf conversion'],
+ ['tablas_a_excel','pdf','ti-table-export','Tablas a Excel','Encuentra las tablas del PDF y deja cada una en una hoja.','pdf','documentos_pdf conversion'],
+ ['comparar','pdf','ti-arrows-diff','Comparar dos PDF','Las páginas y el texto que cambian entre dos versiones.','pdf','documentos_pdf'],
+ ['recortar_imagen','imagenes','ti-crop','Recortar imagen','Recorta un rectángulo o a una proporción (1:1, 4:5, 9:16, 16:9…).','jpg heic png webp','imagenes','imagen'],
+ ['convertir_imagen','imagenes','ti-photo-cog','Convertir imagen','JPG, PNG, WebP, AVIF, HEIC, TIFF, BMP, GIF o PDF; también desde SVG.','jpg heic png webp','imagenes conversion lotes'],
+ ['redimensionar_imagen','imagenes','ti-resize','Redimensionar imagen','Cambia el tamaño por ancho, alto o porcentaje, sin deformar.','jpg heic png webp','imagenes lotes'],
+ ['fondo_imagen','imagenes','ti-color-swatch','Poner fondo','Un lienzo de color o degradado, con margen, esquinas y sombra.','jpg heic png webp','imagenes'],
+ ['foto_documento','imagenes','ti-id-badge-2','Foto de documento','Tamaño carné (35×45 y otros) a la resolución pedida.','jpg heic png','imagenes'],
+ ['ordenar_fotos_por_fecha','imagenes','ti-calendar-time','Ordenar fotos por fecha','Copia la carpeta: corrige extensiones, nombres AAAAMMDD_HHMMSS y la fecha en los metadatos.','dir','imagenes lotes','fotos'],
+ ['auditar_fechas_fotos','imagenes','ti-calendar-search','Auditar fechas de fotos','Qué fecha tiene cada foto y de dónde sale, sin tocar nada.','dir','imagenes lotes'],
+ ['transcribir','audio_video','ti-microphone','Transcribir con Whisper','Audio o video a texto y subtítulos, en esta máquina; también traduce al inglés.','m4a mp3 mp4 wav','audio video transcripcion','transcribir'],
+ ['descargar','audio_video','ti-download','Descargar video o audio','De YouTube, Vimeo, Facebook y más de mil sitios (yt-dlp): calidad, tramo, listas, subtítulos.','','audio video','descargar'],
+ ['convertir_audio','audio_video','ti-music','Convertir audio','MP3, M4A, FLAC, Opus, OGG o WAV, con sus etiquetas.','m4a mp3 wav','audio conversion lotes'],
+ ['convertir_video','audio_video','ti-movie','Convertir video','MP4, MOV, MKV, WebM o GIF (o solo su audio).','mp4','video conversion'],
+ ['recortar_medio','audio_video','ti-scissors','Recortar audio o video','Deja solo el tramo entre dos tiempos.','m4a mp3 mp4','audio video'],
+ ['normalizar_audio','audio_video','ti-volume','Normalizar volumen','El mismo volumen percibido en todo el archivo (EBU R128).','m4a mp3 mp4','audio'],
+ ['ajustar_subtitulos','audio_video','ti-badge-cc','Acortar líneas de subtítulos','Parte las líneas largas para leerlas en pantalla.','srt vtt','transcripcion'],
+ ['a_pdf','documentos','ti-file-export','Documento a PDF','Word, Excel, PowerPoint, LibreOffice, RTF, texto o HTML a PDF.','docx xlsx pptx odt','documentos_pdf conversion lotes'],
+ ['ofimatica','documentos','ti-replace','Entre formatos de oficina','Office ↔ LibreOffice (docx ↔ odt, xlsx ↔ ods, pptx ↔ odp).','docx xlsx pptx odt','documentos_pdf conversion'],
+ ['a_markdown','documentos','ti-markdown','Documento a Markdown','Word, PowerPoint, Excel, PDF o LaTeX a Markdown.','docx pptx xlsx pdf tex','documentos_pdf conversion'],
+ ['imagenes_a_pdf','documentos','ti-photo-down','Imágenes a PDF','Una imagen por página, en el orden dado.','jpg png heic','documentos_pdf conversion lotes'],
+ ['comprimir_archivos','archivos','ti-file-zip','Comprimir en un archivo','ZIP, TAR.GZ o 7Z con lo elegido (archivos y carpetas).','*','lotes'],
+ ['extraer_archivo','archivos','ti-package-export','Extraer archivo comprimido','ZIP, TAR, TAR.GZ, 7Z o RAR a una carpeta.','zip rar 7z','lotes','','unrar'],
+ ['quitar_metadatos_archivo','archivos','ti-eraser','Quitar metadatos (cualquier archivo)','Autor, GPS, programa y fechas fuera, en una copia.','*','lotes'],
+ ['suma_verificacion','archivos','ti-fingerprint','Suma de verificación','SHA-256, SHA-1 o MD5 de cada archivo.','*',''],
+ ['r_escaneo','recetas','ti-list-details','Escaneo de mesa de partes','OCR en español con enderezado, compresión hasta 10 MB, PDF/A-2b y foliación.','pdf','recetas'],
+ ['r_enviar','recetas','ti-list-details','Para enviar','Comprime hasta 10 MB y quita los metadatos.','pdf','recetas'],
+ ['r_archivo','recetas','ti-list-details','Para archivo','Repara si hace falta y convierte a PDF/A-2b.','pdf','recetas'],
+ ['r_blogs','recetas','ti-list-details','Páginas de los blogs','Inventario de páginas de los index.pdf del hub, en un Excel.','','recetas']
+];
+var HID={};H.forEach(function(h){HID[h[0]]=h});
+
+var COLOR={pdf:'#c2410c',m4a:'#7c3aed',dir:'#0d9488',heic:'#2563eb',docx:'#1d4ed8'};
+var ICONO={pdf:'ti-file-type-pdf',m4a:'ti-music',dir:'ti-folder',heic:'ti-photo',docx:'ti-file-type-docx'};
+var ENT={
+ catalogo:[['tesis-retornos-educacion-v7.pdf','pdf','PDF · 38,4 MB · 212 p.'],['clase-econometria-s07.m4a','m4a','Audio · 1 h 32 min · 84 MB'],['fotos-trabajo-de-campo-vraem','dir','Carpeta · 312 archivos']],
+ comprimir:[['tesis-retornos-educacion-v7.pdf','pdf','PDF · 38,4 MB · 212 p.']],
+ ocr:[['lecturas-semana-04-escaneadas.pdf','pdf','PDF · 14 p. · sin texto']],
+ fotos:[['fotos-trabajo-de-campo-vraem','dir','Carpeta · 312 archivos · 1,9 GB']],
+ transcribir:[['clase-econometria-s07.m4a','m4a','Audio · 1 h 32 min · 84 MB']],
+ descargar:[],
+ imagen:[['plaza-de-armas-huamanga.heic','heic','HEIC · 4032×3024 · 3,1 MB']]
+};
+
+// Opciones de cada banco, como en la ficha: [etiqueta, tipo, valor, opciones o ayuda, ayuda]
+var OPC={
+ comprimir:[['Nivel','opcion','ebook (150 ppp)',['screen (72 ppp)','ebook (150 ppp)','printer (300 ppp)','prepress']],['Que pese menos de (MB, 0 = sin tope)','numero','10','p. ej. 10 para una mesa de partes virtual'],['Ganancia mínima (%)','numero','5','si reduce menos, se conserva el original']],
+ ocr:[['Idioma','opcion','Español',['Español','Inglés','Español e inglés']],['Enderezar páginas torcidas','casilla',true],['Girar páginas de costado','casilla',true],['Rehacer aunque ya tenga texto','casilla',false],['Optimización (0–3)','numero','1']],
+ fotos:[['Escribir la fecha en EXIF/QuickTime','casilla',true],['Fotos escaneadas: el nombre manda sobre el EXIF','casilla',false]],
+ transcribir:[['Idioma del audio (código)','texto','es'],['Modelo','opcion','small',['tiny','base','small','medium','large','turbo'],'más grande: más exacto y más lento'],['Tarea','opcion','Transcribir',['Transcribir','Traducir al inglés']],['Salida','opcion','Subtítulos SRT',['Texto','Subtítulos SRT','Subtítulos VTT','Todos (txt, srt, vtt, tsv, json)']],['Subtítulos de líneas cortas','casilla',true]],
+ descargar:[['Enlaces (uno por línea)','multilinea','https://www.youtube.com/watch?v=Xk3rT0mQe2A\nhttps://vimeo.com/912374650'],['Qué bajar','opcion','Video',['Video','Solo audio']],['Altura máxima','opcion','1080',['2160','1440','1080','720','480','360','best']],['Formato del audio','opcion','mp3',['mp3','m4a','opus','flac','wav']],['Tramo (INI-FIN, p. ej. 1:02:00-1:05:30)','texto','','vacío: todo el video'],['Bajar subtítulos (es, en)','casilla',true],['Sin patrocinios (SponsorBlock)','casilla',true],['Cookies del navegador','opcion','ninguno',['ninguno','firefox','chrome','zen']]],
+ imagen:[['Proporción','opcion','4:5',['libre','1:1','4:5','9:16','16:9','3:2']],['Rectángulo (x,y,ancho,alto)','texto','968,181,1936,2420','se ajusta arrastrando el recuadro en el monitor'],['Calidad','numero','90'],['Formato de salida','opcion','jpg',['el mismo','jpg','png','webp']]]
+};
+var PLAN={
+ comprimir:'comprimir · 1 archivo · simulado\n  tesis-retornos-educacion-v7.pdf (38,4 MB)\n  → tesis-retornos-educacion-v7_comprimido.pdf, junto al original\n  modo: hasta 10 MB · probará ebook, después screen\n  backend: Ghostscript · verificación con pikepdf\n  nada se escribió',
+ ocr:'ocr · 1 archivo · simulado\n  lecturas-semana-04-escaneadas.pdf (14 páginas sin texto)\n  → lecturas-semana-04-escaneadas_ocr.pdf\n  ocrmypdf --language spa --deskew --rotate-pages --optimize 1\n  nada se escribió',
+ fotos:'ordenar_fotos_por_fecha · 1 carpeta · simulado\n  fotos-trabajo-de-campo-vraem/ (312 archivos)\n  → fotos-trabajo-de-campo-vraem_ordenadas/ (una copia)\n  287 con fecha EXIF · 19 por el nombre (WhatsApp) · 6 sin fecha: la del archivo\n  4 extensiones corregidas (.jpg que son HEIC)\n  nada se escribió',
+ transcribir:'transcribir · 1 archivo · simulado\n  clase-econometria-s07.m4a (1 h 32 min)\n  → clase-econometria-s07_transcripcion.srt\n  whisper small · es · transcribe · líneas cortas\n  estimado en esta máquina: 50 a 60 min (CPU)\n  nada se escribió',
+ descargar:'descargar · 2 enlaces · simulado\n  yt-dlp -f "bv*[height<=1080]+ba" --sponsorblock-remove all\n         --write-subs --sub-langs es,en\n  → ~/Vídeos/Raphi/\n  nada se descargó',
+ imagen:'recortar_imagen · 1 archivo · simulado\n  plaza-de-armas-huamanga.heic (4032×3024)\n  → plaza-de-armas-huamanga_recorte.jpg (1936×2420, 4:5, calidad 90)\n  nada se escribió'
+};
+var MOTOR={
+ catalogo:'[corredor] fichas: 86 herramientas y recetas en 0,4 s (caché al día)\n[corredor] doctor: falta unrar (extraer_archivo, solo para .rar)',
+ comprimir:'[motor] comprimir: tesis-retornos-educacion-v7.pdf\n[motor] gs -sDEVICE=pdfwrite -dPDFSETTINGS=/ebook … 38,4 MB → 8,7 MB (−77 %)\n[motor] entra bajo 10 MB con ebook: no se prueba screen\n[motor] verificado: 212 páginas, se abre con pikepdf\n[motor] listo: tesis-retornos-educacion-v7_comprimido.pdf',
+ ocr:'[motor] ocr: lecturas-semana-04-escaneadas.pdf\n[motor] página 1 de 14 · enderezada −2,4°\n[motor] página 6 de 14 · girada 90°\n[motor] 14 páginas con texto · 31 842 caracteres\n[motor] listo: lecturas-semana-04-escaneadas_ocr.pdf',
+ fotos:'[motor] ordenar_fotos_por_fecha: fotos-trabajo-de-campo-vraem\n[motor] copia en fotos-trabajo-de-campo-vraem_ordenadas/\n[motor] IMG-20260712-WA0031.jpg → 20260712_000000.jpg (por el nombre)\n[motor] 4 extensiones corregidas · exiftool escribió 312 fechas\n[motor] listo: 312 archivos',
+ transcribir:'[motor] transcribir: clase-econometria-s07.m4a\n[motor] whisper --model small --language es --task transcribe --output_format srt\n[motor] 00:38:41 de 01:32:10 (42 %) · 0,62× tiempo real\n[motor] …',
+ descargar:'[motor] descargar: 2 enlaces\n[yt-dlp] [youtube] Xk3rT0mQe2A: Downloading webpage\n[yt-dlp] [download]  63.4% of 412.18MiB at 4.21MiB/s ETA 00:36\n[yt-dlp] [SponsorBlock] 2 segmentos fuera',
+ imagen:'[motor] recortar_imagen: plaza-de-armas-huamanga.heic\n[motor] HEIC leído con pillow-heif · 4032×3024\n[motor] caja 968,181,1936,2420 (4:5)\n[motor] listo: plaza-de-armas-huamanga_recorte.jpg · 412 KB'
+};
+
+var cola=[
+ {id:1,h:'transcribir',a:'clase-econometria-s07.m4a',e:'curso',p:42,m:'00:38:41 de 01:32:10 · faltan ~31 min'},
+ {id:2,h:'ocr',a:'lecturas-semana-04-escaneadas.pdf',e:'espera',p:0,m:'en cola'},
+ {id:3,h:'descargar',a:'2 enlaces',e:'espera',p:0,m:'en cola'},
+ {id:4,h:'comprimir',a:'tesis-retornos-educacion-v7.pdf',e:'hecho',p:100,m:'38,4 MB → 8,7 MB · hace 6 min'},
+ {id:5,h:'ordenar_fotos_por_fecha',a:'fotos-trabajo-de-campo-vraem',e:'hecho',p:100,m:'312 archivos · hace 1 h'},
+ {id:6,h:'extraer_archivo',a:'enaho-2023-modulo-500.rar',e:'error',p:100,m:'falta unrar en esta máquina'}
+];
+var sigId=7, actual='catalogo', area='todas', soloSirven=false, selTrab=1;
+var titulos={catalogo:'Catálogo',comprimir:'Comprimir PDF',ocr:'OCR (texto buscable)',fotos:'Ordenar fotos por fecha',transcribir:'Transcribir con Whisper',descargar:'Descargar video o audio',imagen:'Recortar imagen',cola:'Cola'};
+var herrDe={comprimir:'comprimir',ocr:'ocr',fotos:'ordenar_fotos_por_fecha',transcribir:'transcribir',descargar:'descargar',imagen:'recortar_imagen'};
+function pantallaDe(hid){return Object.keys(herrDe).filter(function(k){return herrDe[k]===hid})[0]||''}
+var simulado={};
+
+function entradas(){return ENT[actual]||ENT.catalogo}
+function zona(){
+  var e=entradas(), z=$('#zona'), h='<i class="ti ti-file-upload"></i>';
+  if(actual==='descargar') h+='<span class="vacia">Esta herramienta no usa archivos: pega los enlaces en sus opciones (Ctrl+V sobre la ventana también los pone).</span>';
+  else if(!e.length) h+='<span class="vacia">Suelta aquí archivos o carpetas desde Dolphin</span>';
+  e.forEach(function(f,i){h+='<span class="ficha"><span class="ic" style="background:'+COLOR[f[1]]+'"><i class="ti '+ICONO[f[1]]+'"></i></span><span class="nm"><b title="'+f[0]+'">'+f[0]+'</b><small>'+f[2]+'</small></span><button aria-label="Quitar '+f[0]+'" data-q="'+i+'"><i class="ti ti-x"></i></button></span>'});
+  h+='<span class="acc"><button class="b marco" id="z-anadir"><i class="ti ti-plus"></i>Añadir…</button><button class="b solo-escritorio"><i class="ti ti-folder-plus"></i>Carpeta…</button>'+(actual==='catalogo'?'<button class="b'+(soloSirven?' prim':'')+'" id="z-sirven" aria-pressed="'+soloSirven+'"><i class="ti ti-filter"></i>Solo las que sirven</button>':'')+'<button class="b solo-escritorio" id="z-vaciar"><i class="ti ti-trash"></i>Vaciar</button></span>';
+  z.innerHTML=h;
+  var lista=ENT[actual]||ENT.catalogo;
+  $$('button[data-q]',z).forEach(function(b){b.onclick=function(){lista.splice(+b.dataset.q,1);zona();if(actual==='catalogo')catalogo();estado()}});
+  var s=$('#z-sirven');if(s)s.onclick=function(){soloSirven=!soloSirven;zona();catalogo()};
+  $('#z-vaciar').onclick=function(){lista.length=0;zona();if(actual==='catalogo')catalogo();estado()};
+  $('#z-anadir').onclick=function(){if(lista.length<4&&actual!=='descargar'){lista.push(['programa-macro-ii-2026-1.docx','docx','Word · 46 KB']);zona();if(actual==='catalogo')catalogo();estado()}};
+}
+['dragenter','dragover'].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault();$('#zona').classList.add('sobre')})});
+['dragleave','drop'].forEach(function(t){document.addEventListener(t,function(e){e.preventDefault();$('#zona').classList.remove('sobre')})});
+
+function areas(){
+  var c={todas:H.length};H.forEach(function(h){h[6].split(' ').forEach(function(a){if(a)c[a]=(c[a]||0)+1})});
+  $('#areas').innerHTML=AREAS.map(function(a){return '<button data-a="'+a[0]+'" aria-pressed="'+(area===a[0])+'"><i class="ti '+a[2]+'"></i>'+a[1]+' <small>'+(c[a[0]]||0)+'</small></button>'}).join('');
+  $$('#areas button').forEach(function(b){b.onclick=function(){area=b.dataset.a;if(actual!=='catalogo')pantalla('catalogo');else{areas();catalogo()}}});
+}
+function sirve(h){
+  var e=ENT.catalogo; if(!e.length) return true; if(h[5]==='*') return true; if(!h[5]) return false;
+  var x=h[5].split(' '); return e.some(function(f){return x.indexOf(f[1])>=0});
+}
+function catalogo(){
+  var q=norm($('#buscar').value||''), h='';
+  FAM.forEach(function(f){
+    var l=H.filter(function(t){return t[1]===f[0]&&(area==='todas'||t[6].split(' ').indexOf(area)>=0)&&(!q||norm(t[3]+' '+t[4]).indexOf(q)>=0)});
+    if(!l.length) return;
+    h+='<section class="familia"><h3>'+f[1]+' <span>· '+f[2]+'</span></h3><div class="rejilla">';
+    l.forEach(function(t){var s=sirve(t);
+      h+='<button class="herr'+(s?'':(soloSirven?' oculta':' tenue'))+'" data-h="'+t[0]+'"><i class="ti '+t[2]+'"></i><b>'+t[3]+'</b><span class="d">'+t[4]+'</span><span class="f"><span>'+(t[5]==='*'?'cualquier archivo':t[5]==='dir'?'carpetas':t[5]?t[5].toUpperCase().split(' ').join(' · '):'sin archivos')+'</span>'+(t[8]?'<span class="falta"><i class="ti ti-alert-triangle"></i> falta '+t[8]+'</span>':'<span class="ok">lista</span>')+'</span></button>'});
+    h+='</div></section>';
+  });
+  if(!h) h='<p class="suave">Ninguna herramienta con «'+$('#buscar').value+'» en esta área. Ctrl+0 vuelve a todas.</p>';
+  $('#centro').innerHTML=h;
+  $$('.herr').forEach(function(b){b.onclick=function(){var t=HID[b.dataset.h];if(t[7])pantalla(t[7]);else generico(t)}});
+}
+
+function formulario(lista,red){
+  return '<div class="form">'+lista.map(function(o,i){
+    var id='o'+i, h='';
+    if(o[1]==='casilla') return '<span class="casilla"><input type="checkbox" id="'+id+'"'+(o[2]?' checked':'')+'><label for="'+id+'" style="text-align:left">'+o[0]+'</label></span>';
+    h+='<label for="'+id+'">'+o[0]+'</label>';
+    if(o[1]==='opcion') h+='<select id="'+id+'">'+o[3].map(function(x){return '<option'+(x===o[2]?' selected':'')+'>'+x+'</option>'}).join('')+'</select>';
+    else if(o[1]==='multilinea') h+='<textarea id="'+id+'">'+o[2]+'</textarea>';
+    else h+='<input type="'+(o[1]==='numero'?'number':'text')+'" id="'+id+'" value="'+o[2]+'"'+(o[1]==='texto'&&!o[2]?' placeholder="vacío"':'')+'>';
+    var ay=o[1]==='opcion'?o[4]:o[3]; if(ay&&typeof ay==='string') h+='<span class="ayuda">'+ay+'</span>';
+    return h;
+  }).join('')+'</div><div class="salida-elegir"><span class="suave">Dónde dejar la salida</span>'+(red?'<label><input type="radio" name="sal" checked> En la carpeta de descargas: <span class="mono">~/Vídeos/Raphi</span></label>':'<label><input type="radio" name="sal" checked> Junto a cada original, con su sufijo</label>')+'<label><input type="radio" name="sal"> En una carpeta: <span class="mono">~/Documents/raphi-salidas</span></label></div>';
+}
+function cabecera(hid){
+  var t=HID[hid], fam=FAM.filter(function(f){return f[0]===t[1]})[0][1];
+  return '<div class="cab-h"><i class="ti '+t[2]+'"></i><div><h2>'+t[3]+'</h2><p>'+t[4]+'</p><span class="ruta">'+fam+' · '+t[6].split(' ').map(function(a){return AREAS.filter(function(x){return x[0]===a})[0][1]}).join(', ')+' · <span style="color:var(--pos)">lista en esta máquina</span></span></div></div>';
+}
+function plan(id){
+  return simulado[id]?'<div class="caja"><div class="cb"><i class="ti ti-eye" style="color:var(--info)"></i><b>El plan (F5)</b><span class="suave">trabajo simulado en la cola</span></div><div class="cc"><pre class="plan">'+PLAN[id]+'</pre></div></div>':'';
+}
+function opciones(id){return '<div class="caja"><div class="cb"><i class="ti ti-adjustments-horizontal"></i><b>Opciones</b><span class="suave">de su ficha · se recuerdan</span></div><div class="cc">'+formulario(OPC[id],id==='descargar')+'</div></div>'}
+function cmp(antes,despues,ea,ed,x){
+  return '<div class="cmp" style="--x:'+x+'%"><span class="et i">'+ea+'</span><span class="et d">'+ed+'</span><div class="capa">'+despues+'</div><div class="capa antes">'+antes+'</div><div class="linea"></div><input type="range" min="0" max="100" value="'+x+'" aria-label="Antes y después"></div>';
+}
+function paginaTesis(cl){
+  return '<div class="pagina '+(cl||'')+'"><h4>3. Retornos de la educación en el Perú, 2004-2023</h4><p>La ecuación de Mincer estimada con la ENAHO muestra que un año adicional de estudios eleva el ingreso por hora entre 8,1 % y 9,7 %, con retornos crecientes en el nivel superior.</p><div class="fig"><i style="height:38%"></i><i style="height:52%"></i><i style="height:61%"></i><i style="height:74%"></i><i style="height:92%"></i></div><p>Figura 3.2. Retorno por nivel educativo, en porcentaje. Fuente: INEI, ENAHO módulo 500.</p><p>La brecha entre áreas urbana y rural se reduce cuando se controla por la calidad de la escuela.</p><span class="pie">87</span></div>';
+}
+function paginaLectura(cl,marcar){
+  var e=marcar?'<mark>elasticidad</mark>':'elasticidad';
+  return '<div class="pagina '+cl+'"><h4>Lectura 4. Demanda y '+e+'</h4><p>La '+e+' precio de la demanda mide cuánto cambia la cantidad demandada ante un cambio de uno por ciento en el precio.</p><p>Cuando la '+e+' es mayor que uno, el ingreso total cae al subir el precio; cuando es menor, sube.</p><p>Los bienes con pocos sustitutos tienen una '+e+' baja: la sal, la gasolina en el corto plazo.</p><span class="pie">6</span></div>';
+}
+var RES={
+ comprimir:[['Antes','38,4 MB',''],['Después','8,7 MB','mejor'],['Ganancia','−77 %','mejor'],['Páginas','212 de 212','']],
+ ocr:[['Páginas con texto','14 de 14','mejor'],['Enderezadas','3',''],['Giradas','1',''],['«elasticidad»','9 veces','acento']],
+ fotos:[['Con EXIF','287',''],['Por el nombre','19','acento'],['Sin fecha','6',''],['Extensiones corregidas','4','mejor']],
+ imagen:[['Antes','4032×3024 · 3,1 MB',''],['Después','1936×2420 · 412 KB','mejor'],['Proporción','4:5','acento']]
+};
+function resultado(id){
+  var r=RES[id]; if(!r) return '';
+  return '<div class="caja"><div class="cb"><i class="ti ti-circle-check" style="color:var(--pos)"></i><b>Resultado</b><span class="suave">hecho · verificado</span><span class="esp"></span><button class="b marco"><i class="ti ti-external-link"></i>Abrir</button><button class="b marco"><i class="ti ti-folder-open"></i>Mostrar</button></div><div class="cc"><div class="cifras">'+r.map(function(c){return '<div class="cifra"><small>'+c[0]+'</small><b class="'+c[2]+'">'+c[1]+'</b></div>'}).join('')+'</div></div></div>';
+}
+function monitorCab(txt){return '<div class="cb"><b>Monitor</b><span class="suave">'+txt+'</span><span class="esp"></span><span class="segm"><button>Entrada</button><button aria-pressed="true">Antes y después</button></span></div>'}
+
+var VISTA={
+ comprimir:function(){return cabecera('comprimir')+'<div class="banco"><div class="caja">'+monitorCab('página 87 de 212 · arrastra la línea')+'<div class="cc">'+cmp(paginaTesis(),paginaTesis('jpeg'),'Antes · 38,4 MB','Después · 8,7 MB',55)+'</div></div>'+opciones('comprimir')+'</div>'+plan('comprimir')+resultado('comprimir')},
+ ocr:function(){return cabecera('ocr')+'<div class="banco"><div class="caja">'+monitorCab('página 6 de 14 · buscar: <span class="mono">elasticidad</span>')+'<div class="cc">'+cmp(paginaLectura('ruido',false),paginaLectura('capa-texto',true),'Antes · escaneo sin texto','Después · texto buscable',45)+'<p class="suave" style="margin:6px 0 0">El recuadro punteado es la capa de texto que agrega el OCR; el resaltado, la búsqueda sobre ella.</p></div></div>'+opciones('ocr')+'</div>'+plan('ocr')+resultado('ocr')},
+ fotos:function(){
+   var f=[['IMG_4821.HEIC','2026-07-11 08:42:17','EXIF','20260711_084217.heic',''],['IMG-20260712-WA0031.jpg','—','nombre (WhatsApp)','20260712_000000.jpg','sin hora: medianoche'],['DSC_0193.JPG','2026-07-12 15:03:55','EXIF','20260712_150355.jpg',''],['foto.jpg','2026-07-13 10:21:08','EXIF','20260713_102108.heic','era HEIC: extensión corregida'],['VID_20260713_171402.mp4','2026-07-13 17:14:02','QuickTime','20260713_171402.mp4',''],['croquis-pichari.png','—','fecha del archivo','20260715_093000.png','sin fecha: la del archivo']];
+   var cols=['#7a6a4f','#5d7d5a','#8a6d3b','#6a7f95','#4f4a6d','#9b9b8f'];
+   return cabecera('ordenar_fotos_por_fecha')+'<div class="caja"><div class="cb"><b>Monitor</b><span class="suave">6 de 312 · la copia, no el original</span><span class="esp"></span><span class="segm" id="seg-fotos"><button data-m="todo" aria-pressed="true">Antes y después</button><button data-m="avisos">Solo con aviso</button></span></div><div class="cc desborde"><table class="tabla"><thead><tr><th></th><th>Nombre original</th><th>Fecha</th><th>De dónde</th><th>Nombre en la copia</th><th>Aviso</th></tr></thead><tbody>'+f.map(function(r,i){return '<tr'+(r[4]?' data-aviso="1"':'')+'><td><span class="foto" style="background:linear-gradient(160deg,'+cols[i]+',#ddd)"></span></td><td class="mono">'+r[0]+'</td><td class="mono">'+r[1]+'</td><td>'+r[2]+'</td><td class="mono" style="color:var(--acento-t)">'+r[3]+'</td><td class="aviso">'+r[4]+'</td></tr>'}).join('')+'</tbody></table></div></div><div class="banco">'+opciones('fotos')+'<div class="caja"><div class="cb"><i class="ti ti-calendar-search"></i><b>Auditoría previa</b><span class="suave">auditar_fechas_fotos, sin escribir</span></div><div class="cc"><p style="margin:0 0 6px">Del 11 al 19 de julio de 2026 · 298 fotos y 14 videos.</p><p class="suave" style="margin:0">19 fotos de WhatsApp no traen EXIF: su fecha sale del nombre y la hora queda en 00:00:00. Marca «el nombre manda» solo para escaneos.</p></div></div></div>'+plan('fotos')+resultado('fotos')},
+ transcribir:function(){
+   var c=cola.filter(function(x){return x.h==='transcribir'&&x.e==='curso'})[0], p=c?c.p:100;
+   var o='';for(var i=0;i<90;i++){var hh=18+Math.abs(Math.sin(i*1.7)*42+Math.sin(i*.31)*30);o+='<i style="height:'+Math.min(96,hh).toFixed(0)+'%"'+(i<Math.round(p*.9)?' class="oido"':'')+'></i>'}
+   var s=[['00:37:52','Entonces, si el instrumento es débil,'],['00:37:55','el estimador de MC2E se acerca al de MCO'],['00:37:59','y hereda su sesgo.'],['00:38:03','Por eso miramos el estadístico F de la primera etapa:'],['00:38:08','la regla práctica de Staiger y Stock pide que pase de diez.'],['00:38:14','En la ENAHO, la distancia a la universidad'],['00:38:18','da un F de 23, así que podemos seguir.']];
+   return cabecera('transcribir')+'<div class="banco"><div class="caja"><div class="cb"><b>Monitor</b><span class="suave">QtMultimedia · lo transcrito se ve mientras corre</span></div><div class="cc"><div class="onda">'+o+'<span class="cabezal" style="left:'+p+'%"></span></div><div class="reprod"><i class="ti ti-player-play-filled"></i><span class="mono">00:38:41 / 01:32:10</span><span class="esp"></span><span class="suave">Whisper small · CPU · 0,62× tiempo real</span></div><div class="subs">'+s.map(function(x,i){return '<div class="sub'+(i===s.length-1?' nueva':'')+'"><span class="mono">'+x[0]+'</span><span>'+x[1]+'</span></div>'}).join('')+'</div></div></div>'+opciones('transcribir')+'</div>'+plan('transcribir')+(c?'<div class="caja"><div class="cb"><i class="ti ti-loader-2" style="color:var(--acento-t)"></i><b>En curso</b><span class="suave" id="tr-txt">'+p+' % · '+c.m+' · Esc detiene</span><span class="esp"></span><button class="b marco" id="b-detener"><i class="ti ti-player-stop"></i>Detener</button></div><div class="cc"><div class="avance"><i style="width:'+p+'%" id="av-trans"></i></div></div></div>':'')},
+ descargar:function(){
+   var d=[['Perspectivas de la inflación 2027 · conferencia','1:12:40','1080p · MP4 · 412 MB',63,'4,2 MB/s · 0:36'],['Seminario de econometría aplicada, sesión 3','58:09','1080p · MP4 · 318 MB',0,'en espera']];
+   return cabecera('descargar')+'<div class="banco"><div class="caja"><div class="cb"><b>Lo que se baja</b><span class="suave">yt-dlp lee cada enlace antes de bajar</span></div><div class="cc">'+d.map(function(x){return '<div class="descarga"><div class="miniv"><i class="ti ti-player-play-filled"></i><small>'+x[1]+'</small></div><div style="display:grid;gap:3px;min-width:0"><b style="font-weight:500">'+x[0]+'</b><span class="suave">'+x[2]+' · subtítulos es, en · patrocinios fuera</span><div class="avance'+(x[3]?'':' indet')+'"><i style="width:'+x[3]+'%"></i></div><span class="suave">'+(x[3]?x[3]+' % · '+x[4]:x[4])+'</span></div></div>'}).join('')+'<p class="suave" style="margin:8px 0 0">Lo privado o con sesión se baja con las cookies del navegador que elijas; nada se guarda en Raphi.</p></div></div>'+opciones('descargar')+'</div>'+plan('descargar')},
+ imagen:function(){return cabecera('recortar_imagen')+'<div class="caja">'+monitorCab('el recorte, en píxeles reales de la foto')+'<div class="cc"><div class="dos-img"><figure><div class="paisaje" style="aspect-ratio:4/3"><span class="templo"></span><span class="recorte"><i style="left:-5px;top:-5px"></i><i style="right:-5px;top:-5px"></i><i style="left:-5px;bottom:-5px"></i><i style="right:-5px;bottom:-5px"></i></span></div><figcaption>Antes · 4032×3024 · HEIC · 3,1 MB</figcaption></figure><figure><div class="paisaje" style="aspect-ratio:4/5"><span class="templo" style="left:10%;width:48%;height:30%"></span></div><figcaption>Después · 1936×2420 · JPG · 412 KB</figcaption></figure></div></div></div><div class="banco">'+opciones('imagen')+(plan('imagen')||'<div class="mensaje" style="--c:var(--info)">El recuadro se arrastra sobre la foto; sus números van a «Rectángulo» y la proporción lo mantiene en 4:5. F5 muestra el plan.</div>')+'</div>'+resultado('imagen')}
+};
+function generico(t){
+  actual='gen';$('#t-ventana').textContent=t[3]+' · Raphi Studio';
+  $('#areas').hidden=true;$('#b-volver').hidden=false;
+  $('#zona').innerHTML='<i class="ti ti-file-upload"></i><span class="vacia">Suelta aquí lo que acepta: '+(t[5]==='*'?'cualquier archivo':t[5]==='dir'?'carpetas':t[5]?t[5].toUpperCase():'no usa archivos')+'</span>';
+  $('#centro').innerHTML='<div class="cab-h"><i class="ti '+t[2]+'"></i><div><h2>'+t[3]+'</h2><p>'+t[4]+'</p><span class="ruta">'+(t[8]?'<span style="color:var(--neu)"><i class="ti ti-alert-triangle"></i> Falta '+t[8]+' en esta máquina: sudo apt install '+t[8]+'</span>':'<span style="color:var(--pos)">lista en esta máquina</span>')+'</span></div></div><div class="mensaje" style="--c:var(--info)">Sus opciones salen de su ficha, como en las demás. Esta maqueta dibuja en detalle seis bancos: elígelos en «Pantalla» o con Ctrl+K.</div>';
+  estado();
+}
+function vista(){
+  var c=$('#centro');
+  if(actual==='catalogo'){catalogo();return}
+  if(actual==='cola'){vistaCola();return}
+  c.innerHTML=VISTA[actual]();
+  $$('.cmp input',c).forEach(function(r){r.oninput=function(){r.parentNode.style.setProperty('--x',r.value+'%')}});
+  var sf=$('#seg-fotos');if(sf)$$('button',sf).forEach(function(b){b.onclick=function(){$$('button',sf).forEach(function(x){x.setAttribute('aria-pressed',x===b)});$$('tbody tr',c).forEach(function(tr){tr.hidden=b.dataset.m==='avisos'&&!tr.dataset.aviso})}});
+  var dt=$('#b-detener');if(dt)dt.onclick=detener;
+  var rc=$('.recorte',c);if(rc){rc.onpointerdown=function(ev){var caja=rc.parentNode.getBoundingClientRect(),x0=ev.clientX,l0=rc.offsetLeft;rc.setPointerCapture(ev.pointerId);rc.onpointermove=function(m){var l=Math.max(0,Math.min(caja.width-rc.offsetWidth,l0+m.clientX-x0));rc.style.left=l+'px';var campo=$('#o1');if(campo)campo.value=Math.round(l/caja.width*4032)+',181,1936,2420'};rc.onpointerup=function(){rc.onpointermove=null}}}
+  $$('.segm',c).forEach(function(s){if(s.id)return;$$('button',s).forEach(function(b){b.onclick=function(){$$('button',s).forEach(function(x){x.setAttribute('aria-pressed',x===b)});var m=$('.cmp',c);if(m){var r=$('input',m);r.value=b.textContent==='Entrada'?100:50;m.style.setProperty('--x',r.value+'%')}}})});
+}
+
+var EST={curso:'en curso',espera:'en cola',hecho:'hecho',error:'con error',sim:'simulado'};
+function itemCola(t){
+  var h=HID[t.h];
+  return '<button class="trabajo'+(t.id===selTrab?' sel':'')+'" data-t="'+t.id+'"><span class="f1"><b>'+h[3]+'</b><span class="est '+t.e+'">'+(t.e==='curso'?t.p+' %':EST[t.e])+'</span></span><span class="suave">'+t.a+'</span>'+(t.e==='curso'||t.e==='espera'?'<span class="avance"><i style="width:'+t.p+'%"></i></span>':'')+'<span class="suave">'+t.m+'</span></button>';
+}
+function panelCola(){
+  var a=$('#cola');
+  if(actual==='cola'){a.hidden=true;$('#cuerpo').classList.add('sin-cola');return}
+  a.hidden=false;$('#cuerpo').classList.remove('sin-cola');
+  a.innerHTML='<h4><span>Cola</span><span>'+cola.length+'</span></h4>'+cola.map(itemCola).join('')+'<div class="pie-cola"><button class="b marco" id="c-detener"><i class="ti ti-player-stop"></i>Detener</button><button class="b" id="c-ver"><i class="ti ti-list-check"></i>Ver la cola · Ctrl+3</button></div><span class="suave">Uno a la vez (RAPHI_CONCURRENCIA = 1). Un aviso sin decisión va a las notificaciones de KDE.</span>';
+  $$('.trabajo',a).forEach(function(b){b.onclick=function(){selTrab=+b.dataset.t;pantalla('cola')}});
+  $('#c-detener').onclick=detener;$('#c-ver').onclick=function(){pantalla('cola')};
+}
+function vistaCola(){
+  if(!cola.length){$('#centro').innerHTML='<p class="suave">La cola está vacía. Elige una herramienta en el catálogo (Ctrl+1).</p>';return}
+  var t=cola.filter(function(x){return x.id===selTrab})[0]||cola[0], h=HID[t.h], k=pantallaDe(t.h);
+  var secc=[['curso','En curso'],['espera','En cola'],['sim','Simulados'],['hecho','Hechos'],['error','Con error']];
+  var lado=secc.map(function(s){var l=cola.filter(function(x){return x.e===s[0]});return l.length?'<h4><span>'+s[1]+'</span><span>'+l.length+'</span></h4>'+l.map(itemCola).join(''):''}).join('');
+  var det=t.e==='error'&&t.h==='extraer_archivo'?'<div class="mensaje" style="--c:var(--neg)"><b>enaho-2023-modulo-500.rar</b>: falta <span class="mono">unrar</span> en esta máquina. Los demás archivos de un lote habrían seguido: el error es por archivo, nunca por lote.<br><span class="mono">sudo apt install unrar</span> y Repetir.</div>':
+    t.e==='error'?'<div class="mensaje" style="--c:var(--neg)">'+t.m+'</div>':
+    t.e==='sim'?'<pre class="plan">'+(PLAN[k]||'')+'</pre>':
+    t.e==='hecho'?(resultado(k)||'<p>Hecho y verificado.</p>'):
+    '<div class="avance"><i style="width:'+t.p+'%"></i></div><p class="suave">'+t.p+' % · '+t.m+'</p>';
+  var op=(OPC[k]||[]).map(function(o){return o[0].split(' (')[0]+': '+(o[2]===true?'sí':o[2]===false?'no':String(o[2]).split('\n')[0]||'vacío')}).join(' · ')||'las de siempre';
+  $('#centro').innerHTML='<div class="vista-cola"><div class="lado">'+lado+'</div><div style="display:grid;gap:10px;align-content:start;min-width:0"><div class="cab-h"><i class="ti '+h[2]+'"></i><div><h2>'+h[3]+'</h2><p class="mono" style="word-break:break-all">'+t.a+'</p><span class="ruta">trabajo n.º '+t.id+' · '+EST[t.e]+'</span></div></div><div style="display:flex;gap:6px;flex-wrap:wrap"><button class="b marco" id="q-repetir"><i class="ti ti-refresh"></i>Repetir</button><button class="b marco" id="q-ir"><i class="ti ti-arrow-right"></i>Ir a su herramienta</button><button class="b marco" id="q-quitar"><i class="ti ti-trash"></i>Quitar</button>'+(t.e==='curso'?'<button class="b marco" id="q-det"><i class="ti ti-player-stop"></i>Detener · Esc</button>':'')+'</div><div class="pestanas" role="tablist"><button role="tab" aria-selected="true" data-tab="r">Resultado</button><button role="tab" aria-selected="false" data-tab="e">Entradas y opciones</button><button role="tab" aria-selected="false" data-tab="g">Registro</button></div><div id="tab-r">'+det+'</div><div id="tab-e" hidden><dl class="dl"><dt>Entradas</dt><dd class="mono">'+t.a+'</dd><dt>Opciones</dt><dd>'+op+'</dd><dt>Salida</dt><dd>junto a cada original</dd></dl></div><div id="tab-g" hidden><pre class="plan">'+(MOTOR[k]||'[motor] extraer_archivo: enaho-2023-modulo-500.rar\n[motor] error: falta el programa unrar')+'</pre></div></div></div>';
+  $$('.lado .trabajo').forEach(function(b){b.onclick=function(){selTrab=+b.dataset.t;vistaCola()}});
+  $$('.pestanas button').forEach(function(b){b.onclick=function(){$$('.pestanas button').forEach(function(x){x.setAttribute('aria-selected',x===b);$('#tab-'+x.dataset.tab).hidden=x!==b})}});
+  $('#q-repetir').onclick=function(){agregar(t.h,t.a,'espera');aviso('Repetido: '+h[3]+' vuelve a la cola');vistaCola()};
+  $('#q-ir').onclick=function(){if(k)pantalla(k);else generico(h)};
+  $('#q-quitar').onclick=function(){cola=cola.filter(function(x){return x!==t});selTrab=cola.length?cola[0].id:0;vistaCola();estado()};
+  var qd=$('#q-det');if(qd)qd.onclick=detener;
+}
+function agregar(hid,a,e){
+  var t={id:sigId++,h:hid,a:a,e:e,p:e==='sim'?100:0,m:e==='sim'?'el plan · nada se escribió':'en cola'};
+  cola.unshift(t);selTrab=t.id;
+  if(e==='espera'&&!cola.some(function(x){return x.e==='curso'})){t.e='curso';t.m='empezando…'}
+  panelCola();estado();return t;
+}
+function detener(){
+  var c=cola.filter(function(x){return x.e==='curso'})[0];if(!c)return;
+  c.e='error';c.m='detenido por ti (Esc) · lo a medias se borró';aviso(HID[c.h][3]+': detenido');
+  var s=cola.filter(function(x){return x.e==='espera'}).pop();if(s){s.e='curso';s.m='empezando…'}
+  refrescar();if(actual==='transcribir')vista();
+}
+
+function estado(){
+  var n={curso:0,espera:0,hecho:0,error:0,sim:0};cola.forEach(function(t){n[t.e]++});
+  var c=cola.filter(function(x){return x.e==='curso'})[0], hid=herrDe[actual], e=entradas();
+  $('#estado').innerHTML='<span>86 herramientas y recetas · 85 listas</span><span>'+cola.length+' trabajos: '+n.espera+' en cola · '+n.curso+' en curso · '+n.hecho+' hechos · '+n.error+' con error'+(n.sim?' · '+n.sim+' simulados':'')+'</span><span class="esp"></span><span>'+(hid?HID[hid][3]+' · '+(e.length?e.length+' archivo'+(e.length===1?'':'s'):'enlaces'):actual==='cola'?'Cola':'Catálogo')+'</span>'+(c?'<span>'+HID[c.h][3]+' <b>'+c.p+' %</b></span>':'');
+}
+function aviso(t){$('#aviso-t').textContent=t;$('#aviso').hidden=false;clearTimeout(aviso.t);aviso.t=setTimeout(function(){$('#aviso').hidden=true},2600)}
+function refrescar(){panelCola();estado();if(actual==='cola')vistaCola()}
+
+function pantalla(p){
+  actual=p;
+  $$('#g-pantalla button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.p===p)});
+  $('#t-ventana').textContent=titulos[p]+' · Raphi Studio';
+  $('#b-volver').hidden=p==='catalogo';
+  $('#areas').hidden=p!=='catalogo';
+  $('#zona').hidden=p==='cola';
+  var cel=p==='catalogo'?'catalogo':p==='cola'?'cola':'herr';
+  $$('.abajo-cel button').forEach(function(b){b.setAttribute('aria-pressed',b.dataset.v===cel)});
+  if(p==='catalogo')areas();
+  zona();vista();panelCola();estado();
+  $('#salida-pre').textContent=MOTOR[p]||MOTOR.transcribir;
+  if(location.hash.slice(1)!==p&&history.replaceState)history.replaceState(null,'','#'+p);
+}
+function simular(){
+  var hid=herrDe[actual];if(!hid){aviso('Elige una herramienta para simular');return}
+  simulado[actual]=true;agregar(hid,(entradas()[0]||['2 enlaces'])[0],'sim');vista();aviso('Simulado: '+HID[hid][3]+' · el plan, en el banco');
+}
+function confirmar(){
+  var hid=herrDe[actual];if(!hid){aviso('Elige una herramienta para procesar');return}
+  var e=entradas();
+  $('#dc-tit').textContent='Procesar: '+HID[hid][3];
+  $('#dc-dl').innerHTML='<dt>Herramienta</dt><dd>'+HID[hid][3]+'</dd><dt>Entradas</dt><dd class="mono">'+(e.length?e.map(function(f){return f[0]}).join('<br>'):'2 enlaces')+'</dd><dt>Opciones</dt><dd>'+OPC[actual].slice(0,3).map(function(o){return o[0].split(' (')[0]+': <b>'+(o[2]===true?'sí':o[2]===false?'no':String(o[2]).split('\n')[0]||'vacío')+'</b>'}).join(' · ')+'</dd><dt>Salida</dt><dd>junto a cada original, con su sufijo</dd>';
+  $('#d-confirmar').hidden=false;$('#dc-ok').focus();
+}
+$('#dc-ok').onclick=function(){var hid=herrDe[actual];$('#d-confirmar').hidden=true;agregar(hid,(entradas()[0]||['2 enlaces'])[0],'espera');aviso(HID[hid][3]+': a la cola')};
+$$('[data-cerrar]').forEach(function(b){b.onclick=cerrarDialogos});
+function cerrarDialogos(){$('#d-confirmar').hidden=true;$('#d-paleta').hidden=true}
+$$('.velo').forEach(function(d){d.addEventListener('click',function(e){if(e.target===d)cerrarDialogos()})});
+
+var palSel=0;
+function paleta(){$('#d-paleta').hidden=false;$('#pal-q').value='';palSel=0;listaPaleta();$('#pal-q').focus()}
+function listaPaleta(){
+  var q=norm($('#pal-q').value), l=H.filter(function(t){return !q||norm(t[3]+' '+t[4]).indexOf(q)>=0}).slice(0,9);
+  $('#pal-l').innerHTML=l.map(function(t,i){return '<li><button class="'+(i===palSel?'on':'')+'" data-h="'+t[0]+'"><i class="ti '+t[2]+'"></i>'+t[3]+'<small>'+FAM.filter(function(f){return f[0]===t[1]})[0][1]+'</small></button></li>'}).join('')||'<li class="suave" style="padding:8px">Nada con ese nombre.</li>';
+  $$('#pal-l button').forEach(function(b){b.onclick=function(){abrirH(b.dataset.h)}});
+}
+function abrirH(id){cerrarDialogos();var t=HID[id];if(t[7])pantalla(t[7]);else generico(t)}
+$('#pal-q').oninput=function(){palSel=0;listaPaleta()};
+$('#pal-q').onkeydown=function(e){var n=$$('#pal-l button').length;if(e.key==='ArrowDown'){palSel=Math.min(n-1,palSel+1);listaPaleta();e.preventDefault()}else if(e.key==='ArrowUp'){palSel=Math.max(0,palSel-1);listaPaleta();e.preventDefault()}else if(e.key==='Enter'){var b=$$('#pal-l button')[palSel];if(b)abrirH(b.dataset.h);e.preventDefault()}};
+
+$('#b-volver').onclick=function(){pantalla('catalogo')};
+$('#b-simular').onclick=simular;$('#b-procesar').onclick=confirmar;$('#b-paleta').onclick=paleta;
+$('#b-salida').onclick=function(){$('#salida').hidden=!$('#salida').hidden};
+$('#buscar').oninput=function(){if(actual!=='catalogo')pantalla('catalogo');catalogo()};
+$$('#g-pantalla button').forEach(function(b){b.onclick=function(){pantalla(b.dataset.p)}});
+$$('.abajo-cel button').forEach(function(b){b.onclick=function(){var x=b.dataset.v;pantalla(x==='herr'?(herrDe[actual]?actual:'comprimir'):x)}});
+$$('#g-tema button').forEach(function(b){b.onclick=function(){raiz.setAttribute('data-theme',b.dataset.t);$$('#g-tema button').forEach(function(x){x.setAttribute('aria-pressed',x===b)})}});
+function ancho(c){v.classList.toggle('celular',c);$$('#g-ancho button').forEach(function(x){x.setAttribute('aria-pressed',String((x.dataset.a==='celular')===c))})}
+$$('#g-ancho button').forEach(function(b){b.onclick=function(){ancho(b.dataset.a==='celular')}});
+if(window.innerWidth<760)ancho(true);
+var anchoPrevio=window.innerWidth;
+window.addEventListener('resize',function(){var w=window.innerWidth;if(w<760&&anchoPrevio>=760)ancho(true);else if(w>=760&&anchoPrevio<760)ancho(false);anchoPrevio=w});
+
+document.addEventListener('keydown',function(e){
+  var c=e.ctrlKey||e.metaKey, enCampo=/INPUT|TEXTAREA|SELECT/.test(e.target.tagName);
+  if(e.key==='Escape'){if(!$('#d-confirmar').hidden||!$('#d-paleta').hidden)cerrarDialogos();else detener();return}
+  if(c&&e.key==='Enter'){e.preventDefault();if(!$('#d-confirmar').hidden)$('#dc-ok').click();else confirmar();return}
+  if(e.key==='F5'){e.preventDefault();simular();return}
+  if(e.key==='F4'){e.preventDefault();$('#b-salida').click();return}
+  if(c&&e.key.toLowerCase()==='k'){e.preventDefault();paleta();return}
+  if(c&&e.key.toLowerCase()==='f'){e.preventDefault();if(actual!=='catalogo')pantalla('catalogo');$('#buscar').focus();return}
+  if(c&&e.key==='1'){e.preventDefault();pantalla('catalogo');return}
+  if(c&&e.key==='2'){e.preventDefault();pantalla(herrDe[actual]?actual:'comprimir');return}
+  if(c&&e.key==='3'){e.preventDefault();pantalla('cola');return}
+  if(c&&e.key==='0'){e.preventDefault();area='todas';$('#buscar').value='';pantalla('catalogo');return}
+  if(e.altKey&&e.key==='ArrowLeft'&&!enCampo){e.preventDefault();pantalla('catalogo')}
+});
+
+// El avance: el trabajo en curso sube; al acabar, entra el siguiente de la cola
+setInterval(function(){
+  var c=cola.filter(function(x){return x.e==='curso'})[0];if(!c)return;
+  c.p=Math.min(100,c.p+(c.h==='transcribir'?1:7));
+  c.m=c.p<100?(c.h==='transcribir'?'faltan ~'+Math.max(1,Math.round((100-c.p)*.53))+' min':'Esc detiene'):'hecho · verificado';
+  if(c.p>=100){c.e='hecho';aviso(HID[c.h][3]+': 1 correcto');var s=cola.filter(function(x){return x.e==='espera'}).pop();if(s){s.e='curso';s.m='empezando…'}}
+  panelCola();estado();
+  var av=$('#av-trans');if(av&&c.h==='transcribir'){av.style.width=c.p+'%';$('#tr-txt').textContent=c.p+' % · '+c.m+' · Esc detiene'}
+  if(actual==='cola'&&c.id===selTrab)vistaCola();
+},1500);
+
+var h0=(location.hash||'').slice(1);
+pantalla(titulos[h0]?h0:'catalogo');
+window.addEventListener('hashchange',function(){var h=location.hash.slice(1);if(titulos[h]&&h!==actual)pantalla(h)});
+})();
 </script>
 </body>
 </html>
