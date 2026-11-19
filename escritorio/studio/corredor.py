@@ -10,6 +10,7 @@ con el Python del sistema. Sin Qt y sin importar nada del studio: solo `raphi`.
     corredor.py rueda archivo…         # JSON: lo que la rueda de soltar ofrece para esos archivos (o enlaces) juntos, con sus fichas
     corredor.py vista trabajo.json     # una vista previa: la operación de verdad en una carpeta temporal, y su archivo
     corredor.py actuales op archivo    # JSON: los valores que el archivo ya tiene en esa operación (rellenar el formulario)
+    corredor.py enlace url [navegador] # JSON: qué hay detrás de un enlace (la vista «enlace»: título, miniatura, en vivo…)
 
 `ejecutar` escribe cada archivo con su resultado o su error (para el panel inferior), el avance en líneas
 `## progreso <0-100> <mensaje>` (la barra de estado) y, al final, el informe del motor en JSON junto al archivo del
@@ -216,10 +217,18 @@ def main(argv: list[str]) -> int:
         return 0
     if argv[0] == "vista" and len(argv) > 1:
         return vista(argv[1])
+    if argv[0] == "enlace" and len(argv) > 1:
+        from raphi.motor import ErrorOperacion
+        from raphi.motor.audio_video import consultar_enlace
+        try:
+            print(json.dumps(consultar_enlace(argv[1], argv[2] if len(argv) > 2 else ""), ensure_ascii=False))
+        except ErrorOperacion as e:
+            print(json.dumps({"error": str(e)}, ensure_ascii=False))
+        return 0
     if argv[0] == "actuales" and len(argv) > 2:
         print(json.dumps(actuales(argv[1], argv[2]), ensure_ascii=False))
         return 0
-    print("corredor.py: fichas · doctor · ejecutar <trabajo.json> · rueda <archivos…> · vista <trabajo.json> · actuales <op> <archivo>", file=sys.stderr)
+    print("corredor.py: fichas · doctor · ejecutar <trabajo.json> · rueda <archivos…> · vista <trabajo.json> · actuales <op> <archivo> · enlace <url> [navegador]", file=sys.stderr)
     return 2
 
 

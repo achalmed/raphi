@@ -197,7 +197,10 @@ def bajar(enlace: str, formato: str, extra: list[str], a, b, salida: str) -> str
     url = url_de_la_lista(enlace, formato, extra)
     lista = leer_lista(pedir(url).decode("utf-8", "replace"), url)
     ini, fin = limites(lista, a, b, time.time())
-    elegidos = [s for s in lista.segmentos if s.inicio + s.duracion > ini and s.inicio < fin]
+    dentro = [i for i, s in enumerate(lista.segmentos) if s.inicio + s.duracion > ini and s.inicio < fin]
+    # Un segmento de margen a cada lado: el video de un segmento suele durar algo menos que su #EXTINF y, sin
+    # margen, al tramo le faltarían uno o dos segundos de imagen al final (lo vio la verificación el 2026-11-19)
+    elegidos = lista.segmentos[max(0, dentro[0] - 1):dentro[-1] + 2]
     pendientes = [s.secuencia for s in elegidos]
     primero = elegidos[0]
     datos: dict[int, bytes] = {}

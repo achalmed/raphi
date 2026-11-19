@@ -35,6 +35,7 @@ clip_hls_applies() {
 clip_hls_cleanup() {
     [ -n "${CLIP_HLS_DIR}" ] && rm -rf -- "${CLIP_HLS_DIR}"
     CLIP_HLS_DIR=""
+    CLIP_SEEK_SALIDA=false
     return 0
 }
 
@@ -77,6 +78,7 @@ clip_hls_prepare() {
     dur=$(sed -n 's/.*duracion=\([0-9.]*\).*/\1/p' <<< "${linea}")
     hora=$(sed -n 's/.*hora=\([0-9:]*\).*/\1/p' <<< "${linea}")
     CLIP_DURATION=$(printf '%.0f' "${dur}")
+    CLIP_SEEK_SALIDA=true
     if [ "${OPT_MODE}" = "audio" ]; then
         CLIP_AUDIO_URL="${tramo}"; CLIP_SS_AUDIO="${ss}"
     else
@@ -99,7 +101,7 @@ _clip_hls_progress() {
     local l
     while IFS= read -r l; do
         case "${l}" in
-            "[tramo] "*segmentos) printf '\r  %s' "${l#\[tramo\] }" >&2 ;;
+            "[tramo] "*segmentos) printf '\r[tramo] %s' "${l#\[tramo\] }" >&2 ;;
             *) printf '\n' >&2; log_warn "${l#\[tramo\] }" ;;
         esac
     done

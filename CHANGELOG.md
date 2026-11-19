@@ -17,6 +17,20 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 ### Sin publicar
 
+#### Añadido (2026-11-19, la descarga guiada en la web, en Qillqa y en Raphi Studio)
+
+- «Descargar video o audio» sin terminal: al pegar el enlace se ve qué video es (miniatura, título, canal, duración,
+  vertical, calidad máxima; si es una lista; si está EN VIVO y de qué hora a qué hora se puede bajar); el tramo se elige
+  con una barra y dos horas («Todo el video» o «Solo un tramo»; en vivo, siempre por la hora, con «los últimos 5, 15 o
+  30 min»); la calidad y el formato del audio aparecen según lo que se baje; lo demás, plegado en «Más opciones»; el
+  botón dice «Descargar» y la barra de avance cuenta las partes del tramo y el recorte.
+- Lo que lo hace posible es genérico y está en la ficha: `Parametro.si`, `Parametro.grupo`, las vistas «enlace» y
+  «tramo», `Operacion.accion`; `consultar_enlace` y `leer_tramo` en el motor; `GET /api/raphi/enlace`;
+  `corredor.py enlace`. La web (`CampoEnlace`, `EditorTramo`) llega sola a Qillqa, que monta el módulo web.
+- La calidad cuenta el lado corto (`-S res:` de yt-dlp): un reel vertical de 720×1280 sale entero con «1080p».
+- El tramo de un directo sale exacto: un segmento de margen a cada lado y, con el archivo ya en disco, el corte busca
+  después de leer (antes, el video empezaba hasta 2 s tarde y la verificación lo rechazaba).
+
 #### Añadido (2026-11-19, tramos de transmisiones en vivo)
 
 - `descargar` y `backends/video-downloader` recortan un tramo **de un directo** (YouTube y otros sitios HLS) mientras

@@ -40,6 +40,18 @@ def pedir(interprete: str | None = None, plazo: int = 120) -> dict:
     return json.loads(r.stdout)
 
 
+def consultar_enlace(url: str, cookies: str = "", interprete: str | None = None, plazo: int = 150) -> dict:
+    """Qué hay detrás de un enlace (corredor `enlace`): {titulo, miniatura, en_vivo, ventana…} o {error}."""
+    orden = [interprete or rutas.interprete_motor(), str(rutas.CORREDOR), "enlace", url] + ([cookies] if cookies else [])
+    try:
+        r = subprocess.run(orden, capture_output=True, text=True, timeout=plazo, cwd=str(rutas.REPO))
+    except subprocess.TimeoutExpired:
+        return {"error": "El sitio tardó demasiado en responder."}
+    if r.returncode != 0 or not r.stdout.strip():
+        return {"error": (r.stderr.strip().splitlines() or ["El motor no respondió."])[-1]}
+    return json.loads(r.stdout)
+
+
 def herramientas(datos: dict) -> list[dict]:
     """Las fichas de la ventana: cada operación con su familia e icono, y cada receta como herramienta de Recetas."""
     salida = []
@@ -104,11 +116,39 @@ def resumen_markdown(f: dict) -> str:
     return "\n\n".join(p for p in partes if p) + "\n"
 
 
-def campos_formulario(f: dict) -> list[dict]:
+VISTAS_PROPIAS = ("enlace", "tramo")     # las dibuja el studio con su componente (EditorEnlace, EditorTramo)
+
+
+def aplica(p: dict, valores: dict) -> bool:
+    """¿Se muestra este parámetro con estos valores? (`si` de la ficha: otro parámetro debe valer eso)."""
+    si = p.get("si") or []
+    if not si:
+        return True
+    return valores.get(si[0]) in si[1:]
+
+
+def valores_con_defectos(f: dict, valores: dict) -> dict:
+    return {**{p["clave"]: p.get("defecto") for p in f.get("parametros", [])}, **(valores or {})}
+
+
+def parametro_con_vista(f: dict, vista: str) -> dict:
+    return next((p for p in f.get("parametros", []) if p.get("vista") == vista), {})
+
+
+def grupos(f: dict, valores: dict | None = None) -> list[str]:
+    v = valores_con_defectos(f, valores or {})
+    return list(dict.fromkeys(p.get("grupo") for p in f.get("parametros", []) if p.get("grupo") and aplica(p, v)))
+
+
+def campos_formulario(f: dict, valores: dict | None = None, grupo: str = "") -> list[dict]:
     """Los campos de `PaginaFormulario` desde los parámetros de la ficha: los tipos del motor que el marco no tiene se
-    traducen (paginas y tamano a texto con su marcador; json a multilínea)."""
+    traducen (paginas y tamano a texto con su marcador; json a multilínea). Solo los de `grupo` ("" los de a la vista),
+    los que aplican con estos `valores` (`si`) y no los que dibuja el studio con su componente (vistas «enlace» y «tramo»)."""
+    v = valores_con_defectos(f, valores or {})
     salida = []
     for p in f.get("parametros", []):
+        if (p.get("grupo") or "") != grupo or not aplica(p, v) or p.get("vista") in VISTAS_PROPIAS:
+            continue
         tipo = p["tipo"]
         marcador = ""
         if tipo == "paginas":

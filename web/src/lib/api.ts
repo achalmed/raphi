@@ -16,7 +16,35 @@ export interface Parametro {
   maximo: number | null
   ayuda: string
   obligatorio: boolean
+  /** Cómo se edita a la vista, si la web sabe («caja», «enlace», «tramo»); si no, por su tipo. */
+  vista?: '' | 'caja' | 'enlace' | 'tramo'
+  /** Se muestra solo si el parámetro `si[0]` vale alguno de `si[1..]`. */
+  si?: unknown[]
+  /** "" a la vista; otro texto, plegado bajo ese título. */
+  grupo?: string
 }
+
+/** Lo que hay detrás de un enlace (`GET /enlace`): lo usan las vistas «enlace» y «tramo». */
+export interface InfoEnlace {
+  url: string
+  titulo: string
+  canal: string
+  sitio: string
+  lista: boolean
+  elementos: number
+  duracion: number | null
+  en_vivo: boolean
+  miniatura: string
+  vertical: boolean
+  calidades: number[]
+  /** En vivo: cuántos segundos hacia atrás se pueden bajar y desde/hasta qué hora (época, en segundos). */
+  ventana: { segundos: number; desde: number | null; hasta: number | null } | null
+  /** La zona horaria de la máquina que baja (segundos al este de UTC): la hora del tramo se lee en ella. */
+  zona: number
+}
+
+export const consultarEnlace = (url: string, cookies = '') =>
+  api<InfoEnlace>(`${BASE}/enlace?url=${encodeURIComponent(url)}${cookies ? `&cookies=${encodeURIComponent(cookies)}` : ''}`)
 
 export interface Operacion {
   id: string
@@ -31,6 +59,8 @@ export interface Operacion {
   extensiones: string[]
   minimo_entradas: number
   palabras: string[]
+  /** El texto del botón que corre la operación («Descargar»); vacío: «Aplicar». */
+  accion?: string
 }
 
 export interface Receta {

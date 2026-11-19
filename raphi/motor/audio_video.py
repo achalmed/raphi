@@ -50,32 +50,42 @@ NAVEGADORES = (("", "Ninguno (vídeos públicos)"), ("firefox", "Firefox"), ("ch
                ("brave", "Brave"), ("edge", "Edge"), ("opera", "Opera"), ("vivaldi", "Vivaldi"))
 
 
+MAS = "Más opciones"
+
+
 @operacion("descargar", "Medios", "Descargar video o audio",
-           "De YouTube, Facebook, Instagram, TikTok, X, Vimeo y más de mil sitios (yt-dlp): vídeo a la calidad que se "
-           "elija, solo el audio, un tramo exacto, listas enteras o algunos de sus elementos, subtítulos (también los "
-           "automáticos), carátula y capítulos, sin los patrocinios; y lo privado o con sesión, con las cookies de tu navegador.",
+           "Pega el enlace de YouTube, Facebook, TikTok, Instagram, X, Vimeo u otro de más de mil sitios: Raphi muestra qué "
+           "video es y baja el video o solo el audio, entero o un tramo; también de una transmisión que sigue en vivo.",
            entrada="ninguna", lote=False, minimo_entradas=0, extensiones=(), requiere=("yt-dlp", "ffmpeg"),
-           parametros=(Parametro("url", "Enlaces (uno por línea)", "multilinea", obligatorio=True),
+           parametros=(Parametro("url", "Enlace del video (o varios, uno por línea)", "multilinea", obligatorio=True,
+                                 vista="enlace"),
                        Parametro("modo", "Qué bajar", "opcion", "video",
-                                 opciones=(("video", "Video"), ("audio", "Solo audio"))),
-                       Parametro("calidad", "Altura máxima", "opcion", "1080",
-                                 opciones=("2160", "1440", "1080", "720", "480", "360", "best")),
+                                 opciones=(("video", "Video"), ("audio", "Solo el audio"))),
+                       Parametro("calidad", "Calidad", "opcion", "1080",
+                                 opciones=(("best", "La mejor que haya"), ("2160", "4K"), ("1440", "1440p"),
+                                           ("1080", "1080p (Full HD)"), ("720", "720p"), ("480", "480p"), ("360", "360p")),
+                                 ayuda="como mucho; en un video vertical cuenta el lado corto", si=("modo", "video")),
                        Parametro("formato_audio", "Formato del audio", "opcion", "mp3",
-                                 opciones=("mp3", "m4a", "opus", "flac", "wav")),
-                       Parametro("tramo", "Tramo (1:02:00-1:05:30; en vivo, -16:30--14:08 desde el vivo o @11:20-@11:22 por la hora)", "texto", "",
-                                 ayuda="vacío: todo el video"),
-                       Parametro("subtitulos", "Bajar subtítulos (es, en)", "casilla", False),
-                       Parametro("subtitulos_auto", "También los subtítulos automáticos", "casilla", False),
-                       Parametro("lista", "Si el enlace es una lista", "opcion", "todo",
-                                 opciones=(("todo", "Bajar la lista entera"), ("solo_video", "Solo este vídeo"))),
-                       Parametro("elementos", "Elementos de la lista (p. ej. 1:10 o 1,3,5)", "texto", "",
-                                 ayuda="vacío: todos"),
-                       Parametro("caratula", "Incrustar la carátula", "casilla", False),
-                       Parametro("sponsorblock", "Quitar patrocinios y autopromoción (SponsorBlock)", "casilla", False),
-                       Parametro("cookies", "Con la sesión de tu navegador (vídeos privados)", "opcion", "",
+                                 opciones=(("mp3", "MP3"), ("m4a", "M4A"), ("opus", "Opus"), ("flac", "FLAC (sin pérdida)"),
+                                           ("wav", "WAV")), si=("modo", "audio")),
+                       Parametro("tramo", "Tramo", "texto", "", vista="tramo",
+                                 ayuda="vacío: todo. 1:02:00-1:05:30 desde el comienzo; en vivo, @11:20-@11:22:35 por la "
+                                       "hora o -16:30--14:08 hacia atrás desde el vivo"),
+                       Parametro("subtitulos", "Bajar subtítulos (es, en)", "casilla", False, grupo=MAS),
+                       Parametro("subtitulos_auto", "También los subtítulos automáticos", "casilla", False, grupo=MAS,
+                                 si=("subtitulos", True)),
+                       Parametro("lista", "Si el enlace es una lista", "opcion", "todo", grupo=MAS,
+                                 opciones=(("todo", "Bajar la lista entera"), ("solo_video", "Solo este video"))),
+                       Parametro("elementos", "Elementos de la lista (p. ej. 1:10 o 1,3,5)", "texto", "", grupo=MAS,
+                                 ayuda="vacío: todos", si=("lista", "todo")),
+                       Parametro("caratula", "Incrustar la carátula", "casilla", False, grupo=MAS),
+                       Parametro("sponsorblock", "Quitar patrocinios y autopromoción (SponsorBlock)", "casilla", False,
+                                 grupo=MAS),
+                       Parametro("cookies", "Con la sesión de tu navegador (videos privados)", "opcion", "", grupo=MAS,
                                  opciones=NAVEGADORES, ayuda="usa las cookies del navegador elegido; nada sale de tu máquina")),
            palabras=("youtube", "facebook", "tiktok", "instagram", "bajar", "yt-dlp", "descargar audio", "recortar tramo",
-                     "playlist", "lista", "video downloader", "privado"))
+                     "playlist", "lista", "video downloader", "privado", "en vivo", "transmisión", "directo"),
+           accion="Descargar")
 def descargar(ctx):
     urls = [u.strip() for u in (ctx.p("url") or "").splitlines() if u.strip()]
     if not urls:
@@ -89,7 +99,8 @@ def descargar(ctx):
     if ctx.p("modo") == "audio":
         orden += ["--audio-format", ctx.p("formato_audio")]
     if ctx.p("tramo"):
-        orden += ["--clip", ctx.p("tramo")]
+        leer_tramo(ctx.p("tramo"))          # un error claro antes de bajar nada
+        orden += ["--clip", ctx.p("tramo").strip()]
     if ctx.p("subtitulos") or ctx.p("subtitulos_auto"):
         orden += ["--subs"] + (["--auto-subs"] if ctx.p("subtitulos_auto") else [])
     if ctx.p("lista") == "solo_video":
@@ -103,7 +114,7 @@ def descargar(ctx):
     if ctx.p("cookies"):
         orden += ["--cookies-browser", ctx.p("cookies")]
     ctx.avisar(0.01, f"Preparando {len(urls)} enlace(s)…")
-    estado = {"item": 1, "items": 1, "nombre": ""}
+    estado: dict = {"item": 1, "items": 1, "nombre": ""}
 
     def leer(linea: str) -> None:
         item = re.search(r"Downloading (?:item|video) (\d+) of (\d+)", linea)
@@ -124,10 +135,153 @@ def descargar(ctx):
                 velocidad[1] if velocidad else "", f"quedan {eta[1]}" if eta else "") if x))
         elif "Merging" in linea or "ExtractAudio" in linea or "[ffmpeg]" in linea:
             ctx.avisar(0.93, "Uniendo y convirtiendo…")
+        elif partes := re.search(r"(\d+)/(\d+) segmentos", linea):      # el tramo de un directo, parte por parte
+            n, m = int(partes[1]), max(1, int(partes[2]))
+            estado["f"] = 0.05 + 0.7 * n / m
+            ctx.avisar(estado["f"], f"Bajando el tramo: {n} de {m} partes")
+        elif "lista renovada" in linea:
+            ctx.avisar(estado.get("f", 0.05), "El sitio pidió una pausa; se sigue con una lista nueva…")
+        elif "Recortando" in linea:
+            ctx.avisar(0.8, "Recortando el tramo exacto (re-codifica el video)…")
+        elif "Verificado con ffprobe" in linea:
+            ctx.avisar(0.95, "Tramo verificado")
+        elif "Directo: bajando" in linea:
+            ctx.avisar(0.04, "Directo: buscando el tramo en la transmisión…")
     correr_en_vivo(orden + urls, leer, timeout=6 * HORAS, mensaje="La descarga falló")
     ctx.avisar(0.97, "Ordenando lo descargado")
     destino.mkdir(parents=True, exist_ok=True)
     return Resultado(_traer(ctx, temporal, destino))
+
+
+_T = r"\d+(?::\d{1,2}){0,2}(?:\.\d+)?"
+_EXTREMO = rf"(?:@{_T}|-?{_T})"
+_RANGO = re.compile(rf"^\s*({_EXTREMO})\s*(?:\.\.|\s+a\s+|-)\s*({_EXTREMO})\s*$")
+
+
+def leer_tramo(texto: str) -> dict:
+    """«1:02:00-1:05:30», «-16:30--14:08» o «@11:20-@11:22:35» → {clase, inicio, fin} (segundos; en «reloj», del día).
+    La misma gramática que `backends/video-downloader` (`clip_parse_range` y `lib/hls_tramo.py`)."""
+    m = _RANGO.match(texto or "")
+    if not m:
+        raise ErrorOperacion(f"El tramo «{texto}» no se entiende. Ejemplos: 1:02:00-1:05:30 (desde el comienzo), "
+                             "@11:20-@11:22:35 (por la hora, en vivo) o -16:30--14:08 (hacia atrás desde el vivo).")
+
+    def extremo(t: str) -> tuple[str, float]:
+        clase = "reloj" if t[0] == "@" else "vivo" if t[0] == "-" else "abs"
+        cuerpo = t.lstrip("@-")
+        if clase == "reloj" and cuerpo.count(":") == 1:
+            cuerpo += ":00"
+        total = 0.0
+        for parte in cuerpo.split(":"):
+            total = total * 60 + float(parte)
+        return clase, total
+
+    (ca, a), (cb, b) = extremo(m[1]), extremo(m[2])
+    if ca != cb:
+        raise ErrorOperacion("Los dos extremos del tramo deben ser de la misma clase (desde el comienzo, por la hora o "
+                             "desde el vivo).")
+    if ca == "vivo":
+        a, b = -a, -b
+    if ca == "reloj" and b <= a:
+        b += 86400
+    if b <= a:
+        raise ErrorOperacion(f"En el tramo «{texto}», el final debe ir después del inicio.")
+    return {"clase": ca, "inicio": a, "fin": b}
+
+
+_LIMPIAR_TITULO = (re.compile(r"^[\d.,]+[KkMm]? (views|vistas|reproducciones)( · [\d.,]+[KkMm]? (reactions|reacciones))? *[|｜] *"),
+                   re.compile(r" *(on Reels|[|｜] *Facebook)$"))
+_CONSULTAS: dict[tuple[str, str], tuple[float, dict]] = {}
+
+
+def _miniatura(url: str) -> str:
+    """La miniatura como data: URI (la página no pide nada a otro sitio); "" si no se puede."""
+    import base64
+    import urllib.request
+    try:
+        req = urllib.request.Request(url, headers={"User-Agent": "Mozilla/5.0"})
+        with urllib.request.urlopen(req, timeout=10) as r:
+            datos = r.read(600_000)
+            tipo = r.headers.get_content_type() or "image/jpeg"
+        if not tipo.startswith("image/") or len(datos) >= 600_000:
+            return ""
+        return f"data:{tipo};base64,{base64.b64encode(datos).decode()}"
+    except Exception:  # noqa: BLE001 — sin miniatura no pasa nada
+        return ""
+
+
+def _ventana_en_vivo(url: str, cookies: str) -> dict:
+    """De un directo HLS: desde qué hora y hasta qué hora se puede bajar (la ventana de rebobinado)."""
+    import importlib.util
+    import urllib.request
+    ruta = BACKENDS / "video-downloader" / "lib" / "hls_tramo.py"
+    spec = importlib.util.spec_from_file_location("hls_tramo", ruta)
+    h = importlib.util.module_from_spec(spec)
+    sys.modules["hls_tramo"] = h
+    spec.loader.exec_module(h)
+    extra = ["--cookies-from-browser", cookies] if cookies else []
+    lista_url = h.url_de_la_lista(url, "b[protocol^=m3u8]", extra)
+    lista = h.leer_lista(h.pedir(lista_url).decode("utf-8", "replace"), lista_url)
+    primero, ultimo = lista.segmentos[0], lista.segmentos[-1]
+    fin = ultimo.inicio + ultimo.duracion
+    return {"segundos": round(fin, 1), "desde": primero.hora, "hasta": (primero.hora + fin) if primero.hora else None}
+
+
+def consultar_enlace(url: str, cookies: str = "") -> dict:
+    """Qué hay detrás de un enlace, sin bajarlo: título, canal, sitio, miniatura, duración, si es una lista, si está en
+    vivo y, si lo está, la ventana que se puede bajar (con la hora de inicio y de fin). Lo usa la vista «enlace».
+    Se guarda 30 s (un directo cambia)."""
+    import json
+    import time
+    url = (url or "").strip()
+    if not re.match(r"^https?://", url):
+        raise ErrorOperacion("Eso no parece un enlace (debe empezar por http:// o https://).")
+    clave = (url, cookies or "")
+    guardada = _CONSULTAS.get(clave)
+    if guardada and time.time() - guardada[0] < 30:
+        return guardada[1]
+    orden = ["yt-dlp", "-J", "--flat-playlist", "--no-warnings", "--no-playlist"]
+    if cookies:
+        orden += ["--cookies-from-browser", cookies]
+    import subprocess
+    try:
+        r = subprocess.run(orden + ["--", url], capture_output=True, text=True, timeout=90)
+    except FileNotFoundError as e:
+        raise ErrorOperacion("Falta el programa «yt-dlp».") from e
+    except subprocess.TimeoutExpired as e:
+        raise ErrorOperacion("El sitio tardó más de 90 s en responder.") from e
+    if r.returncode != 0 or not r.stdout.strip():
+        ultimo = (r.stderr or "").strip().splitlines()[-1:] or ["sin respuesta"]
+        texto = ultimo[0].removeprefix("ERROR: ")
+        if "login" in texto.lower() or "cookies" in texto.lower() or "private" in texto.lower():
+            texto += " — prueba con «Con la sesión de tu navegador» (Más opciones)."
+        raise ErrorOperacion(f"No se pudo leer el enlace: {texto}")
+    d = json.loads(r.stdout)
+    titulo = d.get("title") or ""
+    for patron in _LIMPIAR_TITULO:
+        titulo = patron.sub("", titulo)
+    if d.get("live_status") == "is_live":   # yt-dlp añade la hora de la consulta al título de un directo
+        titulo = re.sub(r" \d{4}-\d{2}-\d{2} \d{2}:\d{2}$", "", titulo)
+    info = {"url": url, "titulo": titulo.strip() or "(sin título)", "canal": d.get("uploader") or d.get("channel") or "",
+            "sitio": d.get("extractor_key") or d.get("extractor") or "", "lista": d.get("_type") == "playlist",
+            "elementos": len(d.get("entries") or []) if d.get("_type") == "playlist" else 0,
+            "duracion": d.get("duration"), "en_vivo": d.get("live_status") == "is_live",
+            "miniatura": "", "vertical": False, "calidades": [], "ventana": None, "zona": time.localtime().tm_gmtoff}
+    videos = [f for f in d.get("formats") or [] if f.get("height") and f.get("width") and f.get("vcodec") != "none"]
+    if videos:
+        mayor = max(videos, key=lambda f: f["height"] * f["width"])
+        info["vertical"] = mayor["height"] > mayor["width"]
+        info["calidades"] = sorted({min(f["height"], f["width"]) for f in videos}, reverse=True)
+    miniaturas = [t for t in d.get("thumbnails") or [] if t.get("url")]
+    if d.get("thumbnail") or miniaturas:
+        info["miniatura"] = _miniatura(d.get("thumbnail") or miniaturas[-1]["url"])
+    if info["en_vivo"]:
+        try:
+            info["ventana"] = _ventana_en_vivo(url, cookies)
+        except Exception:  # noqa: BLE001 — sin ventana, el tramo se pide a mano
+            info["ventana"] = None
+    _CONSULTAS[clave] = (time.time(), info)
+    return info
 
 
 def opciones_para_enlaces(urls: list[str]) -> list[dict]:

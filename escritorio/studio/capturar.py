@@ -42,6 +42,7 @@ def main() -> int:
     parser.add_argument("--aplicar", action="store_true", help="aplica de verdad la herramienta (además de simularla) antes de capturar")
     parser.add_argument("--sin-correr", action="store_true", help="no corre nada antes de capturar")
     parser.add_argument("--paleta", default=None, help="abre la paleta de órdenes con este texto")
+    parser.add_argument("--valores", default="", help='JSON con las opciones de la herramienta (p. ej. {"url": "https://…"}); un enlace se consulta antes de capturar')
     parser.add_argument("--ancho", type=int, default=1440)
     parser.add_argument("--alto", type=int, default=900)
     args = parser.parse_args()
@@ -92,7 +93,7 @@ def main() -> int:
     pendientes = []
 
     def correr_siguiente():
-        if piezas["tareas"].activa or trabajos.enCurso:
+        if piezas["tareas"].activa or trabajos.enCurso or herramientas.estadoEnlace == "consultando":
             QTimer.singleShot(150, correr_siguiente)
             return
         if pendientes:
@@ -111,6 +112,13 @@ def main() -> int:
         if ref:
             herramientas.irA(ref)
             operaciones.fijar("herramienta")
+            if args.valores:
+                import json
+                for clave, valor in json.loads(args.valores).items():
+                    herramientas.fijarValor(clave, valor)
+                enlace = herramientas.paramEnlace.get("clave")
+                if enlace and herramientas.valores.get(enlace):
+                    herramientas.consultarEnlace(herramientas.valores[enlace])
             if not args.sin_correr:
                 pendientes.append(False)
                 if args.aplicar:

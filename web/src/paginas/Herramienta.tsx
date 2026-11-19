@@ -12,6 +12,7 @@ import Stack from '@mui/material/Stack'
 import TextField from '@mui/material/TextField'
 import Typography from '@mui/material/Typography'
 import PlayArrowIcon from '@mui/icons-material/PlayArrow'
+import DownloadIcon from '@mui/icons-material/Download'
 import VisibilityOutlinedIcon from '@mui/icons-material/VisibilityOutlined'
 import { Marco, api } from '@qillqa/tiqsi'
 import ElegirArchivos from '../componentes/Archivos'
@@ -98,8 +99,8 @@ export default function Herramienta() {
         {error && <Alert severity="error">{error}</Alert>}
         <Stack direction="row" spacing={1.5}>
           <Button variant="outlined" startIcon={<VisibilityOutlinedIcon />} disabled={!listo} onClick={() => correr(true)}>Simular</Button>
-          <Button variant="contained" startIcon={<PlayArrowIcon />} disabled={!listo || (destino === 'carpeta' && !carpeta)} onClick={() => correr(false)}>
-            Aplicar
+          <Button variant="contained" startIcon={op?.accion === 'Descargar' ? <DownloadIcon /> : <PlayArrowIcon />} disabled={!listo || (destino === 'carpeta' && !carpeta)} onClick={() => correr(false)}>
+            {op?.accion || 'Aplicar'}
           </Button>
           <Box sx={{ flex: 1 }} />
           {trabajos.length > 0 && <Button onClick={() => navegar('/raphi/trabajos')}>Ver todos los trabajos</Button>}

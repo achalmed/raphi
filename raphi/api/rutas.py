@@ -41,6 +41,18 @@ async def operaciones(_u: Usuario = Depends(usuario_actual)) -> dict:
             "modo": _cfg().modo, "recetas": [r.a_dict() for r in recetas.todas()]}
 
 
+@router.get("/enlace")
+async def enlace(url: str = Query(...), cookies: str = Query(""), _u: Usuario = Depends(usuario_actual)) -> dict:
+    """Qué hay detrás de un enlace (la vista «enlace» de un parámetro): título, miniatura, duración, si está en vivo y
+    su ventana. Consulta el sitio con yt-dlp; no baja nada."""
+    import asyncio
+    from raphi.motor.audio_video import consultar_enlace
+    try:
+        return await asyncio.to_thread(consultar_enlace, url, cookies)
+    except ErrorOperacion as e:
+        raise HTTPException(422, str(e)) from e
+
+
 @router.get("/sistema")
 async def sistema(_u: Usuario = Depends(usuario_actual)) -> dict:
     """El diagnóstico (lo que la GUI tenía en Sistema → Diagnóstico): qué hay instalado y qué operaciones faltan."""

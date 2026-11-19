@@ -42,7 +42,9 @@ class Cancelado(Exception):
 TIPOS = ("texto", "multilinea", "entero", "decimal", "opcion", "casilla", "paginas", "clave", "color", "tamano", "json")
 # Pistas de edición visual: la interfaz que las conoce pone un editor a la vista; la que no, el control de su tipo.
 # «caja»: un rectángulo «x,y,ancho,alto» en píxeles de la imagen de entrada (ya girada según su EXIF).
-VISTAS = ("", "caja")
+# «enlace»: enlaces de la red; la interfaz los consulta (`consultar_enlace`) y muestra qué son (título, duración, en vivo).
+# «tramo»: un tramo de tiempo «INI-FIN» (ver `leer_tramo`) que se elige sobre la duración o la ventana del enlace.
+VISTAS = ("", "caja", "enlace", "tramo")
 
 
 @dataclass(frozen=True)
@@ -59,6 +61,8 @@ class Parametro:
     ayuda: str = ""
     obligatorio: bool = False
     vista: str = ""                # cómo se edita a la vista, si la interfaz sabe (ver VISTAS); si no, por su tipo
+    si: tuple = ()                 # se muestra solo si otro parámetro vale eso: («modo», «audio») o («modo», «a», «b»)
+    grupo: str = ""                # "": a la vista; otro texto: plegado bajo ese título («Más opciones»)
 
     def __post_init__(self):
         if self.tipo not in TIPOS:
@@ -102,6 +106,7 @@ class Parametro:
     def ficha(self) -> dict:
         d = asdict(self)
         d["opciones"] = [list(o) if isinstance(o, tuple) else [o, o] for o in self.opciones]
+        d["si"] = list(self.si)
         return d
 
 
@@ -138,6 +143,7 @@ class Operacion:
     sufijo: str = ""                # el sufijo de la salida por omisión (sin él, el id)
     palabras: tuple[str, ...] = ()  # para el buscador de la web («juntar», «combinar»…)
     actuales: Callable[[Path], dict] | None = None   # los valores que ya tiene un archivo (rellena el formulario)
+    accion: str = ""                # el texto del botón que la corre («Descargar»); vacío: «Aplicar»
 
     def faltan(self) -> list[str]:
         """Lo que esta máquina no tiene para correrla."""
@@ -148,7 +154,7 @@ class Operacion:
                 "entrada": self.entrada, "lote": self.lote, "parametros": [p.ficha() for p in self.parametros],
                 "requiere": list(self.requiere), "faltan": self.faltan(), "extensiones": list(self.extensiones),
                 "minimo_entradas": self.minimo_entradas, "palabras": list(self.palabras),
-                "con_actuales": self.actuales is not None}
+                "con_actuales": self.actuales is not None, "accion": self.accion}
 
 
 REGISTRO: dict[str, Operacion] = {}

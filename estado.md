@@ -16,6 +16,7 @@ vivían en `docs/decisiones.md` §Pendientes por una regla propia del repo; desd
 
 | fecha | qué | dónde se ve |
 |---|---|---|
+| 2026-11-19 | **Descarga guiada sin terminal** (web, Qillqa y Raphi Studio): el enlace muestra qué video es y si está en vivo con su ventana; el tramo con barra y horas (en vivo, por la hora y con atajos); calidad y formato según lo que se baje; «Más opciones» plegadas; botón «Descargar»; avance por partes. Genérico en la ficha (`si`, `grupo`, vistas «enlace» y «tramo», `accion`). Probado en el navegador contra `raphi.sola` (el reel de Facebook, tramo 2:00–3:30, 720×1280 y 90 s exactos) y en Raphi Studio por captura (el reel y el Pleno en vivo); la calidad cuenta el lado corto | `docs/arquitectura.md` §El motor, `tests/test_audio_video_fotos.py` |
 | 2026-11-19 | **Tramos de directos**: `descargar` recorta una transmisión en vivo de YouTube (HLS) desde el comienzo, desde el vivo (`-16:30--14:08`) o por la hora (`@11:20-@11:22:35`), bajando solo sus segmentos y renovando la lista ante el 403 de YouTube; el tramo va suelto tras el enlace; títulos de Facebook sin vistas ni reacciones. Probado en vivo con el Pleno del Congreso (3 min 40 s de 1080p en ~4 min) y con un reel de Facebook | `backends/video-downloader/README.md`, `tests/test_backends_medios.py` |
 | 2026-11-18 | **Raphi Studio, un taller** (rediseño visual aprobado, R14): arriba la zona para soltar con lo que entró, la paleta de herramientas por familia (PDF, imágenes, audio y video, documentos…) y a la derecha la cola con su barra de avance; cero colores propios; los avisos, a las notificaciones de KDE; el cambio de claro a oscuro en vivo probado aislado. Sobre la muestra: `tests/run.sh` 35 pasan | `docs/decisiones.md` R14, `escritorio/studio/README.md`, `docs/figuras/raphi-studio-*.png` |
 | 2026-11-11 | **Probado con uso real** (desde Muyu): `descargar` de YouTube a MP3 con el avance real de yt-dlp, `transcribir` lo bajado con Whisper (SRT y su versión de líneas cortas), `quitar_metadatos_archivo` con mat2 sobre una foto con GPS, autor y número de serie (quedan solo los campos del formato) | `tests/test_archivos_multimedia.py` |
@@ -34,9 +35,13 @@ nada en curso
 
 ## Por hacer
 
-- 2026-11-19 · dueño: director · `-q` de `descargar` filtra por la altura: en un video vertical (reel 720×1280) `-q 1080`
-  baja la versión de 768. Pasar a la dimensión menor (`-S res:<q>` de yt-dlp) en `lib/options.sh`, `lib/clipper.sh` y
-  `lib/clipper_hls.sh`, con su prueba.
+- 2026-11-19 · dueño: director · ver «Descargar video o audio» dentro de Qillqa de prueba (5198): hoy la web de Qillqa no
+  arranca en modo dev por un cambio en curso de otra sesión (`@qillqa/qillqasqa` sin el export `HOJAS`); el módulo es el
+  mismo que se probó contra `raphi.sola`.
+- 2026-11-19 · dueño: director · en una ventana angosta (~420 px) la página de una herramienta mide 860 px de ancho;
+  no se halló aún qué lo fuerza (no son los componentes nuevos: ocultarlos no lo cambia). Revisar el `Marco` de Tiqsi y
+  la página `Herramienta`.
+
 
 - 2026-11-18 · dueño: **el autor** · ver el taller en la sesión real: soltar desde Dolphin sobre la zona (se marca con
   el resaltado) y sobre la paleta, la cola de la derecha con un trabajo largo (transcribir: la barra va indeterminada

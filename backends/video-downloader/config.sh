@@ -126,6 +126,8 @@ OUTPUT_TEMPLATE_ORGANIZED="%(uploader).80B/%(playlist_title|Sueltos)s/%(title)s 
 TITLE_CLEANUP_ARGS=(
     --replace-in-metadata title '^[0-9.,]+[KkMm]? (views|vistas|reproducciones)( · [0-9.,]+[KkMm]? (reactions|reacciones))? *[|｜] *' ''
     --replace-in-metadata title ' *(on Reels|[|｜] *Facebook)$' ''
+    # En un directo, yt-dlp añade al título la hora de la consulta («… 2026-11-19 13:12»)
+    --replace-in-metadata title ' [0-9]{4}-[0-9]{2}-[0-9]{2} [0-9]{2}:[0-9]{2}$' ''
 )
 
 # --- Flags crudas extra para yt-dlp (casos avanzados) ----------------------

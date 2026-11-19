@@ -35,9 +35,10 @@ _opts_format() {
     elif [ "${OPT_QUALITY}" = "worst" ]; then
         YTDLP_ARGS+=( -f "wv*+wa/w" )
     else
-        # <=? no falla si la altura del stream es desconocida; cadena de reserva al final
+        # La calidad es el lado corto («res» de yt-dlp): un reel vertical de 720×1280 es «720p», no «1280p»;
+        # -S prefiere lo que no pase de ese tamaño y, si no hay, lo más cercano
         local h="${OPT_QUALITY}"
-        YTDLP_ARGS+=( -f "bv*[height<=?${h}]+ba/b[height<=?${h}]/bv*+ba/b" )
+        YTDLP_ARGS+=( -f "bv*+ba/b" -S "res:${h}" )
     fi
 
     # Contenedor de salida al fusionar (solo aplica a modos con video)

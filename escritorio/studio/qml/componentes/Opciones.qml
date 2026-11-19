@@ -25,6 +25,11 @@ QQC2.ScrollView {
             type: Kirigami.MessageType.Warning
             text: "Falta en esta máquina: " + pagina.h.faltan.join(", ") + ". Instálalo para usar esta herramienta (Herramientas › Lo que falta…)."
         }
+        EditorEnlace {
+            visible: pagina.h.hayActual && !!pagina.h.paramEnlace.clave
+            Layout.fillWidth: true
+            h: pagina.h
+        }
         PaginaFormulario {
             id: formulario
             visible: pagina.h.hayActual
@@ -35,6 +40,31 @@ QQC2.ScrollView {
             onCamposChanged: poner(pagina.h.valores)
             onCambiado: (clave, valor) => pagina.h.fijarValor(clave, valor)
             Connections { target: pagina.h; function onOpcionesCambiadas() { if (JSON.stringify(formulario.valores) !== JSON.stringify(pagina.h.valores)) formulario.poner(pagina.h.valores) } }
+            Component.onCompleted: poner(pagina.h.valores)
+        }
+        EditorTramo {
+            visible: pagina.h.hayActual && !!pagina.h.paramTramo.clave
+            Layout.fillWidth: true
+            h: pagina.h
+        }
+        // Los parámetros plegados de la ficha (su `grupo`, p. ej. «Más opciones»)
+        QQC2.ToolButton {
+            id: verMas
+            visible: pagina.h.hayActual && pagina.h.tituloMas !== ""
+            checkable: true
+            text: pagina.h.tituloMas
+            icon.name: checked ? "arrow-down" : "arrow-right"
+            Accessible.name: text
+        }
+        PaginaFormulario {
+            id: formularioMas
+            visible: verMas.visible && verMas.checked
+            Layout.fillWidth: true
+            campos: pagina.h.camposMas
+            nombreAccesible: pagina.h.tituloMas
+            onCamposChanged: poner(pagina.h.valores)
+            onCambiado: (clave, valor) => pagina.h.fijarValor(clave, valor)
+            Connections { target: pagina.h; function onOpcionesCambiadas() { if (JSON.stringify(formularioMas.valores) !== JSON.stringify(pagina.h.valores)) formularioMas.poner(pagina.h.valores) } }
             Component.onCompleted: poner(pagina.h.valores)
         }
         Kirigami.FormLayout {
@@ -82,7 +112,7 @@ QQC2.ScrollView {
                 readonly property var a: studio.acciones.accion("op.aplicar")
                 visible: pagina.o.escribe
                 highlighted: true
-                text: a.textoPlano; icon.name: a.icono; enabled: a.habilitada
+                text: pagina.h.accion || a.textoPlano; icon.name: pagina.h.accion === "Descargar" ? "download" : a.icono; enabled: a.habilitada
                 onClicked: a.disparar()
                 QQC2.ToolTip.text: a.descripcion + " (" + a.atajoTexto + ")"; QQC2.ToolTip.visible: hovered
             }

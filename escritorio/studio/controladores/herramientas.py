@@ -34,6 +34,9 @@ class Herramientas(QObject):
     cambiado = Signal()                 # la tabla y los contadores
     actualCambiado = Signal()           # la herramienta actual
     opcionesCambiadas = Signal()        # los valores y el destino
+    camposCambiados = Signal()          # qué campos se ven (cambian con la herramienta y con `si` de la ficha)
+    enlaceCambiado = Signal()           # lo que se sabe del enlace (vista «enlace»)
+    _enlaceLlego = Signal(int, "QVariantMap")
     seleccionar = Signal(int)
     aviso = Signal(str, str)
 
@@ -52,6 +55,12 @@ class Herramientas(QObject):
         self._destino = ""
         self._en_carpeta = False
         self._motivo = ""
+        self._visibles: tuple = ()
+        self._enlace: dict = {}
+        self._enlace_estado = ""
+        self._enlace_pedido = 0
+        self._enlaceLlego.connect(self._enlace_recibido)
+        self.actualCambiado.connect(self._campos_quizas)
         self._modelo.aceptar_con(self._acepta)
         espacio.filtroCambiado.connect(lambda: (self._modelo.aceptar_con(self._acepta), self.cambiado.emit()))
         archivos.cambiado.connect(self._archivos_cambiaron)
@@ -316,9 +325,87 @@ class Herramientas(QObject):
     def resumenMarkdown(self) -> str:
         return svc.resumen_markdown(self._ficha_actual()) if self._actual else ""
 
-    @Property("QVariantList", notify=actualCambiado)
+    @Property("QVariantList", notify=camposCambiados)
     def campos(self) -> list:
-        return svc.campos_formulario(self._ficha_actual()) if self._actual else []
+        return svc.campos_formulario(self._ficha_actual(), self._valores) if self._actual else []
+
+    @Property("QVariantList", notify=camposCambiados)
+    def camposMas(self) -> list:
+        """Los campos plegados (el primer `grupo` de la ficha, p. ej. «Más opciones»)."""
+        g = self.tituloMas
+        return svc.campos_formulario(self._ficha_actual(), self._valores, g) if g else []
+
+    @Property(str, notify=camposCambiados)
+    def tituloMas(self) -> str:
+        gs = svc.grupos(self._ficha_actual(), self._valores) if self._actual else []
+        return gs[0] if gs else ""
+
+    def _campos_quizas(self) -> None:
+        """Avisa que cambiaron los campos solo si cambió QUÉ campos se ven: rehacer el formulario a cada tecla le quitaría
+        el foco al campo en que se escribe."""
+        f = self._ficha_actual() if self._actual else {}
+        visibles = (self._actual, tuple(c["clave"] for c in svc.campos_formulario(f, self._valores)),
+                    tuple(c["clave"] for g in svc.grupos(f, self._valores) for c in svc.campos_formulario(f, self._valores, g)))
+        if visibles != self._visibles:
+            self._visibles = visibles
+            self.camposCambiados.emit()
+
+    @Property("QVariantMap", notify=actualCambiado)
+    def paramEnlace(self) -> dict:
+        """El parámetro con vista «enlace» (EditorEnlace lo dibuja), o {}."""
+        return svc.parametro_con_vista(self._ficha_actual(), "enlace") if self._actual else {}
+
+    @Property("QVariantMap", notify=actualCambiado)
+    def paramTramo(self) -> dict:
+        """El parámetro con vista «tramo» (EditorTramo lo dibuja), o {}."""
+        return svc.parametro_con_vista(self._ficha_actual(), "tramo") if self._actual else {}
+
+    @Property(str, notify=actualCambiado)
+    def accion(self) -> str:
+        """El texto del botón que corre la herramienta («Descargar»), o "" (el de siempre)."""
+        return str(self._ficha_actual().get("accion") or "") if self._actual else ""
+
+    # ------------------------------------------------------------------ el enlace (vista «enlace»)
+    @Property("QVariantMap", notify=enlaceCambiado)
+    def infoEnlace(self) -> dict:
+        return dict(self._enlace)
+
+    @Property(str, notify=enlaceCambiado)
+    def estadoEnlace(self) -> str:
+        """"" · «consultando» · «listo» · «error»."""
+        return self._enlace_estado
+
+    @Slot(str)
+    def consultarEnlace(self, texto: str) -> None:
+        """Consulta el primer enlace en segundo plano (el corredor con yt-dlp); el resultado llega a `infoEnlace`."""
+        import threading
+        urls = [u.strip() for u in (texto or "").splitlines() if u.strip()]
+        self._enlace_pedido += 1
+        pedido = self._enlace_pedido
+        if not urls:
+            self._enlace, self._enlace_estado = {}, ""
+            self.enlaceCambiado.emit()
+            return
+        self._enlace, self._enlace_estado = {"url": urls[0], "varios": len(urls) > 1}, "consultando"
+        self.enlaceCambiado.emit()
+        cookies = str(self._valores.get("cookies") or "")
+
+        def trabajo():
+            try:
+                info = svc.consultar_enlace(urls[0], cookies)
+            except Exception as e:      # noqa: BLE001
+                info = {"error": str(e)}
+            info["varios"] = len(urls) > 1
+            self._enlaceLlego.emit(pedido, info)
+
+        threading.Thread(target=trabajo, daemon=True).start()
+
+    def _enlace_recibido(self, pedido: int, info: dict) -> None:
+        if pedido != self._enlace_pedido:
+            return
+        self._enlace = dict(info)
+        self._enlace_estado = "error" if info.get("error") else "listo"
+        self.enlaceCambiado.emit()
 
     @Property(bool, notify=actualCambiado)
     def aceptaLosArchivos(self) -> bool:
@@ -352,6 +439,7 @@ class Herramientas(QObject):
             self._valores[clave] = valor
         self._s.setValue(f"opciones/{self._actual}", json.dumps(self._valores, ensure_ascii=False, default=str))
         self.opcionesCambiadas.emit()
+        self._campos_quizas()
 
     @Slot()
     def restablecerOpciones(self) -> None:
@@ -359,6 +447,7 @@ class Herramientas(QObject):
             self._valores = {}
             self._s.remove(f"opciones/{self._actual}")
             self.opcionesCambiadas.emit()
+            self._campos_quizas()
 
     @Property(bool, notify=opcionesCambiadas)
     def enCarpeta(self) -> bool:

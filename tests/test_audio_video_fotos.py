@@ -34,6 +34,40 @@ def test_descargar_sin_enlace_es_error_claro():
 
 
 @pytest.mark.skipif(not shutil.which("ffmpeg"), reason="falta ffmpeg")
+def test_descargar_la_ficha_dice_como_pedirla():
+    """La descarga guiada (2026-11-19): enlace y tramo con su vista, lo que depende de otro parámetro con `si`, lo
+    demás plegado en «Más opciones» y el botón «Descargar»; ninguna interfaz sabe que es «descargar»."""
+    f = obtener("descargar").ficha()
+    p = {x["clave"]: x for x in f["parametros"]}
+    assert p["url"]["vista"] == "enlace" and p["tramo"]["vista"] == "tramo"
+    assert p["calidad"]["si"] == ["modo", "video"] and p["formato_audio"]["si"] == ["modo", "audio"]
+    assert {k for k, x in p.items() if x["grupo"]} == {"subtitulos", "subtitulos_auto", "lista", "elementos", "caratula",
+                                                       "sponsorblock", "cookies"}
+    assert f["accion"] == "Descargar"
+
+
+def test_leer_tramo_entiende_las_tres_clases():
+    from raphi.motor.audio_video import leer_tramo
+    assert leer_tramo("1:02:00-1:05:30") == {"clase": "abs", "inicio": 3720, "fin": 3930}
+    assert leer_tramo("@11:17-@11:22") == {"clase": "reloj", "inicio": 40620, "fin": 40920}   # HH:MM en la hora
+    assert leer_tramo("-16:30--14:08") == {"clase": "vivo", "inicio": -990, "fin": -848}
+    assert leer_tramo("@23:50 a @00:10")["fin"] == 86400 + 600                                # pasa la medianoche
+    for malo in ("1:00", "2:00-1:00", "-1:00-2:00", "ayer-hoy"):
+        with pytest.raises(motor.ErrorOperacion):
+            leer_tramo(malo)
+
+
+def test_descargar_rechaza_un_tramo_mal_escrito_antes_de_bajar(tmp_path):
+    inf = motor.ejecutar("descargar", [], {"url": "https://example.org/v", "tramo": "de 1 a 2"}, destino=tmp_path)
+    assert not inf.ok and "no se entiende" in inf.elementos[0].error and not list(tmp_path.iterdir())
+
+
+def test_consultar_enlace_rechaza_lo_que_no_es_enlace():
+    from raphi.motor.audio_video import consultar_enlace
+    with pytest.raises(motor.ErrorOperacion):
+        consultar_enlace("no es un enlace")
+
+
 def test_transcribir_simula(tmp_path):
     audio = tmp_path / "a.wav"
     subprocess.run(["ffmpeg", "-loglevel", "error", "-f", "lavfi", "-i", "sine=duration=1", str(audio)], check=True)

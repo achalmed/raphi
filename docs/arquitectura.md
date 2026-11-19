@@ -140,6 +140,14 @@ Lo usan la CLI (`raphi <operación>`), la API y la web que vienen (R2–R3) y, a
   por entrada y anota el error de cada una sin detener el resto; `Contexto.salida` nunca devuelve la ruta de una
   entrada ni una que exista («-2», «-3»…); `verificar_salida` comprueba toda salida (existe, no está vacía; un PDF abre
   y tiene páginas) antes de darla por buena. Con `simular=True` cada función devuelve su `plan` sin escribir.
+- **La ficha también dice cómo se pide** (2026-11-19), sin que ninguna interfaz sepa de qué operación se trata:
+  `Parametro.si` (se muestra solo si otro parámetro vale eso: «Formato del audio» solo con «Solo el audio»),
+  `Parametro.grupo` (plegado bajo ese título: «Más opciones»), `Parametro.vista` («caja»; «enlace»: la interfaz
+  consulta los enlaces con `consultar_enlace` —`GET /api/raphi/enlace`, `corredor.py enlace`— y muestra qué son;
+  «tramo»: un tramo elegido con una barra sobre la duración o, en un directo, sobre su ventana y por la hora) y
+  `Operacion.accion` (el texto del botón: «Descargar»). La web los dibuja en `Formulario.tsx` (`CampoEnlace`,
+  `EditorTramo`) y Raphi Studio en `Opciones.qml` (`EditorEnlace`, `EditorTramo`, un segundo `PaginaFormulario` para
+  el grupo).
 - **Recetas** (`raphi/recetas.py`): pasos encadenados en una carpeta temporal; lo que sale de un paso entra al
   siguiente, un paso sin cambio deja pasar lo que recibió y solo el resultado final se copia al destino.
 - **Fuentes** (`raphi/fuentes/`): de dónde sale un inventario de páginas; «hub» es el caso de page-counter y solo

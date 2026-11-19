@@ -95,7 +95,12 @@ export default function PanelTrabajo({ trabajo: inicial, extra }: { trabajo: Tra
             <Stack key={i} direction="row" spacing={1} alignItems="flex-start">
               {e.ok ? <CheckCircleOutlineIcon color="success" fontSize="small" /> : <ErrorOutlineIcon color="error" fontSize="small" />}
               <Box sx={{ minWidth: 0 }}>
-                <Typography variant="body2" noWrap title={e.entrada}>{e.entrada.split('/').pop()}</Typography>
+                <Typography variant="body2" noWrap title={e.entrada}>
+                  {/* Una herramienta sin archivos de entrada (descargar) informa «0 archivos»: se dice lo que dejó */}
+                  {/^0 archivos?$/.test(e.entrada) && e.ok
+                    ? (t.salidas.length === 1 ? '1 archivo listo' : `${t.salidas.length} archivos listos`)
+                    : e.entrada.split('/').pop()}
+                </Typography>
                 {e.error && <Typography variant="body2" color="error">{e.error}</Typography>}
                 {[...(e.plan ?? []), ...(e.mensajes ?? [])].map((m, j) => (
                   <Typography key={j} variant="caption" color="text.secondary" component="div">{m}</Typography>

@@ -151,7 +151,8 @@ _clip_extract_urls() {
     elif [ "${OPT_QUALITY}" = "worst" ]; then
         vsel="wv*"
     else
-        vsel="bv*[height<=?${OPT_QUALITY}]"
+        vsel="bv*"
+        access+=( -S "res:${OPT_QUALITY}" )   # el lado corto, como en options.sh
     fi
 
     CLIP_VIDEO_URL="" ; CLIP_AUDIO_URL=""
@@ -272,8 +273,14 @@ _clip_run_ffmpeg() {
         cmd+=( -c:v libx264 -crf "${CLIP_VIDEO_CRF}" -preset "${CLIP_VIDEO_PRESET}" )
         cmd+=( -c:a aac -b:a "${CLIP_AUDIO_BITRATE}" -movflags +faststart -shortest )
     else
-        # Formato combinado: una sola entrada ('?' = audio opcional)
-        cmd+=( -ss "${ssv}" -t "${CLIP_DURATION}" -i "${CLIP_VIDEO_URL}" )
+        # Formato combinado: una sola entrada ('?' = audio opcional). Con el tramo de un directo ya en disco
+        # (CLIP_SEEK_SALIDA, lib/clipper_hls.sh) el -ss va DESPUÉS de -i: buscar antes deja el video unos segundos
+        # tarde respecto del audio en esos MPEG-TS pegados (se vio el 2026-11-19: video desde 2,1 s)
+        if [ "${CLIP_SEEK_SALIDA:-false}" = true ]; then
+            cmd+=( -i "${CLIP_VIDEO_URL}" -ss "${ssv}" -t "${CLIP_DURATION}" )
+        else
+            cmd+=( -ss "${ssv}" -t "${CLIP_DURATION}" -i "${CLIP_VIDEO_URL}" )
+        fi
         cmd+=( -map 0:v:0 -map "0:a:0?" )
         cmd+=( -c:v libx264 -crf "${CLIP_VIDEO_CRF}" -preset "${CLIP_VIDEO_PRESET}" )
         cmd+=( -c:a aac -b:a "${CLIP_AUDIO_BITRATE}" -movflags +faststart -shortest )
