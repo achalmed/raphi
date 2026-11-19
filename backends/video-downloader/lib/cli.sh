@@ -118,9 +118,15 @@ ${CLR_BOLD}MODO Y CALIDAD:${CLR_RESET}
 
 ${CLR_BOLD}RECORTE EXACTO DE TRAMOS:${CLR_RESET}
         --clip <INI-FIN>    Recorta solo ese tramo, con corte exacto y
-                            verificación automática (formatos: H:MM:SS,
-                            MM:SS o SS). Compatible con modos video/best/audio.
-                            Ej.: --clip 2:46:00-2:47:00
+                            verificación automática. Compatible con los modos
+                            video/best/audio. También sin --clip, tras el enlace:
+                              main.sh <url> 2:46:00-2:47:00   desde el comienzo
+                              main.sh <url> -16:30--14:08     EN VIVO: hacia atrás
+                                                              desde el vivo (ahora)
+                              main.sh <url> @11:20-@11:22:35  EN VIVO: por la hora
+                            Tiempos H:MM:SS, MM:SS o SS; separador «-», «..» o
+                            « a ». En un directo de YouTube baja solo los
+                            segmentos del tramo (hasta 12 h hacia atrás).
 
 ${CLR_BOLD}AUDIO (modo audio):${CLR_RESET}
         --audio-format <f>  mp3|m4a|opus|flac|wav|vorbis|aac|best  (def: ${DEFAULT_AUDIO_FORMAT})
@@ -266,6 +272,12 @@ parse_args() {
             --extra)               _require_value "--extra" "${2:-}"; OPT_EXTRA="$2"; shift 2 ;;
 
             --)                    shift; while [[ $# -gt 0 ]]; do OPT_URLS+=("$1"); shift; done ;;
+            # Un tramo suelto (también «-16:30--14:08», que empieza por guion): «main.sh <url> <tramo>»
+            -[0-9]*|@[0-9]*|[0-9]*)
+                if clip_looks_like_range "$1"; then OPT_CLIP="$1"
+                elif [[ "$1" == -* ]]; then log_error "Argumento desconocido: '$1'"; exit 2
+                else OPT_URLS+=("$1"); fi
+                shift ;;
             -*)
                 log_error "Argumento desconocido: '$1'"
                 log_error "Usa --help para ver las opciones disponibles."

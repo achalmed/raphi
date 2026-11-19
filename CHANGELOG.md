@@ -17,6 +17,15 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 ### Sin publicar
 
+#### Añadido (2026-11-19, tramos de transmisiones en vivo)
+
+- `descargar` y `backends/video-downloader` recortan un tramo **de un directo** (YouTube y otros sitios HLS) mientras
+  sigue en vivo: desde el comienzo (`1:02:00-1:05:30`), hacia atrás desde el vivo (`-16:30--14:08`) o por la hora del
+  reloj (`@11:20-@11:22:35`). Se bajan solo los segmentos del tramo, uno tras otro y renovando la lista cuando YouTube
+  responde 403 (`lib/hls_tramo.py`, `lib/clipper_hls.sh`); el clip se rotula con su hora real.
+- El tramo va suelto tras el enlace: `main.sh <url> 1:20-2:30` (sin `--clip`); separadores `-`, `..` o ` a `.
+- Los títulos de Facebook salen sin vistas ni reacciones («4.2K views · 387 reactions | … on Reels»).
+
 #### Cambiado (2026-11-12, la escala de diseño de Qillqa)
 
 - Tres títulos de 15 y 17 px a 16 y un peso 500 a 400, según `qillqa/frontend/src/diseno.ts`.

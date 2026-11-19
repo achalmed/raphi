@@ -54,6 +54,9 @@ formatos, sin descargar) y `subs` (solo subtítulos).
 ./main.sh --cookies-browser firefox "https://www.facebook.com/watch?v=ZZZZ"
 ./main.sh --subs --auto-subs --embed-subs --sub-langs es "https://youtu.be/XXXX"
 ./main.sh --clip 2:46:00-2:47:00 -o ~/Downloads "https://www.facebook.com/watch?v=ZZZZ"
+./main.sh "https://youtu.be/XXXX" 2:46:00-2:47:00                 # el tramo, suelto tras el enlace
+./main.sh "https://www.youtube.com/watch?v=VIVO" -16:30--14:08     # EN VIVO: hacia atrás desde el vivo
+./main.sh "https://www.youtube.com/watch?v=VIVO" @11:20-@11:22:35  # EN VIVO: por la hora del reloj
 ./main.sh --batch urls.txt --archive --no-confirm --log
 ./main.sh -m formats "https://youtu.be/XXXX"; ./main.sh -f "137+140" "https://youtu.be/XXXX"
 ./main.sh --update                                                 # yt-dlp -U y sale
@@ -75,7 +78,7 @@ En `--batch`, una URL por línea; las vacías y las que empiezan por `#` se salt
 | `-f`, `--format STR` | cadena `-f` cruda de yt-dlp (ignora `-q`) | — |
 | `--audio-format F` | `mp3`, `m4a`, `opus`, `flac`, `wav`, `vorbis`, `aac` o `best` | `mp3` |
 | `--audio-quality Q` | `0` (mejor) a `10`, o un bitrate (`192K`) | `0` |
-| `--clip INI-FIN` | recorta ese tramo (`H:MM:SS`, `MM:SS` o segundos); solo modos `video`, `best`, `audio` | — |
+| `--clip INI-FIN` | recorta ese tramo (`H:MM:SS`, `MM:SS` o segundos; en un directo también `-MM:SS` desde el vivo o `@HH:MM[:SS]` por la hora; separador `-`, `..` o ` a `); también suelto tras el enlace; solo modos `video`, `best`, `audio` | — |
 | `-o`, `--output-dir DIR` | carpeta de destino | «~/Downloads/videos» |
 | `-t`, `--template TPL` | plantilla de nombres de yt-dlp | `%(title)s [%(id)s].%(ext)s` |
 | `--organize` | subcarpetas por autor y lista | `false` |
@@ -120,6 +123,8 @@ en mp4) y `jq` (resumen del modo `info`).
 | `lib/validator.sh` | dependencias, calidad, cookies, carpeta de destino, objetivos |
 | `lib/options.sh` | traduce las opciones al arreglo de argumentos de yt-dlp |
 | `lib/clipper.sh` | `--clip`: URL crudas con `yt-dlp -g`, corte con ffmpeg, verificación con ffprobe, nombre del clip |
+| `lib/clipper_hls.sh` | `--clip` sobre una transmisión **en vivo** (HLS, p. ej. YouTube): decide el camino y prepara el corte |
+| `lib/hls_tramo.py` | lee la ventana de rebobinado con la hora de cada segmento y baja solo los del tramo |
 | `lib/clipper_dash.sh` | `--clip` sobre grabaciones de vivos de Facebook (DASH «dynamic»): calibra y baja solo los segmentos del tramo |
 | `lib/downloader.sh` | lotes, un objetivo por modo, contadores de éxito y fallo |
 | `lib/summary.sh` | banner de configuración, confirmación, resumen y `--post-cmd` |
@@ -139,6 +144,14 @@ en mp4) y `jq` (resumen del modo `info`).
   (`CLIP_DASH_PARALLEL` a la vez) a una carpeta temporal que se borra al terminar; el minuto 0 es el primer segmento
   de la emisión. Depende de los atributos `FBPredicted*` del manifiesto: si Facebook los retira, este camino deja de
   aplicar y se vuelve al corte normal.
+- **`--clip` en un directo** (YouTube y otros HLS) baja los segmentos del tramo **uno tras otro**: YouTube rechaza con
+  403 los pedidos en paralelo y, tras unos once segmentos, la misma lista; ante un 403 se pide una lista nueva a
+  yt-dlp y se sigue por el número de segmento (`RENOVACIONES_MAX` en `lib/hls_tramo.py`). Unos 4 min de 1080p tardan
+  ~4 min (bajar y re-codificar). La ventana de YouTube llega a 12 h hacia atrás.
+- **`-16:30--14:08` se cuenta desde el vivo en el momento de la orden**, no cuando se miró el reproductor: con el
+  directo andando, ese tramo corre. Lo estable es la hora (`@11:18:44-@11:20:47`); el clip se rotula con su hora real.
+- **`-q` es la altura**: en un video vertical (un reel de 720×1280) `-q 1080` baja la versión de 768 de alto; para
+  verticales, `-q best`.
 - **`--clip` en modo audio con `vorbis` o `best`** codifica AAC, pero la extensión del archivo es la palabra pedida.
 - **`--extra` divide por espacios simples**: un valor con espacios va en `EXTRA_YTDLP_OPTS` de `config.sh`, un
   elemento por token.

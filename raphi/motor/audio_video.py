@@ -62,7 +62,7 @@ NAVEGADORES = (("", "Ninguno (vídeos públicos)"), ("firefox", "Firefox"), ("ch
                                  opciones=("2160", "1440", "1080", "720", "480", "360", "best")),
                        Parametro("formato_audio", "Formato del audio", "opcion", "mp3",
                                  opciones=("mp3", "m4a", "opus", "flac", "wav")),
-                       Parametro("tramo", "Tramo (INI-FIN, p. ej. 1:02:00-1:05:30)", "texto", "",
+                       Parametro("tramo", "Tramo (1:02:00-1:05:30; en vivo, -16:30--14:08 desde el vivo o @11:20-@11:22 por la hora)", "texto", "",
                                  ayuda="vacío: todo el video"),
                        Parametro("subtitulos", "Bajar subtítulos (es, en)", "casilla", False),
                        Parametro("subtitulos_auto", "También los subtítulos automáticos", "casilla", False),

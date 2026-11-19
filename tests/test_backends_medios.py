@@ -106,6 +106,33 @@ def test_video_downloader_help(entorno):
                         home.parent, trabajo, env)
 
 
+def test_video_downloader_tramos_en_vivo():
+    """El tramo de un directo HLS: las tres clases de tiempo, sin red (lista HLS de muestra)."""
+    import importlib.util
+    import time
+    spec = importlib.util.spec_from_file_location("hls_tramo", BACKENDS / "video-downloader" / "lib" / "hls_tramo.py")
+    h = importlib.util.module_from_spec(spec)
+    sys.modules["hls_tramo"] = h          # sus dataclasses lo buscan ahí
+    spec.loader.exec_module(h)
+    # Una ventana de 1 h en segmentos de 5 s que empieza a las 15:00:00 UTC
+    texto = "#EXTM3U\n#EXT-X-TARGETDURATION:5\n#EXT-X-MEDIA-SEQUENCE:0\n" \
+            "#EXT-X-PROGRAM-DATE-TIME:2026-11-19T15:00:00+00:00\n" + "".join(
+                f"#EXTINF:5.0,\nseg/{i}.ts\n" for i in range(720))
+    lista = h.leer_lista(texto, "https://ejemplo.invalid/lista.m3u8")
+    assert len(lista.segmentos) == 720 and lista.vivo
+    assert lista.segmentos[3].url == "https://ejemplo.invalid/seg/3.ts"
+    a, b = h.leer_rango("10:00-12:30")
+    assert h.limites(lista, a, b, time.time()) == (600, 750)
+    a, b = h.leer_rango("-16:30--14:08")
+    assert h.limites(lista, a, b, time.time()) == (3600 - 990, 3600 - 848)
+    a, b = h.leer_rango("@11:20 a @11:22:35")       # HH:MM en la hora; se compara con la hora local
+    assert (a, b) == (("reloj", 11 * 3600 + 1200), ("reloj", 11 * 3600 + 1355))
+    with pytest.raises(h.ErrorTramo):
+        h.leer_rango("-1:00-2:00")                  # clases mezcladas
+    with pytest.raises(h.ErrorTramo):
+        h.limites(lista, *h.leer_rango("50:00-70:00"), time.time())   # fuera de la ventana
+
+
 @pytest.mark.skip(reason="red: --simulate <url> consulta el sitio con yt-dlp; ver test_video_downloader_help")
 def test_video_downloader_simulate():
     pass

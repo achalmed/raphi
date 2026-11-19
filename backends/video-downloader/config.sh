@@ -120,6 +120,14 @@ USER_AGENT=""                 # User-Agent personalizado (vacío = el de yt-dlp)
 OUTPUT_TEMPLATE="%(title)s [%(id)s].%(ext)s"
 OUTPUT_TEMPLATE_ORGANIZED="%(uploader).80B/%(playlist_title|Sueltos)s/%(title)s [%(id)s].%(ext)s"
 
+# --- Títulos limpios -------------------------------------------------------
+# Facebook pone en el título las vistas y las reacciones («4.2K views · 387
+# reactions | Título on Reels»); se quitan antes de nombrar el archivo.
+TITLE_CLEANUP_ARGS=(
+    --replace-in-metadata title '^[0-9.,]+[KkMm]? (views|vistas|reproducciones)( · [0-9.,]+[KkMm]? (reactions|reacciones))? *[|｜] *' ''
+    --replace-in-metadata title ' *(on Reels|[|｜] *Facebook)$' ''
+)
+
 # --- Flags crudas extra para yt-dlp (casos avanzados) ----------------------
 # Todo lo que no esté envuelto por una flag propia va aquí, un elemento por token.
 # Ej.: EXTRA_YTDLP_OPTS=( "--geo-bypass-country" "US" "--force-ipv4" )

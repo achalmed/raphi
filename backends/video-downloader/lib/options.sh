@@ -186,6 +186,7 @@ _opts_misc() {
 build_ytdlp_args() {
     YTDLP_ARGS=()
     _opts_output
+    YTDLP_ARGS+=( "${TITLE_CLEANUP_ARGS[@]}" )   # títulos sin vistas ni reacciones (config.sh)
     _opts_format
     _opts_audio
     _opts_subs

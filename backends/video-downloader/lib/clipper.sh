@@ -17,7 +17,11 @@
 # =============================================================================
 
 # --- Estado global del clip (lo fija clip_parse_range desde main) ----------
-CLIP_START=""        # tiempo de inicio tal como lo escribió el usuario
+CLIP_START=""        # tiempo de inicio (sin «-» ni «@») para el corte normal
+CLIP_START_RAW=""    # extremos tal como los escribió el usuario
+CLIP_END_RAW=""
+CLIP_KIND="abs"      # abs (desde el comienzo) · vivo (hacia atrás desde el vivo) · reloj (hora)
+CLIP_BASE=""         # «<título> [<id>]» saneado
 CLIP_DURATION=0      # duración del tramo en segundos
 CLIP_LABEL=""        # etiqueta para el nombre de archivo (sin ':')
 CLIP_OUTPUT=""       # ruta final del clip (la fija _clip_output_path)
@@ -56,27 +60,59 @@ _time_to_seconds() {
 #   0 y fija CLIP_START/CLIP_DURATION/CLIP_LABEL; exit 2 si es inválido
 clip_parse_range() {
     local range="$1"
-    if [[ ! "${range}" =~ ^[0-9]+(:[0-9]{1,2}){0,2}-[0-9]+(:[0-9]{1,2}){0,2}$ ]]; then
-        log_error "--clip requiere INICIO-FIN (H:MM:SS, MM:SS o SS). Ej.: 2:46:00-2:47:00"
+    # Un extremo: H:MM:SS, MM:SS o SS (con decimales); «-» delante = hacia atrás
+    # desde el vivo; «@» delante = hora del reloj. Separador: «-», «..» o « a ».
+    local t='[0-9]+(:[0-9]{1,2}){0,2}([.][0-9]+)?'
+    local e="(@${t}|-?${t})"
+    if [[ ! "${range}" =~ ^[[:space:]]*${e}[[:space:]]*(-|[.][.]|[[:space:]]a[[:space:]])[[:space:]]*${e}[[:space:]]*$ ]]; then
+        log_error "Tramo no válido: '${range}'. Ejemplos: 2:46:00-2:47:00 · -16:30--14:08 (desde el vivo) · @11:20-@11:22:35 (por la hora)"
+        exit 2
+    fi
+    # BASH_REMATCH: 1 = primer extremo (2–5, sus grupos internos); 6 = separador; 7 = segundo extremo
+    local start_raw="${BASH_REMATCH[1]}" end_raw="${BASH_REMATCH[7]}"
+
+    local k1=abs k2=abs
+    [[ "${start_raw}" == -* ]] && k1=vivo; [[ "${start_raw}" == @* ]] && k1=reloj
+    [[ "${end_raw}" == -* ]] && k2=vivo;   [[ "${end_raw}" == @* ]] && k2=reloj
+    if [ "${k1}" != "${k2}" ]; then
+        log_error "Los dos extremos del tramo deben ser de la misma clase: '${range}'"
         exit 2
     fi
 
-    local start_raw="${range%%-*}" end_raw="${range##*-}"
-    local start_secs end_secs
-    start_secs=$(_time_to_seconds "${start_raw}")
-    end_secs=$(_time_to_seconds "${end_raw}")
-
+    local s="${start_raw#[-@]}" f="${end_raw#[-@]}" start_secs end_secs
+    if [ "${k1}" = reloj ]; then   # en la hora, «11:20» es HH:MM, no MM:SS
+        [[ "${s%%.*}" =~ ^[0-9]+:[0-9]+$ ]] && s="${s}:00"
+        [[ "${f%%.*}" =~ ^[0-9]+:[0-9]+$ ]] && f="${f}:00"
+    fi
+    start_secs=$(_time_to_seconds "${s%%.*}")
+    end_secs=$(_time_to_seconds "${f%%.*}")
+    case "${k1}" in
+        vivo)  local tmp="${start_secs}"; start_secs="${end_secs}"; end_secs="${tmp}" ;;  # -16:30 va antes que -14:08
+        reloj) [ "${end_secs}" -le "${start_secs}" ] && end_secs=$(( end_secs + 86400 )) ;;
+    esac
     if [ "${end_secs}" -le "${start_secs}" ]; then
-        log_error "--clip: el FIN (${end_raw}) debe ser mayor que el INICIO (${start_raw})"
+        log_error "El FIN del tramo (${end_raw}) debe ser posterior al INICIO (${start_raw})"
         exit 2
     fi
 
-    CLIP_START="${start_raw}"
+    CLIP_KIND="${k1}"
+    CLIP_START_RAW="${start_raw}"
+    CLIP_END_RAW="${end_raw}"
+    CLIP_START="${s}"
     CLIP_DURATION=$(( end_secs - start_secs ))
     # ':' es inválido en FAT/NTFS; se usa '.' en el nombre de archivo
-    CLIP_LABEL="${start_raw//:/.}-${end_raw//:/.}"
-    log_debug "Clip: inicio=${CLIP_START} duración=${CLIP_DURATION}s"
+    CLIP_LABEL="${start_raw//:/.}_${end_raw//:/.}"
+    [ "${k1}" != vivo ] && CLIP_LABEL="${s//:/.}-${f//:/.}"
+    log_debug "Clip: clase=${CLIP_KIND} inicio=${CLIP_START_RAW} duración=${CLIP_DURATION}s"
     return 0
+}
+
+# --- clip_looks_like_range() -----------------------------------------------
+# ¿Es este argumento suelto un tramo? (para «main.sh <url> 1:20-2:30»)
+clip_looks_like_range() {
+    local t='[0-9]+(:[0-9]{1,2}){0,2}([.][0-9]+)?'
+    local e="(@${t}|-?${t})"
+    [[ "$1" =~ ^${e}(-|[.][.])${e}$ ]] && [[ "$1" == *[:@.]* || "$1" =~ ^[0-9]+-[0-9]+$ ]]
 }
 
 # --- _clip_access_args() ---------------------------------------------------
@@ -175,13 +211,20 @@ _clip_output_path() {
     _clip_access_args access
 
     local base
-    base=$(yt-dlp "${access[@]}" --print "%(title)s [%(id)s]" -- "${url}" 2>/dev/null | head -1) || true
+    base=$(yt-dlp "${access[@]}" "${TITLE_CLEANUP_ARGS[@]}" --print "%(title)s [%(id)s]" -- "${url}" 2>/dev/null \
+           | head -1) || true
     base="${base//\//_}"                    # '/' en el título rompería la ruta
-    base=$(_clip_sanitize_base "${base}")   # nunca vacío, nunca dotfile oculto
+    CLIP_BASE=$(_clip_sanitize_base "${base}")   # nunca vacío, nunca dotfile oculto
+    _clip_compose_output
+}
 
+# --- _clip_compose_output() ------------------------------------------------
+# Arma CLIP_OUTPUT con CLIP_BASE y CLIP_LABEL (clipper_hls.sh la vuelve a
+# llamar cuando el tramo de un directo se rotula con su hora real).
+_clip_compose_output() {
     local ext="${OPT_CONTAINER}"
     [ "${OPT_MODE}" = "audio" ] && ext="${OPT_AUDIO_FORMAT}"
-    CLIP_OUTPUT="${OPT_OUTPUT_DIR}/${base} (clip ${CLIP_LABEL}).${ext}"
+    CLIP_OUTPUT="${OPT_OUTPUT_DIR}/${CLIP_BASE} (clip ${CLIP_LABEL}).${ext}"
 }
 
 # --- _clip_audio_codec_args() ----------------------------------------------
@@ -230,7 +273,7 @@ _clip_run_ffmpeg() {
         cmd+=( -c:a aac -b:a "${CLIP_AUDIO_BITRATE}" -movflags +faststart -shortest )
     else
         # Formato combinado: una sola entrada ('?' = audio opcional)
-        cmd+=( -ss "${CLIP_START}" -t "${CLIP_DURATION}" -i "${CLIP_VIDEO_URL}" )
+        cmd+=( -ss "${ssv}" -t "${CLIP_DURATION}" -i "${CLIP_VIDEO_URL}" )
         cmd+=( -map 0:v:0 -map "0:a:0?" )
         cmd+=( -c:v libx264 -crf "${CLIP_VIDEO_CRF}" -preset "${CLIP_VIDEO_PRESET}" )
         cmd+=( -c:a aac -b:a "${CLIP_AUDIO_BITRATE}" -movflags +faststart -shortest )
@@ -284,20 +327,32 @@ _clip_verify() {
 #   0 si el clip se creó y verificó; 1 en cualquier fallo
 run_clip() {
     local url="$1"
-    _clip_extract_urls "${url}" || return 1
+    CLIP_SS_VIDEO="" ; CLIP_SS_AUDIO=""
+    local en_vivo=false
+    clip_hls_applies "${url}" && en_vivo=true
+    if [ "${en_vivo}" = false ]; then
+        _clip_extract_urls "${url}" || return 1
+    fi
     _clip_output_path "${url}"
 
     if [ "${OPT_SIMULATE}" = true ]; then
-        log_info "[SIMULACIÓN] Se recortaría ${CLIP_START} +${CLIP_DURATION}s → ${CLIP_OUTPUT}"
+        log_info "[SIMULACIÓN] Se recortaría ${OPT_CLIP}$([ "${en_vivo}" = true ] && echo ' del directo') → ${CLIP_OUTPUT}"
         return 0
+    fi
+
+    # Transmisión en vivo (HLS): se bajan solo los segmentos del tramo (lib/clipper_hls.sh)
+    if [ "${en_vivo}" = true ]; then
+        if ! clip_hls_prepare "${url}"; then
+            clip_hls_cleanup
+            return 1
+        fi
     fi
 
     # Grabación de un vivo (manifiesto DASH «dynamic»): ffmpeg no puede saltar
     # dentro de él; se bajan solo los segmentos del tramo (lib/clipper_dash.sh)
-    CLIP_SS_VIDEO="" ; CLIP_SS_AUDIO=""
     local raw="${CLIP_VIDEO_URL:-${CLIP_AUDIO_URL}}"
     [ "${OPT_MODE}" = "audio" ] && raw="${CLIP_AUDIO_URL}"
-    if clip_dash_applies "${raw}"; then
+    if [ "${en_vivo}" = false ] && clip_dash_applies "${raw}"; then
         if ! clip_dash_prepare "${raw}"; then
             clip_dash_cleanup
             return 1
@@ -308,11 +363,11 @@ run_clip() {
     if ! _clip_run_ffmpeg; then
         # Un archivo a medias no sirve y confunde; se elimina
         rm -f "${CLIP_OUTPUT}"
-        clip_dash_cleanup
+        clip_dash_cleanup; clip_hls_cleanup
         log_error "ffmpeg falló al recortar el tramo."
         return 1
     fi
-    clip_dash_cleanup
+    clip_dash_cleanup; clip_hls_cleanup
 
     _clip_verify || return 1
     log_ok "Clip guardado: ${CLIP_OUTPUT}"
