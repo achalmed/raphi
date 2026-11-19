@@ -210,6 +210,9 @@ def _miniatura(url: str) -> str:
         return ""
 
 
+VENTANA_YOUTUBE = 4 * HORAS       # lo que YouTube deja rebobinar en un directo (medido el 2026-11-19)
+
+
 def _ventana_en_vivo(url: str, cookies: str) -> dict:
     """De un directo HLS: desde qué hora y hasta qué hora se puede bajar (la ventana de rebobinado)."""
     import importlib.util
@@ -224,7 +227,10 @@ def _ventana_en_vivo(url: str, cookies: str) -> dict:
     lista = h.leer_lista(h.pedir(lista_url).decode("utf-8", "replace"), lista_url)
     primero, ultimo = lista.segmentos[0], lista.segmentos[-1]
     fin = ultimo.inicio + ultimo.duracion
-    return {"segundos": round(fin, 1), "desde": primero.hora, "hasta": (primero.hora + fin) if primero.hora else None}
+    # `llena`: la ventana ya llegó a su tope (en YouTube, unas 4 h) y su inicio avanza con el vivo; la interfaz mueve los
+    # dos extremos con el reloj, no solo el final
+    return {"segundos": round(fin, 1), "desde": primero.hora, "hasta": (primero.hora + fin) if primero.hora else None,
+            "llena": fin >= VENTANA_YOUTUBE - 120}
 
 
 def consultar_enlace(url: str, cookies: str = "") -> dict:
@@ -266,7 +272,8 @@ def consultar_enlace(url: str, cookies: str = "") -> dict:
             "sitio": d.get("extractor_key") or d.get("extractor") or "", "lista": d.get("_type") == "playlist",
             "elementos": len(d.get("entries") or []) if d.get("_type") == "playlist" else 0,
             "duracion": d.get("duration"), "en_vivo": d.get("live_status") == "is_live",
-            "miniatura": "", "vertical": False, "calidades": [], "ventana": None, "zona": time.localtime().tm_gmtoff}
+            "miniatura": "", "vertical": False, "calidades": [], "ventana": None, "zona": time.localtime().tm_gmtoff,
+            "consultado": time.time()}
     videos = [f for f in d.get("formats") or [] if f.get("height") and f.get("width") and f.get("vcodec") != "none"]
     if videos:
         mayor = max(videos, key=lambda f: f["height"] * f["width"])

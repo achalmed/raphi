@@ -10,11 +10,16 @@ import org.kde.kirigami as Kirigami
 
 ColumnLayout {
     id: raiz
-    required property var h            // studio.herramientas
+    property var h: studio.herramientas        // por omisión, el de la ventana (Opciones lo pasa igual)
     readonly property var p: h.paramTramo
     readonly property var info: h.estadoEnlace === "listo" && !h.infoEnlace.varios ? h.infoEnlace : ({})
     readonly property bool vivo: info.en_vivo === true && !!info.ventana && !!info.ventana.desde
-    readonly property var escala: vivo ? [info.ventana.desde, info.ventana.hasta] : (info.duracion ? [0, info.duracion] : null)
+    // En vivo la ventana crece mientras se mira: el reloj la corre cada segundo (y el inicio, si ya está llena)
+    property real ahora: Date.now() / 1000
+    readonly property real paso: vivo ? Math.max(0, ahora - (info.consultado || ahora)) : 0
+    readonly property var escala: vivo ? [info.ventana.desde + (info.ventana.llena ? paso : 0), info.ventana.hasta + paso]
+                                       : (info.duracion ? [0, info.duracion] : null)
+    Timer { interval: 1000; repeat: true; running: raiz.vivo && raiz.visible; onTriggered: raiz.ahora = Date.now() / 1000 }
     readonly property string valor: h.valores[p.clave] || ""
     property bool pide: valor !== ""
     readonly property bool quiere: vivo || pide
@@ -36,9 +41,9 @@ ColumnLayout {
         if (vivo) {
             if (m[1][0] !== "@" || m[2][0] !== "@") return null
             const dia = t => { const x = t.slice(1); return segundos(x.split(":").length === 2 ? x + ":00" : x) }
-            const base = info.ventana.hasta + info.zona, medianoche = base - (base % 86400) - info.zona
+            const hasta = escala[1], base = hasta + info.zona, medianoche = base - (base % 86400) - info.zona
             let a = medianoche + dia(m[1]), b = medianoche + dia(m[2])
-            if (a > info.ventana.hasta + 300) { a -= 86400; b -= 86400 }
+            if (a > hasta + 300) { a -= 86400; b -= 86400 }
             if (b <= a) b += 86400
             return [a, b]
         }
@@ -53,7 +58,7 @@ ColumnLayout {
         if (vivo) escribir(Math.max(escala[0], escala[1] - 120), escala[1])
         else escribir(escala[0], Math.min(escala[1], escala[0] + 60))
     }
-    onEscalaChanged: porOmision()
+    onInfoChanged: porOmision()
     onQuiereChanged: porOmision()
 
     Kirigami.Heading { level: 4; text: raiz.p.etiqueta || "Tramo" }

@@ -43,6 +43,7 @@ def main() -> int:
     parser.add_argument("--sin-correr", action="store_true", help="no corre nada antes de capturar")
     parser.add_argument("--paleta", default=None, help="abre la paleta de órdenes con este texto")
     parser.add_argument("--valores", default="", help='JSON con las opciones de la herramienta (p. ej. {"url": "https://…"}); un enlace se consulta antes de capturar')
+    parser.add_argument("--ficha", action="store_true", help="abre la Ficha de la herramienta antes de capturar")
     parser.add_argument("--ancho", type=int, default=1440)
     parser.add_argument("--alto", type=int, default=900)
     args = parser.parse_args()
@@ -135,6 +136,11 @@ def main() -> int:
             trabajos.irA(trabajos.id)
             if trabajos.salidas:
                 piezas["vista"].mostrar(trabajos.salidas[0])
+        if args.ficha:
+            from gui_comun.qt import QMetaObject, QObject
+            dialogo = raiz.findChild(QObject, "dialogoFicha")
+            if dialogo is not None:
+                QTimer.singleShot(600, lambda: QMetaObject.invokeMethod(dialogo, "open"))
         if args.paleta is not None:
             QTimer.singleShot(900, lambda: interfaz.pedir.emit("paleta", {"texto": args.paleta}))
         app.capturar(args.salida, espera_ms=3000)

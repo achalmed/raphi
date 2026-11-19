@@ -8,7 +8,7 @@ import org.kde.kirigami as Kirigami
 
 ColumnLayout {
     id: raiz
-    required property var h            // studio.herramientas
+    property var h: studio.herramientas        // por omisión, el de la ventana (Opciones lo pasa igual)
     readonly property var p: h.paramEnlace
     readonly property var info: h.infoEnlace
     readonly property bool vivo: info.en_vivo === true
@@ -93,7 +93,7 @@ ColumnLayout {
                     color: Kirigami.Theme.disabledTextColor
                     text: {
                         const i = raiz.info, partes = []
-                        if (raiz.vivo && i.ventana && i.ventana.desde) partes.push("se puede bajar de las " + raiz.hora(i.ventana.desde) + " a las " + raiz.hora(i.ventana.hasta))
+                        if (raiz.vivo && i.ventana && i.ventana.desde) partes.push("se puede bajar desde las " + raiz.hora(i.ventana.desde) + (i.ventana.llena ? " (corre con el vivo)" : "") + " hasta ahora")
                         else if (i.duracion) partes.push("Dura " + raiz.reloj(i.duracion))
                         if (i.lista) partes.push("lista de " + i.elementos + " videos")
                         if (i.vertical) partes.push("vertical")

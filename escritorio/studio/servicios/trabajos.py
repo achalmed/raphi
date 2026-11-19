@@ -127,6 +127,10 @@ def texto_resultado(t: Trabajo) -> str:
         partes.append(f"**No pudo empezar**: {t.informe['error']}")
     for e in t.informe.get("elementos", []):
         nombre = Path(e.get("entrada", "")).name or e.get("entrada", "")
+        if re.fullmatch(r"0 archivos?", nombre or "") and not t.archivos:
+            # una herramienta sin archivos de entrada (descargar): se dice lo que dejó, no «0 archivos»
+            n = len(e.get("archivos", []))
+            nombre = ("el plan" if t.simular else "1 archivo listo" if n == 1 else f"{n} archivos listos")
         cabeza = f"### {'·' if t.simular else ('✓' if e.get('ok') else '✗')} {nombre}"
         cuerpo = []
         if e.get("error"):

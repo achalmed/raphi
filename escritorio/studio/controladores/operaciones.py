@@ -203,6 +203,10 @@ class Operaciones(QObject):
         h = self.herramientas
         entradas = [] if h.sinArchivos else list(self.archivos.rutas)
         destino = h.destino if h.enCarpeta and h.destino.strip() else ""
+        if not destino and not entradas:
+            # sin archivos de entrada (descargar), «En Descargas» es la carpeta que muestra la ventana: se manda tal
+            # cual, para que el motor no elija otra por su cuenta
+            destino = str(rutas.carpeta_descargas())
         return self.trabajos.encolar(h.ref, h.titulo, entradas, dict(h.valores), destino, simular)
 
     def _lanzar(self, o: ops.Operacion, orden: ops.Orden) -> bool:

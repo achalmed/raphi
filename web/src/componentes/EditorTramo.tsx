@@ -15,7 +15,7 @@ import TextField from '@mui/material/TextField'
 import ToggleButton from '@mui/material/ToggleButton'
 import ToggleButtonGroup from '@mui/material/ToggleButtonGroup'
 import Typography from '@mui/material/Typography'
-import type { InfoEnlace, Parametro } from '../lib/api'
+import { ventanaAhora, type InfoEnlace, type Parametro } from '../lib/api'
 import { horaDe, reloj } from './CampoEnlace'
 
 const segundos = (t: string) => t.trim().split(':').reduce((acc, p) => acc * 60 + Number(p), 0)
@@ -28,10 +28,11 @@ function leer(valor: string, info: InfoEnlace | null): [number, number] | null {
   if (info.en_vivo && info.ventana?.desde != null) {
     if (!m[1].startsWith('@') || !m[2].startsWith('@')) return null
     const dia = (t: string) => { const x = t.slice(1); return segundos(x.split(':').length === 2 ? `${x}:00` : x) }
-    const base = info.ventana.hasta! + info.zona
+    const hasta = ventanaAhora(info)![1]
+    const base = hasta + info.zona
     const medianoche = base - (base % 86400) - info.zona
     let a = medianoche + dia(m[1]), b = medianoche + dia(m[2])
-    if (a > info.ventana.hasta! + 300) { a -= 86400; b -= 86400 }
+    if (a > hasta + 300) { a -= 86400; b -= 86400 }
     if (b <= a) b += 86400
     return [a, b]
   }
@@ -47,11 +48,18 @@ export default function EditorTramo({ parametro, valor, alCambiar, info, deshabi
   deshabilitado?: boolean
 }) {
   const vivo = Boolean(info?.en_vivo && info.ventana?.desde != null && info.ventana.hasta != null)
+  // En vivo, la ventana crece mientras se mira: el reloj la corre cada segundo (el «ahora» de la barra avanza)
+  const [ahora, setAhora] = useState(() => Date.now() / 1000)
+  useEffect(() => {
+    if (!vivo) return
+    const t = setInterval(() => setAhora(Date.now() / 1000), 1000)
+    return () => clearInterval(t)
+  }, [vivo])
   const escala = useMemo<[number, number] | null>(() => {
     if (!info) return null
-    if (vivo) return [info.ventana!.desde!, info.ventana!.hasta!]
+    if (vivo) return ventanaAhora(info, ahora)
     return info.duracion ? [0, info.duracion] : null
-  }, [info, vivo])
+  }, [info, vivo, ahora])
   const [pide, setPide] = useState(Boolean(valor))
   // Un directo siempre se baja por tramos: «todo» lo grabaría hasta que termine
   const quiere = vivo || pide
@@ -68,7 +76,7 @@ export default function EditorTramo({ parametro, valor, alCambiar, info, deshabi
     const [lo, hi] = escala
     if (actual && actual[0] >= lo && actual[1] <= hi + 1) return
     escribir(vivo ? [Math.max(lo, hi - 120), hi] : [lo, Math.min(hi, lo + 60)])
-  }, [escala, quiere]) // eslint-disable-line react-hooks/exhaustive-deps
+  }, [info, quiere]) // eslint-disable-line react-hooks/exhaustive-deps
   useEffect(() => { if (actual) setTextos([formato(actual[0]), formato(actual[1])]) }, [valor]) // eslint-disable-line react-hooks/exhaustive-deps
 
   const elegir = (q: boolean) => { setPide(q); if (!q) alCambiar('') }
@@ -113,7 +121,12 @@ export default function EditorTramo({ parametro, valor, alCambiar, info, deshabi
             onChange={(_e, v) => escribir(v as [number, number])} valueLabelDisplay="auto" valueLabelFormat={formato}
             getAriaValueText={formato} getAriaLabel={(k) => (k === 0 ? 'Inicio del tramo' : 'Fin del tramo')}
             marks={[{ value: escala[0], label: formato(escala[0]) }, { value: escala[1], label: vivo ? `${formato(escala[1])} (ahora)` : formato(escala[1]) }]}
-            sx={{ mx: 1, width: 'calc(100% - 16px)', '& .MuiSlider-markLabel': { fontSize: 12 } }} />
+            sx={{
+              mx: 1, width: 'calc(100% - 16px)', '& .MuiSlider-markLabel': { fontSize: 12 },
+              // las dos marcas de los extremos, hacia adentro: centradas se salían de una ventana angosta
+              '& .MuiSlider-markLabel[data-index="0"]': { transform: 'translateX(0)' },
+              '& .MuiSlider-markLabel[data-index="1"]': { transform: 'translateX(-100%)' },
+            }} />
           <Stack direction={{ xs: 'column', sm: 'row' }} spacing={1.5} sx={{ mt: 2.5 }} alignItems={{ sm: 'center' }}>
             <TextField size="small" label={vivo ? 'Desde las' : 'Desde'} value={textos[0]} disabled={deshabilitado}
               error={Boolean(textos[0]) && !valido(textos[0])} onChange={(e) => ponerTexto(0, e.target.value)}

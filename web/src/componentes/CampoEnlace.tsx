@@ -52,7 +52,7 @@ function Ficha({ e }: { e: Estado }) {
           {i.en_vivo && <Chip size="small" color="error" label="EN VIVO" />}
           {i.en_vivo && ventana?.desde && ventana.hasta && (
             <Typography variant="body2" color="text.secondary">
-              se puede bajar de las {horaDe(ventana.desde, i.zona)} a las {horaDe(ventana.hasta, i.zona)}
+              se puede bajar desde las {horaDe(ventana.desde, i.zona)}{ventana.llena ? ' (corre con el vivo)' : ''} hasta ahora
             </Typography>
           )}
           {!i.en_vivo && i.duracion != null && <Typography variant="body2" color="text.secondary">Dura {reloj(i.duracion)}</Typography>}

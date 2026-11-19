@@ -17,6 +17,13 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 ### Sin publicar
 
+#### Corregido (2026-11-19, lo que vio el autor en Raphi Studio)
+
+- En un directo, el «ahora» de la barra (y el inicio, cuando la ventana ya está llena) corre con el reloj.
+- La Ficha de Raphi Studio llena su diálogo (antes, una caja chica y el resto en blanco).
+- La cola dice «1 archivo listo» (no «0 archivos») y la salida sin archivos de entrada es la carpeta de Descargas.
+- La página de una herramienta cabe en una ventana angosta; las marcas de la barra del tramo, hacia adentro.
+
 #### Añadido (2026-11-19, la descarga guiada en la web, en Qillqa y en Raphi Studio)
 
 - «Descargar video o audio» sin terminal: al pegar el enlace se ve qué video es (miniatura, título, canal, duración,

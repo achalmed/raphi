@@ -148,10 +148,17 @@ ColumnLayout {
 
     Kirigami.Dialog {
         id: ficha
+        objectName: "dialogoFicha"
         title: raiz.h.titulo
         standardButtons: Kirigami.Dialog.Close
         preferredWidth: Kirigami.Units.gridUnit * 34
         preferredHeight: Kirigami.Units.gridUnit * 26
-        VistaTexto { texto: raiz.h.resumenMarkdown; markdown: true; nombreAccesible: "Ficha de " + raiz.h.titulo }
+        // Su alto propio es el del diálogo: con el implícito de VistaTexto (12 filas) la ficha quedaba en una caja chica con
+        // su propia barra y el resto del diálogo en blanco (lo vio el autor el 2026-11-19)
+        VistaTexto {
+            implicitWidth: Kirigami.Units.gridUnit * 33
+            implicitHeight: Kirigami.Units.gridUnit * 23
+            texto: raiz.h.resumenMarkdown; markdown: true; nombreAccesible: "Ficha de " + raiz.h.titulo
+        }
     }
 }

@@ -378,7 +378,13 @@ class Trabajos(QObject):
     @Property(str, notify=actualCambiado)
     def destino(self) -> str:
         t = self._t()
-        return (t.destino or "junto a cada original") if t else ""
+        if not t:
+            return ""
+        if t.destino:
+            return t.destino
+        if not t.archivos:      # sin archivos de entrada no hay original al lado del cual escribir: la carpeta de Descargas
+            return str(rutas.carpeta_descargas())
+        return "junto a cada original"
 
     @Property(str, notify=actualCambiado)
     def inicio(self) -> str:

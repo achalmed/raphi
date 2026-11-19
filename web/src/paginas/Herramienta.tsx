@@ -67,7 +67,9 @@ export default function Herramienta() {
 
   return (
     <Marco modulo="raphi" titulo={titulo} volver="/raphi">
-      <Stack spacing={2.5} sx={{ maxWidth: 860, mx: 'auto', p: { xs: 1, sm: 2 } }}>
+      {/* width y minWidth: dentro del contenedor flex del marco, sin ellos la página no baja de su ancho máximo en una
+          ventana angosta (medía 860 px en una de 420) */}
+      <Stack spacing={2.5} sx={{ maxWidth: 860, width: '100%', minWidth: 0, mx: 'auto', p: { xs: 1, sm: 2 } }}>
         <Stack direction="row" spacing={1.75} alignItems="center">
           {op && <IconoOperacion id={op.id} categoria={op.categoria} tamano={48} />}
           <Typography color="text.secondary" sx={{ maxWidth: '68ch' }}>{descripcion}</Typography>

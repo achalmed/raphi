@@ -38,9 +38,19 @@ export interface InfoEnlace {
   vertical: boolean
   calidades: number[]
   /** En vivo: cuántos segundos hacia atrás se pueden bajar y desde/hasta qué hora (época, en segundos). */
-  ventana: { segundos: number; desde: number | null; hasta: number | null } | null
+  ventana: { segundos: number; desde: number | null; hasta: number | null; llena?: boolean } | null
   /** La zona horaria de la máquina que baja (segundos al este de UTC): la hora del tramo se lee en ella. */
   zona: number
+  /** Cuándo se consultó (época): en vivo, la ventana de entonces más lo que pasó desde ese momento. */
+  consultado?: number
+}
+
+/** La ventana de un directo AHORA: la consultada, corrida por el tiempo que pasó (el inicio también, si ya está llena). */
+export function ventanaAhora(i: InfoEnlace, ahora = Date.now() / 1000): [number, number] | null {
+  const v = i.ventana
+  if (!i.en_vivo || !v || v.desde == null || v.hasta == null) return null
+  const paso = Math.max(0, ahora - (i.consultado ?? ahora))
+  return [v.desde + (v.llena ? paso : 0), v.hasta + paso]
 }
 
 export const consultarEnlace = (url: string, cookies = '') =>
