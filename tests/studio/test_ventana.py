@@ -101,7 +101,7 @@ def test_abre_y_cierra_su_ventana(tmp_path, muestra):
     assert datos["en_cola"][0] == "cola" and datos["en_cola"][1].startswith("Cola") and datos["catalogo"][0] == "catalogo" and datos["catalogo"][1] >= 1
     if MOTOR:
         assert datos["total"] >= 60 and datos["corrio"] and datos["estado"] == "hecho" and datos["simulado"] and "entrevista.vtt" in datos["resultado"]
-        assert datos["resumen"].startswith(f"{datos['total']} herramientas · ") and "1 trabajos: 0 en cola · 0 en curso · 1 hechos" in datos["resumen"]
+        assert datos["resumen"].startswith(f"{datos['total']} herramientas · ") and "1 trabajo: 1 hecho" in datos["resumen"]
     assert datos["contexto"].startswith("Convertir subtítulos · 1 archivo: entrevista.srt") and datos["titulo"].startswith("Convertir subtítulos")
 
 

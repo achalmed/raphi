@@ -111,8 +111,8 @@ def test_trabajos_servicio(tmp_path):
     archivo = tmp_path / "t.informe.json"
     archivo.write_text(json.dumps(informe), encoding="utf-8")
     assert svc_trabajos.informe_de(["x", f"## informe {archivo}"]) == informe and svc_trabajos.informe_de(['## informe {"ok": true}']) == {"ok": True}
-    assert svc_trabajos.estado_final(1, informe, False) == ("parcial", "1 correcto(s), 1 con error")
-    assert svc_trabajos.estado_final(0, {"ok": True, "correctos": 2, "fallidos": 0, "simulado": True, "elementos": []}, False) == ("hecho", "plan de 2 elemento(s)")
+    assert svc_trabajos.estado_final(1, informe, False) == ("parcial", "1 correcto, 1 con error")
+    assert svc_trabajos.estado_final(0, {"ok": True, "correctos": 2, "fallidos": 0, "simulado": True, "elementos": []}, False) == ("hecho", "plan de 2 elementos")
     assert svc_trabajos.estado_final(130, None, True) == ("cancelado", "Cancelado.") and svc_trabajos.estado_final(2, None, False)[0] == "fallido"
     t.informe, t.simular = informe, False
     md = svc_trabajos.texto_resultado(t)

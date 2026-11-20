@@ -181,7 +181,7 @@ def test_trabajos_simular_aplicar_y_la_cli(piezas, app):
     _esperar(app, tr, t)
     assert terminados and terminados[0][1] is True and terminados[0][2] == "hecho"
     assert t.hayActual and t.simulado and t.estado == "hecho" and "entrevista.srt → entrevista.vtt" in t.resultado and t.nSalidas == 0
-    assert t.contadores == {"todos": 1, "en_cola": 0, "en_curso": 0, "hechos": 1, "con_error": 0} and t.resumen.startswith("1 trabajos: 0 en cola")
+    assert t.contadores == {"todos": 1, "en_cola": 0, "en_curso": 0, "hechos": 1, "con_error": 0} and t.resumen == "1 trabajo: 1 hecho"
     assert o.aplicar()
     _esperar(app, tr, t)
     assert t.estado == "hecho" and not t.simulado and t.nSalidas == 1 and t.salidas[0].endswith("entrevista.vtt") and t.vistaPrevia == "texto" and "WEBVTT" in t.textoSalida

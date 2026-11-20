@@ -101,6 +101,11 @@ def informe_de(lineas: list[str]) -> dict | None:
     return None
 
 
+def _cuenta(n: int, uno: str, varios: str) -> str:
+    """«1 correcto», «2 correctos»: la concordancia que la barra de estado y la cola muestran (antes, «correcto(s)»)."""
+    return f"{n} {uno if n == 1 else varios}"
+
+
 def estado_final(codigo: int, informe: dict | None, cancelado: bool) -> tuple[str, str]:
     """(estado, mensaje) al terminar el proceso del corredor."""
     if cancelado:
@@ -112,9 +117,10 @@ def estado_final(codigo: int, informe: dict | None, cancelado: bool) -> tuple[st
     correctos = informe.get("correctos", sum(1 for e in informe.get("elementos", []) if e.get("ok")))
     fallidos = informe.get("fallidos", sum(1 for e in informe.get("elementos", []) if not e.get("ok")))
     if informe.get("ok", not fallidos):
-        return "hecho", (f"{correctos} correcto(s)" if not informe.get("simulado") else f"plan de {correctos} elemento(s)")
+        return "hecho", (_cuenta(correctos, "correcto", "correctos") if not informe.get("simulado")
+                         else "plan de " + _cuenta(correctos, "elemento", "elementos"))
     if correctos:
-        return "parcial", f"{correctos} correcto(s), {fallidos} con error"
+        return "parcial", f"{_cuenta(correctos, 'correcto', 'correctos')}, {fallidos} con error"
     return "fallido", next((e.get("error") for e in informe.get("elementos", []) if e.get("error")), "Falló.")
 
 

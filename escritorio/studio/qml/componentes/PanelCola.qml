@@ -30,6 +30,7 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.leftMargin: Kirigami.Units.largeSpacing
         Layout.rightMargin: Kirigami.Units.largeSpacing
+        visible: panel.c.todos > 0
         text: panel.c.todos === 0 ? "Sin trabajos"
               : [panel.c.en_curso ? panel.c.en_curso + " en curso" : "", panel.c.en_cola ? panel.c.en_cola + " en cola" : "",
                  panel.c.hechos ? panel.c.hechos + " hecho" + (panel.c.hechos === 1 ? "" : "s") : "",
@@ -39,8 +40,10 @@ ColumnLayout {
         elide: Text.ElideRight
     }
 
-    // ------------------------------------------------------------------ el trabajo en curso y su barra de avance
+    // ------------------------------------------------------------------ el trabajo en curso y su barra de avance (solo si
+    // hay algo en curso o esperando: el vacío lo dice el mensaje de la lista, una sola vez)
     ColumnLayout {
+        visible: panel.t.enCurso || panel.c.en_cola > 0
         Layout.fillWidth: true
         Layout.margins: Kirigami.Units.largeSpacing
         spacing: Kirigami.Units.smallSpacing
@@ -86,7 +89,7 @@ ColumnLayout {
             elide: Text.ElideRight
         }
     }
-    Kirigami.Separator { Layout.fillWidth: true }
+    Kirigami.Separator { Layout.fillWidth: true; visible: panel.t.enCurso || panel.c.en_cola > 0 }
 
     // ------------------------------------------------------------------ los trabajos
     ListView {
@@ -100,40 +103,51 @@ ColumnLayout {
         QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
         section.property: "seccion"
         section.delegate: Kirigami.ListSectionHeader { required property string section; width: lista.width; text: section }
+        leftMargin: Kirigami.Units.smallSpacing
+        rightMargin: Kirigami.Units.smallSpacing
+        spacing: 2
+        // cada trabajo: el elegido teñido del acento con su marca (nunca el bloque lleno: en Lliphi Oscuro el acento es
+        // rojo y un trabajo hecho parecería un error); su estado, una etiqueta del color de su nivel
         delegate: QQC2.ItemDelegate {
             id: fila
             required property var model
             required property int index
-            width: lista.width
-            highlighted: panel.t.hayActual && panel.t.id === model.id
+            readonly property bool elegida: panel.t.hayActual && panel.t.id === model.id
+            width: lista.width - Kirigami.Units.smallSpacing * 2
+            hoverEnabled: true
             onClicked: panel.t.irA(model.id)
-            Accessible.name: model.titulo + ": " + model.estado
+            Accessible.name: model.titulo + ": " + model.estado + (elegida ? ", elegido" : "")
             QQC2.ToolTip.text: "Ver el trabajo en la cola: su resultado, sus salidas y su registro"
             QQC2.ToolTip.visible: hovered
             QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
+            // sin los márgenes que el estilo de KDE deja alrededor del fondo: el fondo es la fila entera y
+            // el contenido respeta su relleno (con ellos, la marca de lo elegido caía encima del texto)
+            leftInset: 0; rightInset: 0; topInset: 0; bottomInset: 0
+            topPadding: Kirigami.Units.smallSpacing * 2; bottomPadding: Kirigami.Units.smallSpacing * 2
+            background: FondoSeleccion { elegida: fila.elegida; sobre: fila.hovered; pulsada: fila.pressed; foco: fila.visualFocus }
             contentItem: ColumnLayout {
-                spacing: 0
+                spacing: Kirigami.Units.smallSpacing / 2
                 RowLayout {
                     Layout.fillWidth: true
                     spacing: Kirigami.Units.smallSpacing
-                    Kirigami.Icon { source: fila.model.icono; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth }
                     QQC2.Label {
                         text: fila.model.titulo
                         elide: Text.ElideRight
                         Layout.fillWidth: true
-                        color: fila.highlighted ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor
+                        font.weight: fila.elegida ? Font.DemiBold : Font.Normal
+                    }
+                    EtiquetaNivel {
+                        text: fila.model.clave === "en_curso" ? fila.model.progreso : fila.model.estado
+                        nivel: fila.model.nivel || ""
+                        icono: fila.model.icono || ""
                     }
                 }
                 QQC2.Label {
                     Layout.fillWidth: true
-                    text: (fila.model.clave === "en_curso" ? fila.model.progreso : fila.model.estado) + " · " + fila.model.archivos
+                    text: fila.model.archivos + (fila.model.duracion && fila.model.duracion !== "—" ? " · " + fila.model.duracion : "")
                     elide: Text.ElideRight
-                    font: Kirigami.Theme.smallFont
-                    color: fila.highlighted ? Kirigami.Theme.highlightedTextColor
-                           : fila.model.nivel === "positivo" ? Kirigami.Theme.positiveTextColor
-                           : fila.model.nivel === "negativo" ? Kirigami.Theme.negativeTextColor
-                           : fila.model.nivel === "activo" ? Kirigami.Theme.activeTextColor
-                           : fila.model.nivel === "neutro" ? Kirigami.Theme.neutralTextColor : Kirigami.Theme.disabledTextColor
+                    font.pointSize: Kirigami.Theme.smallFont.pointSize
+                    color: Kirigami.Theme.disabledTextColor
                 }
             }
         }

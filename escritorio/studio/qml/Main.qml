@@ -79,7 +79,6 @@ VentanaBase {
                 else archivos.fijarFila(indice)
             }
         }
-        Kirigami.Separator { Layout.fillWidth: true; visible: zona.visible }
         RowLayout {
             Layout.fillWidth: true
             Layout.fillHeight: true
@@ -97,7 +96,8 @@ VentanaBase {
                 id: panelCola
                 Layout.fillHeight: true
                 Layout.preferredWidth: Kirigami.Units.gridUnit * 16
-                visible: vista !== "cola"
+                // en una ventana angosta la cola se ve en su vista (el botón «Cola»): el taller se queda con el ancho
+                visible: vista !== "cola" && ventana.width >= Kirigami.Units.gridUnit * 56
             }
         }
     }

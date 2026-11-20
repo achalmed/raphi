@@ -43,49 +43,50 @@ QQC2.ToolBar {
             Item { Layout.fillWidth: true }
             QQC2.ToolSeparator { visible: barra.e.vista === "herramienta" }
             BotonAccion { visible: barra.e.vista === "herramienta"; accion: studio.acciones.accion("op.simular") }
-            QQC2.Button {
+            // la acción principal del taller, una sola vez y con el relleno del acento (con Kvantum el «highlighted» de
+            // un Button no pinta nada)
+            BotonPrincipal {
                 readonly property var a: studio.acciones.accion("op.aplicar")
-                visible: barra.e.vista === "herramienta"
-                highlighted: true
-                text: "Procesar"
-                icon.name: a.icono
+                visible: barra.e.vista === "herramienta" && studio.operaciones.escribe
+                text: studio.herramientas.accion || "Procesar"
+                icon.name: studio.herramientas.accion === "Descargar" ? "download" : a.icono
                 enabled: a.habilitada
                 onClicked: a.disparar()
                 QQC2.ToolTip.text: (a.habilitada ? a.descripcion : studio.operaciones.motivoNoAplicar) + " (" + a.atajoTexto + ")"
                 QQC2.ToolTip.visible: hovered
+                QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
             }
             QQC2.ToolSeparator {}
-            QQC2.ToolButton {
+            // la cola: una opción teñida mientras se ve (no el bloque del acento de un botón marcado), con lo pendiente
+            OpcionColor {
                 icon.name: barra.t.enCurso ? "media-playback-start" : "view-task"
-                checkable: true
-                checked: barra.e.vista === "cola"
+                elegida: barra.e.vista === "cola"
                 text: "Cola" + (barra.t.contadores.en_curso + barra.t.contadores.en_cola > 0 ? " · " + (barra.t.contadores.en_curso + barra.t.contadores.en_cola) : "")
-                onClicked: barra.e.fijarVista(checked ? "cola" : "catalogo")
-                QQC2.ToolTip.text: barra.t.resumen + " (Ctrl+3)"
-                QQC2.ToolTip.visible: hovered
+                descripcion: barra.t.resumen
+                atajo: "Ctrl+3"
+                onClicked: barra.e.fijarVista(elegida ? "catalogo" : "cola")
             }
         }
-        // las áreas del catálogo
-        Flow {
+        // las áreas del catálogo: un selector segmentado con la cifra de cada una; si no caben, se desplazan de lado
+        Flickable {
+            id: areas
             Layout.fillWidth: true
+            Layout.preferredHeight: selector.implicitHeight
             visible: barra.e.vista === "catalogo"
-            spacing: Kirigami.Units.smallSpacing
-            Repeater {
-                model: barra.e.areas
-                delegate: QQC2.ToolButton {
-                    required property var modelData
-                    readonly property int cuantas: barra.h.porArea[modelData.nombre] || 0
-                    visible: modelData.nombre === "" || cuantas > 0
-                    checkable: true
-                    checked: barra.e.area === modelData.nombre
-                    icon.name: modelData.icono
-                    text: modelData.texto + "  " + cuantas
-                    onClicked: barra.e.fijarArea(modelData.nombre)
-                    QQC2.ToolTip.text: modelData.descripcion || "Todas las herramientas y recetas"
-                    QQC2.ToolTip.visible: hovered && modelData.nombre !== ""
-                    QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
-                    Accessible.name: modelData.texto + ": " + cuantas + " herramientas"
-                }
+            contentWidth: selector.implicitWidth
+            contentHeight: selector.implicitHeight
+            flickableDirection: Flickable.HorizontalFlick
+            boundsBehavior: Flickable.StopAtBounds
+            clip: contentWidth > width
+            SelectorSegmentado {
+                id: selector
+                titulo: "Áreas del catálogo"
+                compacto: barra.width < Kirigami.Units.gridUnit * 80
+                opciones: barra.e.areas.map(a => ({ clave: a.nombre, texto: a.texto, icono: a.icono, contador: barra.h.porArea[a.nombre] || 0,
+                                                     descripcion: a.descripcion || "Todas las herramientas y recetas",
+                                                     visible: a.nombre === "" || (barra.h.porArea[a.nombre] || 0) > 0 }))
+                actual: barra.e.area
+                onElegida: (clave) => barra.e.fijarArea(clave)
             }
         }
     }

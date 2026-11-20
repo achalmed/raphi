@@ -21,21 +21,27 @@ QQC2.SplitView {
         QQC2.SplitView.minimumWidth: Kirigami.Units.gridUnit * 18
         clip: true
         spacing: 0
-        Flow {
+        // los grupos de la cola: un selector con la cifra de cada uno (y limpiar los terminados al lado)
+        RowLayout {
             Layout.fillWidth: true
             Layout.margins: Kirigami.Units.smallSpacing
+            Layout.leftMargin: Kirigami.Units.largeSpacing
             spacing: Kirigami.Units.smallSpacing
-            Repeater {
-                model: raiz.t.filasNavegacion
-                delegate: QQC2.ToolButton {
-                    required property var modelData
-                    readonly property string grupo: modelData.nombre === "trabajos" ? "todos" : modelData.nombre.substring(9)
-                    checkable: true
-                    checked: raiz.e.grupo === grupo
-                    text: modelData.texto + " " + modelData.contador
-                    icon.name: modelData.icono
-                    onClicked: raiz.e.fijarGrupo(grupo)
-                    Accessible.name: modelData.texto + ": " + modelData.contador
+            Flickable {
+                Layout.fillWidth: true
+                Layout.preferredHeight: grupos.implicitHeight
+                contentWidth: grupos.implicitWidth
+                flickableDirection: Flickable.HorizontalFlick
+                boundsBehavior: Flickable.StopAtBounds
+                clip: contentWidth > width
+                SelectorSegmentado {
+                    id: grupos
+                    titulo: "Grupos de la cola"
+                    compacto: true
+                    opciones: raiz.t.filasNavegacion.map(f => ({ clave: f.nombre === "trabajos" ? "todos" : f.nombre.substring(9), texto: f.texto,
+                                                                   contador: f.contador }))
+                    actual: raiz.e.grupo
+                    onElegida: (clave) => raiz.e.fijarGrupo(clave)
                 }
             }
             BotonAccion { accion: studio.acciones.accion("trabajos.limpiar"); conTexto: false }
@@ -51,35 +57,39 @@ QQC2.SplitView {
             Accessible.name: "Trabajos"
             QQC2.ScrollBar.vertical: QQC2.ScrollBar {}
             section.property: "seccion"
-            section.delegate: Kirigami.ListSectionHeader { required property string section; width: lista.width; text: section }
+            section.delegate: Kirigami.ListSectionHeader { required property string section; width: lista.width - Kirigami.Units.smallSpacing * 2; text: section }
+            leftMargin: Kirigami.Units.smallSpacing
+            rightMargin: Kirigami.Units.smallSpacing
+            spacing: 2
+            // el elegido teñido con su marca; su estado, una etiqueta del color de su nivel (también sobre lo elegido)
             delegate: QQC2.ItemDelegate {
                 id: fila
                 required property var model
                 required property int index
-                width: lista.width
-                highlighted: ListView.isCurrentItem
+                width: lista.width - Kirigami.Units.smallSpacing * 2
+                hoverEnabled: true
                 onClicked: { lista.currentIndex = index; raiz.t.fijarFila(index) }
-                Accessible.name: model.titulo + ": " + model.estado
+                Accessible.name: model.titulo + ": " + model.estado + (ListView.isCurrentItem ? ", elegido" : "")
+                // sin los márgenes que el estilo de KDE deja alrededor del fondo: el fondo es la fila entera y
+                // el contenido respeta su relleno (con ellos, la marca de lo elegido caía encima del texto)
+                leftInset: 0; rightInset: 0; topInset: 0; bottomInset: 0
+                topPadding: Kirigami.Units.smallSpacing * 2; bottomPadding: Kirigami.Units.smallSpacing * 2
+                background: FondoSeleccion { elegida: fila.ListView.isCurrentItem; sobre: fila.hovered; pulsada: fila.pressed; foco: fila.visualFocus }
                 contentItem: ColumnLayout {
                     spacing: Kirigami.Units.smallSpacing / 2
                     RowLayout {
                         Layout.fillWidth: true
                         spacing: Kirigami.Units.smallSpacing
-                        Kirigami.Icon { source: fila.model.icono; implicitWidth: Kirigami.Units.iconSizes.small; implicitHeight: implicitWidth }
                         QQC2.Label { text: fila.model.titulo; font.weight: Font.DemiBold; elide: Text.ElideRight; Layout.fillWidth: true }
-                        QQC2.Label {
-                            text: fila.model.estado
-                            color: fila.highlighted ? Kirigami.Theme.highlightedTextColor : fila.model.nivel === "positivo" ? Kirigami.Theme.positiveTextColor : fila.model.nivel === "negativo" ? Kirigami.Theme.negativeTextColor
-                                   : fila.model.nivel === "activo" ? Kirigami.Theme.activeTextColor : Kirigami.Theme.disabledTextColor
-                        }
+                        EtiquetaNivel { text: fila.model.estado; nivel: fila.model.nivel || ""; icono: fila.model.icono || "" }
                     }
                     QQC2.Label {
                         Layout.fillWidth: true
                         text: fila.model.archivos + (fila.model.salidas ? " → " + fila.model.salidas + " salida" + (fila.model.salidas === 1 ? "" : "s") : "")
                               + " · " + fila.model.inicio + (fila.model.duracion !== "—" ? " · " + fila.model.duracion : "")
                         elide: Text.ElideRight
-                        font: Kirigami.Theme.smallFont
-                        color: fila.highlighted ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.disabledTextColor
+                        font.pointSize: Kirigami.Theme.smallFont.pointSize
+                        color: Kirigami.Theme.disabledTextColor
                     }
                     QQC2.ProgressBar { Layout.fillWidth: true; visible: fila.model.clave === "en_curso"; from: 0; to: 100; value: fila.model.porcentaje }
                     QQC2.Label { Layout.fillWidth: true; visible: fila.model.mensaje !== "" && fila.model.clave !== "hecho"; text: fila.model.mensaje; wrapMode: Text.WordWrap; maximumLineCount: 2; elide: Text.ElideRight; font: Kirigami.Theme.smallFont }
@@ -125,6 +135,8 @@ QQC2.SplitView {
             QQC2.ProgressBar { Layout.fillWidth: true; visible: raiz.t.estado === "en_curso"; from: 0; to: 100; value: raiz.t.progreso }
             Kirigami.FormLayout {
                 Layout.fillWidth: true
+                wideMode: true
+                Layout.alignment: Qt.AlignLeft
                 QQC2.Label { Kirigami.FormData.label: "Estado:"; text: raiz.t.textoEstado + (raiz.t.mensaje ? " · " + raiz.t.mensaje : ""); wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 QQC2.Label { Kirigami.FormData.label: "Entradas:"; text: raiz.t.textoArchivos; wrapMode: Text.WordWrap; Layout.fillWidth: true }
                 QQC2.Label { Kirigami.FormData.label: "Opciones:"; text: raiz.t.textoOpciones; wrapMode: Text.WordWrap; Layout.fillWidth: true }
@@ -132,13 +144,21 @@ QQC2.SplitView {
                 QQC2.Label { Kirigami.FormData.label: "Inicio:"; text: raiz.t.inicio + (raiz.t.duracion ? " · " + raiz.t.duracion : "") }
             }
         }
-        QQC2.TabBar {
+        SelectorSegmentado {
             id: pestanas
+            // qué se ve del trabajo: su propio estado (el selector de la base solo avisa con `elegida`)
+            property string vista: "resultado"
+            readonly property int currentIndex: ["resultado", "salidas", "registro"].indexOf(vista)
             visible: raiz.t.hayActual
-            Layout.fillWidth: true
-            QQC2.TabButton { text: "Resultado" }
-            QQC2.TabButton { text: "Salidas · " + raiz.t.nSalidas; enabled: raiz.t.nSalidas > 0 }
-            QQC2.TabButton { text: "Registro" }
+            Layout.leftMargin: Kirigami.Units.largeSpacing
+            Layout.bottomMargin: Kirigami.Units.smallSpacing
+            titulo: "Lo que se ve del trabajo"
+            actual: vista
+            onElegida: (clave) => vista = clave
+            opciones: [{ clave: "resultado", texto: "Resultado", icono: "view-task" },
+                       { clave: "salidas", texto: "Salidas", icono: "document-preview", contador: raiz.t.nSalidas, visible: raiz.t.nSalidas > 0 },
+                       { clave: "registro", texto: "Registro", icono: "utilities-terminal" }]
+            Connections { target: raiz.t; function onCambiado() { if (raiz.t.nSalidas === 0 && pestanas.vista === "salidas") pestanas.vista = "resultado" } }
         }
         StackLayout {
             visible: raiz.t.hayActual

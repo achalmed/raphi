@@ -94,7 +94,7 @@ def construir(app: Aplicacion, cache: Path | None = None, releer: bool = True) -
         return vista.ruta or archivos.rutaActual or (archivos.rutas[0] if archivos.rutas else "")
 
     # --- Archivo
-    acciones.registrar("archivo.anadir", "&Añadir archivos…", "document-open", StandardKey.Open, "Archivo", al_disparar=pedir("elegir_archivos"),
+    acciones.registrar("archivo.anadir", "&Añadir archivos…", "document-import", StandardKey.Open, "Archivo", al_disparar=pedir("elegir_archivos"),
                        descripcion="Archivos de entrada, con el diálogo de KDE (también se sueltan desde Dolphin sobre la ventana)")
     acciones.registrar("archivo.anadir_carpeta", "Añadir una &carpeta…", "folder-open", "Ctrl+Shift+O", "Archivo", al_disparar=pedir("elegir_carpeta"),
                        descripcion="Una carpeta entera como entrada (las herramientas que trabajan con carpetas)")

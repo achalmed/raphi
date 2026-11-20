@@ -42,6 +42,8 @@ ColumnLayout {
     }
     Connections { target: raiz.h; function onActualCambiado() { raiz.monitor = "entrada"; raiz.v.mostrar(raiz.a.rutaActual || (raiz.a.total ? raiz.a.rutas[0] : "")) } }
 
+    PaletaCategorica { id: paleta }
+
     Kirigami.PlaceholderMessage {
         Layout.fillWidth: true
         Layout.fillHeight: true
@@ -57,21 +59,40 @@ ColumnLayout {
         Layout.fillWidth: true
         Layout.margins: Kirigami.Units.largeSpacing
         spacing: Kirigami.Units.largeSpacing
-        Kirigami.Icon { source: raiz.h.icono; implicitWidth: Kirigami.Units.iconSizes.large; implicitHeight: implicitWidth }
-        ColumnLayout {
-            Layout.fillWidth: true
-            spacing: 0
-            Kirigami.Heading { level: 2; text: raiz.h.titulo; elide: Text.ElideRight; Layout.fillWidth: true }
-            QQC2.Label { text: raiz.h.descripcion; wrapMode: Text.WordWrap; Layout.fillWidth: true; maximumLineCount: 2; elide: Text.ElideRight }
-            QQC2.Label {
-                text: raiz.h.textoAreas + " · acepta " + raiz.h.textoAcepta + (raiz.h.larga ? " · tarda: verás su progreso" : "")
-                color: Kirigami.Theme.disabledTextColor
-                font: Kirigami.Theme.smallFont
-                elide: Text.ElideRight
-                Layout.fillWidth: true
+        // el icono de la acción en la pastilla del color de su familia (como en el catálogo)
+        Rectangle {
+            readonly property color tono: paleta.rol(raiz.h.rol || "gris")
+            implicitWidth: Kirigami.Units.gridUnit * 2.8
+            implicitHeight: implicitWidth
+            radius: width / 2
+            color: Kirigami.ColorUtils.tintWithAlpha(Kirigami.Theme.backgroundColor, tono, 0.16)
+            border.width: 1
+            border.color: Kirigami.ColorUtils.tintWithAlpha(Kirigami.Theme.backgroundColor, tono, 0.38)
+            Kirigami.Icon {
+                anchors.centerIn: parent
+                source: raiz.h.icono
+                fallback: "system-run"
+                isMask: true
+                color: Kirigami.ColorUtils.linearInterpolation(parent.tono, Kirigami.Theme.textColor, 0.35)
+                implicitWidth: Kirigami.Units.iconSizes.medium
+                implicitHeight: implicitWidth
             }
         }
-        QQC2.Button { text: "Ficha"; icon.name: "help-about"; flat: true; onClicked: ficha.open() }
+        ColumnLayout {
+            Layout.fillWidth: true
+            spacing: Kirigami.Units.smallSpacing / 2
+            Kirigami.Heading { level: 1; text: raiz.h.titulo; font.weight: Font.DemiBold; elide: Text.ElideRight; Layout.fillWidth: true }
+            QQC2.Label { text: raiz.h.descripcion; wrapMode: Text.WordWrap; Layout.fillWidth: true; maximumLineCount: 2; elide: Text.ElideRight; opacity: 0.85 }
+            RowLayout {
+                Layout.fillWidth: true
+                spacing: Kirigami.Units.smallSpacing
+                EtiquetaNivel { text: raiz.h.textoAreas }
+                EtiquetaNivel { text: "acepta " + raiz.h.textoAcepta; elide: Text.ElideRight; Layout.maximumWidth: Kirigami.Units.gridUnit * 20 }
+                EtiquetaNivel { visible: raiz.h.larga; text: "tarda: verás su progreso"; nivel: "neutro"; icono: "chronometer" }
+                Item { Layout.fillWidth: true }
+            }
+        }
+        QQC2.Button { text: "Ficha"; icon.name: "documentinfo"; flat: true; onClicked: ficha.open() }
     }
     Kirigami.InlineMessage {
         Layout.fillWidth: true
@@ -94,33 +115,44 @@ ColumnLayout {
             QQC2.SplitView.fillWidth: true
             QQC2.SplitView.minimumWidth: Kirigami.Units.gridUnit * 16
             spacing: 0
-            QQC2.TabBar {
-                Layout.fillWidth: true
-                currentIndex: raiz.monitor === "entrada" ? 0 : 1
-                QQC2.TabButton { text: "Entrada"; onClicked: { raiz.monitor = "entrada"; raiz.v.mostrar(raiz.a.rutaActual || (raiz.a.total ? raiz.a.rutas[0] : "")) } }
-                QQC2.TabButton {
-                    text: "Resultado" + (raiz.t.hayActual && raiz.t.ref === raiz.h.ref && raiz.t.nSalidas > 0 ? " · " + raiz.t.nSalidas : "")
-                    onClicked: { raiz.monitor = "resultado"; raiz.v.mostrar(raiz.t.ref === raiz.h.ref ? raiz.t.salidaActual : "") }
-                }
-            }
-            // las salidas del último trabajo de esta herramienta (o su plan, si fue simulado)
-            Flow {
+            // qué se ve en el monitor (la entrada o el resultado) y, del resultado, cuál de sus salidas: una sola fila
+            RowLayout {
                 Layout.fillWidth: true
                 Layout.margins: Kirigami.Units.smallSpacing
-                visible: raiz.monitor === "resultado" && raiz.t.hayActual && raiz.t.ref === raiz.h.ref && raiz.t.nSalidas > 0
-                spacing: Kirigami.Units.smallSpacing
-                Repeater {
-                    model: raiz.monitor === "resultado" && raiz.t.ref === raiz.h.ref ? raiz.t.salidas : []
-                    delegate: QQC2.Button {
-                        required property var modelData
-                        required property int index
-                        text: String(modelData).split("/").pop()
-                        icon.name: "document-preview"
-                        checkable: true
-                        checked: raiz.v.ruta === String(modelData)
-                        onClicked: { raiz.t.fijarSalida(index); raiz.verSalida(String(modelData)) }
+                Layout.leftMargin: Kirigami.Units.largeSpacing
+                spacing: Kirigami.Units.largeSpacing
+                SelectorSegmentado {
+                    titulo: "Lo que muestra el monitor"
+                    opciones: [{ clave: "entrada", texto: "Entrada", icono: "document-import" },
+                               { clave: "resultado", texto: "Resultado", icono: "view-task",
+                                 contador: raiz.t.hayActual && raiz.t.ref === raiz.h.ref && raiz.t.nSalidas > 0 ? raiz.t.nSalidas : "" }]
+                    actual: raiz.monitor
+                    onElegida: (clave) => {
+                        raiz.monitor = clave
+                        if (clave === "entrada") raiz.v.mostrar(raiz.a.rutaActual || (raiz.a.total ? raiz.a.rutas[0] : ""))
+                        else raiz.v.mostrar(raiz.t.ref === raiz.h.ref ? raiz.t.salidaActual : "")
                     }
                 }
+                // las salidas del último trabajo de esta herramienta, como opciones (si hay más de una)
+                Flickable {
+                    Layout.fillWidth: true
+                    Layout.preferredHeight: salidas.implicitHeight
+                    visible: raiz.monitor === "resultado" && raiz.t.hayActual && raiz.t.ref === raiz.h.ref && raiz.t.nSalidas > 1
+                    contentWidth: salidas.implicitWidth
+                    flickableDirection: Flickable.HorizontalFlick
+                    boundsBehavior: Flickable.StopAtBounds
+                    clip: true
+                    SelectorSegmentado {
+                        id: salidas
+                        titulo: "Salidas"
+                        compacto: true
+                        opciones: (raiz.monitor === "resultado" && raiz.t.ref === raiz.h.ref ? raiz.t.salidas : [])
+                                  .map((s, i) => ({ clave: String(i), texto: String(s).split("/").pop(), icono: "document-preview" }))
+                        actual: String(Math.max(0, (raiz.t.salidas || []).indexOf(raiz.v.ruta)))
+                        onElegida: (clave) => { raiz.t.fijarSalida(Number(clave)); raiz.verSalida(String(raiz.t.salidas[Number(clave)])) }
+                    }
+                }
+                Item { Layout.fillWidth: true; visible: !(raiz.monitor === "resultado" && raiz.t.nSalidas > 1) }
             }
             VistaPrevia {
                 Layout.fillWidth: true
@@ -150,7 +182,10 @@ ColumnLayout {
         id: ficha
         objectName: "dialogoFicha"
         title: raiz.h.titulo
-        standardButtons: Kirigami.Dialog.Close
+        // sin la × roja de la cabecera ni el «Cerrar» de icono rojo (el tema de iconos los pinta como círculos rojos)
+        standardButtons: Kirigami.Dialog.NoButton
+        showCloseButton: false
+        customFooterActions: [ Kirigami.Action { text: "Listo"; onTriggered: ficha.close() } ]
         preferredWidth: Kirigami.Units.gridUnit * 34
         preferredHeight: Kirigami.Units.gridUnit * 26
         // Su alto propio es el del diálogo: con el implícito de VistaTexto (12 filas) la ficha quedaba en una caja chica con
@@ -158,7 +193,8 @@ ColumnLayout {
         VistaTexto {
             implicitWidth: Kirigami.Units.gridUnit * 33
             implicitHeight: Kirigami.Units.gridUnit * 23
-            texto: raiz.h.resumenMarkdown; markdown: true; nombreAccesible: "Ficha de " + raiz.h.titulo
+            texto: raiz.h.resumenMarkdown.replace(/^# [^\n]*\n+/, ""); markdown: true;   // el título ya va en la cabecera
+            nombreAccesible: "Ficha de " + raiz.h.titulo
         }
     }
 }

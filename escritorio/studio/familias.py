@@ -27,6 +27,9 @@ DESCRIPCIONES = {id_: para for id_, _n, para, _i in FAMILIAS}
 # lo que trabaja con cualquier archivo y las recetas.
 ORDEN_PALETA = ("pdf", "imagenes", "audio_video", "documentos", "archivos", "recetas")
 ICONOS = {id_: icono for id_, _n, _p, icono in FAMILIAS}
+# El color de cada familia en el catálogo: un rol con significado de la paleta de gui-comun (PaletaCategorica.rol), el
+# mismo en claro y en oscuro (los índices de la paleta giran con el acento y cambiarían con el esquema)
+ROLES = {"pdf": "rojo", "imagenes": "verde", "audio_video": "morado", "documentos": "azul", "archivos": "dorado", "recetas": "cian"}
 
 IMG = {".jpg", ".jpeg", ".png", ".webp", ".heic", ".heif", ".avif", ".tif", ".tiff", ".bmp", ".gif", ".svg"}
 MEDIOS = {".mp3", ".m4a", ".aac", ".flac", ".opus", ".ogg", ".wav", ".mp4", ".mov", ".mkv", ".webm", ".avi", ".m4v",
@@ -40,17 +43,34 @@ POR_ID = {
 CON_CARPETAS = {"auditar_fechas_fotos", "ordenar_fotos_por_fecha"}
 
 # El icono de cada operación: el de su familia, salvo estas (el catálogo de Raphi Studio y la rueda de soltar)
-ICONO_POR_ID = {"descargar": "download", "transcribir": "text-x-generic", "ajustar_subtitulos": "media-subtitle",
-                "convertir_subtitulos": "media-subtitle", "convertir_video": "video-x-generic", "comprimir_video": "transform-scale",
-                "recortar_medio": "edit-cut", "auditar_fechas_fotos": "image-x-generic", "ordenar_fotos_por_fecha": "folder-images",
+ICONO_POR_ID = {"descargar": "download", "ajustar_subtitulos": "format-text-blockquote",
+                "convertir_subtitulos": "format-text-blockquote", "comprimir_video": "transform-scale",
+                "recortar_medio": "edit-cut", "ordenar_fotos_por_fecha": "folder-images",
                 "comprimir": "transform-scale", "comprimir_imagen": "transform-scale", "comprimir_archivos": "archive-insert",
                 "extraer_archivo": "archive-extract", "recortar_imagen": "transform-crop", "fondo_imagen": "fill-color",
                 "redimensionar_imagen": "image-resize-symbolic", "quitar_metadatos_archivo": "edit-clear-all",
                 "quitar_metadatos": "edit-clear-all", "metadatos": "document-properties", "ocr": "document-scan",
                 "tachar": "format-text-strikethrough", "nota": "knotes", "marca_agua": "insert-text", "rotar": "object-rotate-right",
                 "dividir": "edit-cut", "foliar": "format-list-ordered", "sello": "document-sign", "resaltar": "draw-highlight",
-                "cifrar": "document-encrypt", "firmas": "security-high", "tablas_a_excel": "x-office-spreadsheet",
-                "leer_comprobante": "document-preview", "unir": "merge", "comparar": "kompare"}
+                "cifrar": "document-encrypt", "firmas": "security-high", "leer_comprobante": "document-preview", "unir": "merge", "comparar": "kompare",
+                # 2026-11-19: un icono de acción por herramienta, no el del tipo de archivo (el catálogo era una pared de
+                # 41 iconos de PDF iguales); el studio los pinta monocromos sobre la pastilla del color de su familia
+                "componer": "view-pages-overview", "comparar_compresion": "office-chart-bar", "linearizar": "network-connect",
+                "reparar": "tools-wizard", "validar": "document-edit-verify", "pdfa": "document-export",
+                "pdf_a_imagen": "view-preview", "pdf_a_texto": "edit-select-text", "pdf_a_html": "globe",
+                "pdf_a_word": "document-edit", "extraer_imagenes": "edit-image", "miniatura": "zoom-select", "numerar": "tag",
+                "estampar_imagen": "insert-image", "formulario": "insert-text-frame", "aplanar": "document-duplicate",
+                "descifrar": "document-decrypt", "detectar_ocr": "edit-find-replace", "info": "view-list-details",
+                "inventario_paginas": "view-statistics", "ver_metadatos": "document-properties", "verificar_suma": "checkmark",
+                "verificar_comprimido": "document-edit-verify", "info_medio": "view-list-details", "foto_documento": "document-scan",
+                "convertir_audio": "audio-volume-high", "normalizar_audio": "audio-volume-high", "rotar_video": "object-rotate-right",
+                "unir_medios": "media-playlist-append", "portada_audio": "media-album-cover", "dividir_medio": "split",
+                "suma_verificacion": "checkmark", "incrustar_subtitulos": "insert-text-frame",
+                "extraer": "view-split-left-right", "reordenar": "view-sort", "eliminar": "edit-delete",
+                "tablas_a_excel": "insert-table", "ofimatica": "transform-move",
+                "imagenes_a_pdf": "document-new", "a_markdown": "format-text-bold", "auditar_fechas_fotos": "view-calendar",
+                "convertir_video": "view-media-visualization",
+                "transcribir": "media-record", "extraer_subtitulos": "format-text-blockquote"}
 
 
 def nombre_de(familia: str) -> str:

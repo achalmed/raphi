@@ -120,7 +120,11 @@ class Trabajos(QObject):
         c = self._lista.contar()
         if not c["todos"]:
             return "sin trabajos"
-        return f"{c['todos']} trabajos: {c['en_cola']} en cola · {c['en_curso']} en curso · {c['hechos']} hechos · {c['con_error']} con error"
+        # solo las cifras que no son cero, con su concordancia («1 trabajo: 1 hecho»)
+        partes = [f"{c['en_curso']} en curso" if c["en_curso"] else "", f"{c['en_cola']} en cola" if c["en_cola"] else "",
+                  (f"{c['hechos']} hecho" + ("" if c["hechos"] == 1 else "s")) if c["hechos"] else "",
+                  f"{c['con_error']} con error" if c["con_error"] else ""]
+        return f"{c['todos']} trabajo" + ("" if c["todos"] == 1 else "s") + ": " + " · ".join(x for x in partes if x)
 
     @Property("QVariantList", notify=cambiado)
     def filasNavegacion(self) -> list:

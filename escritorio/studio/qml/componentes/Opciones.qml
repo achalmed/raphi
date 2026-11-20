@@ -67,10 +67,17 @@ QQC2.ScrollView {
             Connections { target: pagina.h; function onOpcionesCambiadas() { if (JSON.stringify(formularioMas.valores) !== JSON.stringify(pagina.h.valores)) formularioMas.poner(pagina.h.valores) } }
             Component.onCompleted: poner(pagina.h.valores)
         }
+        // dónde dejar el resultado: un título alineado con el resto (no la sección centrada de FormLayout), y solo si
+        // la herramienta escribe algo
+        Kirigami.Heading {
+            visible: pagina.h.hayActual && pagina.o.escribe
+            level: 4
+            text: "Dónde dejar el resultado"
+            Layout.topMargin: Kirigami.Units.smallSpacing
+        }
         Kirigami.FormLayout {
-            visible: pagina.h.hayActual
+            visible: pagina.h.hayActual && pagina.o.escribe
             Layout.fillWidth: true
-            Kirigami.Separator { Kirigami.FormData.isSection: true; Kirigami.FormData.label: "Dónde dejar el resultado" }
             QQC2.RadioButton {
                 id: junto
                 text: pagina.h.sinArchivos ? "En Descargas" : "Junto a cada original"
@@ -100,21 +107,18 @@ QQC2.ScrollView {
             QQC2.Label { Kirigami.FormData.label: "Salida:"; text: pagina.h.destinoEfectivo; wrapMode: Text.WrapAnywhere; Layout.fillWidth: true; color: Kirigami.Theme.disabledTextColor }
             QQC2.Label { Kirigami.FormData.label: "Ahora:"; visible: !pagina.o.puedeSimular; text: pagina.o.motivoNoSimular; wrapMode: Text.WordWrap; Layout.fillWidth: true; color: Kirigami.Theme.neutralTextColor }
         }
+        // Simular y Procesar viven una sola vez, en la barra de arriba; aquí, volver a las opciones de siempre
         RowLayout {
             visible: pagina.h.hayActual
             Layout.fillWidth: true
             spacing: Kirigami.Units.smallSpacing
-            BotonAccion { accion: studio.acciones.accion("herramienta.restablecer"); conTexto: false }
+            BotonAccion { accion: studio.acciones.accion("herramienta.restablecer"); conTexto: true }
             Item { Layout.fillWidth: true }
-            BotonAccion { accion: studio.acciones.accion("op.cancelar"); conTexto: false; visible: pagina.o.enCurso }
-            BotonAccion { accion: studio.acciones.accion("op.simular") }
-            QQC2.Button {
-                readonly property var a: studio.acciones.accion("op.aplicar")
-                visible: pagina.o.escribe
-                highlighted: true
-                text: pagina.h.accion || a.textoPlano; icon.name: pagina.h.accion === "Descargar" ? "download" : a.icono; enabled: a.habilitada
-                onClicked: a.disparar()
-                QQC2.ToolTip.text: a.descripcion + " (" + a.atajoTexto + ")"; QQC2.ToolTip.visible: hovered
+            QQC2.Label {
+                visible: !pagina.o.escribe
+                text: "Solo lee: el resultado sale en el monitor (F5)."
+                color: Kirigami.Theme.disabledTextColor
+                font.pointSize: Kirigami.Theme.smallFont.pointSize
             }
         }
         Item { Layout.preferredHeight: Kirigami.Units.largeSpacing }

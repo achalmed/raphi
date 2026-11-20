@@ -200,7 +200,7 @@ class Herramientas(QObject):
             if self._acepta(i):
                 grupos.setdefault(f.get("familia") or "archivos", []).append(dict(f, sirve=f.get("ref") in sirven))
         orden = list(familias.ORDEN_PALETA) + sorted(set(grupos) - set(familias.ORDEN_PALETA))
-        return [{"familia": fam, "texto": familias.nombre_de(fam), "icono": familias.icono_familia(fam),
+        return [{"familia": fam, "texto": familias.nombre_de(fam), "icono": familias.icono_familia(fam), "rol": familias.ROLES.get(fam, "gris"),
                  "descripcion": familias.DESCRIPCIONES.get(fam, ""), "herramientas": grupos[fam]} for fam in orden if fam in grupos]
 
     @Property(int, notify=cambiado)
@@ -283,6 +283,11 @@ class Herramientas(QObject):
     @Property(str, notify=actualCambiado)
     def familia(self) -> str:
         return self._ficha_actual().get("familia", "")
+
+    @Property(str, notify=actualCambiado)
+    def rol(self) -> str:
+        """El color de su familia (un rol de la paleta de gui-comun): la pastilla del icono en el espacio de trabajo."""
+        return familias.ROLES.get(self.familia, "gris")
 
     @Property(str, notify=actualCambiado)
     def textoFamilia(self) -> str:

@@ -153,6 +153,24 @@ retiraron el 2026-10-27; su historia queda abajo. Sin etiquetas de versión: por
 
 ### Sin publicar
 
+#### Cambiado (2026-11-19, el acabado de la familia: gui-comun 4.2)
+
+- **El catálogo**: cada herramienta con su icono de acción (`familias.ICONO_POR_ID`), monocromo sobre una pastilla del
+  color de su familia (`familias.ROLES`, un rol de la paleta de gui-comun, igual en claro y en oscuro); tarjetas con
+  estado al pasar el ratón y la descripción en dos líneas; «tarda» y lo que falta, etiquetas de su nivel.
+- **Procesar**, la acción principal con el relleno del acento (`BotonPrincipal`), una sola vez: arriba, junto a Simular
+  (se retiran del pie de las opciones). La sección «Dónde dejar el resultado», solo si la herramienta escribe.
+- **La cola**: lo elegido teñido con su marca (en Lliphi Oscuro un trabajo hecho pintado de rojo parecía un error) y el
+  estado como etiqueta de su nivel; sin el bloque «Nada en curso» cuando no hay nada; en una ventana angosta, solo en
+  su vista.
+- **El monitor**: Entrada · Resultado y las salidas del resultado en una sola fila de selectores (eran cuatro cabeceras
+  apiladas); la cabecera de la herramienta con su pastilla y sus áreas como etiquetas.
+- **La zona para soltar**: un pozo de borde punteado que se tiñe al arrastrar encima, cada entrada como una ficha con
+  su X neutra, «Añadir archivos» con su propio icono.
+- Las áreas del catálogo, los grupos de la cola y las pestañas del trabajo, selectores segmentados con su cifra; la
+  ficha de la herramienta sin la × roja ni el título repetido.
+- Concordancia: «1 trabajo: 1 hecho» (solo las cifras que no son cero), «2 correctos», «plan de 1 elemento».
+
 #### Cambiado (2026-11-18, el taller: rediseño visual aprobado, decisión R14)
 
 - **Arriba, la zona para soltar** archivos y carpetas con lo que ya entró (miniatura o icono, tipo, tamaño, quitar),

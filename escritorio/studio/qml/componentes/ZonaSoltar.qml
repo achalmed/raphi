@@ -4,6 +4,7 @@
 // atiende en toda la ventana (Main.qml); aquí solo se señala. Los colores, del tema: la zona se marca con el resaltado
 // mientras se arrastra encima.
 import QtQuick
+import QtQuick.Shapes
 import QtQuick.Layouts
 import QtQuick.Controls as QQC2
 import org.kde.kirigami as Kirigami
@@ -16,20 +17,46 @@ QQC2.Control {
     readonly property var e: studio.espacio
     property bool arrastrando: false                  // lo pone la ventana mientras algo se arrastra encima
     signal elegida(int indice)
+    readonly property bool oscuro: Kirigami.ColorUtils.brightnessForColor(Kirigami.Theme.backgroundColor) === Kirigami.ColorUtils.Dark
 
-    padding: Kirigami.Units.smallSpacing
-    leftPadding: Kirigami.Units.largeSpacing
-    rightPadding: Kirigami.Units.largeSpacing
-    Kirigami.Theme.colorSet: Kirigami.Theme.View
-    Kirigami.Theme.inherit: false
+    padding: Kirigami.Units.smallSpacing * 2
+    leftPadding: Kirigami.Units.largeSpacing * 2
+    rightPadding: Kirigami.Units.largeSpacing * 2
     Accessible.name: "Zona para soltar archivos y carpetas"
     Accessible.description: a.total > 0 ? a.resumen : "Vacía"
 
-    background: Rectangle {
-        color: zona.arrastrando ? Kirigami.Theme.highlightColor : Kirigami.Theme.alternateBackgroundColor
-        opacity: zona.arrastrando ? 0.25 : 1
-        border.width: zona.arrastrando ? 2 : 0
-        border.color: Kirigami.Theme.highlightColor
+    // el pozo para soltar: un recuadro redondeado de borde punteado, del tema; mientras se arrastra encima, teñido del
+    // acento y con el borde lleno
+    background: Item {
+        Rectangle {
+            id: pozo
+            anchors.fill: parent
+            anchors.leftMargin: Kirigami.Units.largeSpacing
+            anchors.rightMargin: Kirigami.Units.largeSpacing
+            anchors.topMargin: Kirigami.Units.smallSpacing
+            anchors.bottomMargin: Kirigami.Units.smallSpacing
+            radius: Kirigami.Units.cornerRadius * 2
+            color: zona.arrastrando ? Kirigami.ColorUtils.tintWithAlpha(Kirigami.Theme.backgroundColor, Kirigami.Theme.highlightColor, 0.16)
+                 : Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.backgroundColor, Kirigami.Theme.textColor, zona.oscuro ? 0.05 : 0.035)
+            Behavior on color { ColorAnimation { duration: Kirigami.Units.shortDuration } }
+        }
+        Shape {
+            anchors.fill: pozo
+            anchors.leftMargin: pozo.anchors.leftMargin
+            anchors.rightMargin: pozo.anchors.rightMargin
+            anchors.topMargin: pozo.anchors.topMargin
+            anchors.bottomMargin: pozo.anchors.bottomMargin
+            preferredRendererType: Shape.CurveRenderer
+            ShapePath {
+                strokeWidth: zona.arrastrando ? 2 : 1
+                strokeColor: zona.arrastrando ? Kirigami.Theme.highlightColor
+                           : Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.backgroundColor, Kirigami.Theme.textColor, 0.32)
+                strokeStyle: zona.arrastrando ? ShapePath.SolidLine : ShapePath.DashLine
+                dashPattern: [4, 3]
+                fillColor: "transparent"
+                PathRectangle { x: 0.5; y: 0.5; width: pozo.width - 1; height: pozo.height - 1; radius: pozo.radius }
+            }
+        }
     }
 
     contentItem: RowLayout {
@@ -39,11 +66,21 @@ QQC2.Control {
         RowLayout {
             Layout.maximumWidth: zona.a.total > 0 ? Kirigami.Units.gridUnit * 15 : -1
             Layout.fillWidth: zona.a.total === 0
-            spacing: Kirigami.Units.smallSpacing
-            Kirigami.Icon {
-                source: zona.arrastrando ? "document-import" : "folder-download"
-                implicitWidth: Kirigami.Units.iconSizes.medium
+            Layout.leftMargin: Kirigami.Units.largeSpacing
+            spacing: Kirigami.Units.largeSpacing
+            Rectangle {
+                implicitWidth: Kirigami.Units.gridUnit * 2
                 implicitHeight: implicitWidth
+                radius: width / 2
+                color: Kirigami.ColorUtils.tintWithAlpha(Kirigami.Theme.backgroundColor, Kirigami.Theme.highlightColor, zona.arrastrando ? 0.35 : 0.16)
+                Kirigami.Icon {
+                    anchors.centerIn: parent
+                    source: "document-import"
+                    isMask: true
+                    color: Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.highlightColor, Kirigami.Theme.textColor, 0.3)
+                    implicitWidth: Kirigami.Units.iconSizes.smallMedium
+                    implicitHeight: implicitWidth
+                }
             }
             ColumnLayout {
                 Layout.fillWidth: true
@@ -59,14 +96,14 @@ QQC2.Control {
                     text: zona.e.vista === "herramienta" && zona.h.hayActual
                           ? (zona.h.sinArchivos ? zona.h.titulo + " trabaja sin archivos" : zona.h.titulo + " acepta " + zona.h.textoAcepta)
                           : zona.a.total > 0 ? "Más desde Dolphin, o con Ctrl+O" : "Desde Dolphin, o con «Añadir» (Ctrl+O; una carpeta, Ctrl+Mayús+O)"
-                    font: Kirigami.Theme.smallFont
+                    font.pointSize: Kirigami.Theme.smallFont.pointSize
                     color: Kirigami.Theme.disabledTextColor
                     elide: Text.ElideRight
                 }
             }
         }
 
-        // lo que ya entró
+        // lo que ya entró: cada entrada como una ficha con su miniatura o icono, nombre, tipo y tamaño, y su X
         ListView {
             id: fila
             Layout.fillWidth: true
@@ -85,14 +122,28 @@ QQC2.Control {
                 required property int index
                 readonly property var f: zona.a.modelo.fila(index)
                 readonly property bool esImagen: /\.(png|jpe?g|webp|gif|bmp|svg)$/i.test(String(modelData))
+                readonly property bool elegida: ListView.isCurrentItem
                 width: Kirigami.Units.gridUnit * 12
                 height: fila.height
-                highlighted: ListView.isCurrentItem
+                hoverEnabled: true
                 onClicked: zona.elegida(index)
-                Accessible.name: (f.nombre || "") + ", " + (f.tipo || "") + ", " + (f.tamano || "")
+                Accessible.name: (f.nombre || "") + ", " + (f.tipo || "") + ", " + (f.tamano || "") + (elegida ? ", elegida" : "")
                 QQC2.ToolTip.text: String(modelData)
                 QQC2.ToolTip.visible: hovered
                 QQC2.ToolTip.delay: Kirigami.Units.toolTipDelay
+                // sin los márgenes que el estilo de KDE deja alrededor del fondo: el fondo es la fila entera y
+                // el contenido respeta su relleno (con ellos, la marca de lo elegido caía encima del texto)
+                leftInset: 0; rightInset: 0; topInset: 0; bottomInset: 0
+                topPadding: Kirigami.Units.smallSpacing * 2; bottomPadding: Kirigami.Units.smallSpacing * 2
+                background: Rectangle {
+                    radius: Kirigami.Units.cornerRadius * 2
+                    color: entrada.elegida ? Kirigami.ColorUtils.tintWithAlpha(Kirigami.Theme.backgroundColor, Kirigami.Theme.highlightColor, entrada.hovered ? 0.30 : 0.22)
+                         : entrada.hovered ? Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.backgroundColor, Kirigami.Theme.textColor, 0.08)
+                         : Kirigami.Theme.backgroundColor
+                    border.width: 1
+                    border.color: entrada.elegida ? Kirigami.Theme.highlightColor
+                                : Kirigami.ColorUtils.linearInterpolation(Kirigami.Theme.backgroundColor, Kirigami.Theme.textColor, 0.14)
+                }
                 contentItem: RowLayout {
                     spacing: Kirigami.Units.smallSpacing
                     Item {
@@ -111,23 +162,18 @@ QQC2.Control {
                     ColumnLayout {
                         Layout.fillWidth: true
                         spacing: 0
-                        QQC2.Label { text: entrada.f.nombre || ""; elide: Text.ElideMiddle; Layout.fillWidth: true; color: entrada.highlighted ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.textColor }
+                        QQC2.Label { text: entrada.f.nombre || ""; elide: Text.ElideMiddle; Layout.fillWidth: true; font.weight: entrada.elegida ? Font.DemiBold : Font.Normal }
                         QQC2.Label {
                             text: (entrada.f.tipo || "") + " · " + (entrada.f.tamano || "")
-                            font: Kirigami.Theme.smallFont
-                            color: entrada.highlighted ? Kirigami.Theme.highlightedTextColor : Kirigami.Theme.disabledTextColor
+                            font.pointSize: Kirigami.Theme.smallFont.pointSize
+                            color: Kirigami.Theme.disabledTextColor
                             elide: Text.ElideRight
                             Layout.fillWidth: true
                         }
                     }
-                    QQC2.ToolButton {
-                        icon.name: "list-remove"
-                        text: "Quitar"
-                        display: QQC2.AbstractButton.IconOnly
+                    BotonCierre {
+                        text: "Quitar " + (entrada.f.nombre || "") + " de las entradas"
                         onClicked: zona.a.quitar(entrada.index)
-                        Accessible.name: "Quitar " + (entrada.f.nombre || "")
-                        QQC2.ToolTip.text: "Quitar de las entradas"
-                        QQC2.ToolTip.visible: hovered
                     }
                 }
             }
@@ -135,7 +181,8 @@ QQC2.Control {
 
         // añadir, filtrar y vaciar (las acciones de siempre, del registro)
         RowLayout {
-            spacing: 0
+            spacing: Kirigami.Units.smallSpacing
+            Layout.rightMargin: Kirigami.Units.largeSpacing
             BotonAccion { accion: studio.acciones.accion("archivo.anadir"); conTexto: zona.a.total === 0 }
             BotonAccion { accion: studio.acciones.accion("archivo.anadir_carpeta"); conTexto: false }
             QQC2.ToolSeparator { visible: zona.a.total > 0 }
